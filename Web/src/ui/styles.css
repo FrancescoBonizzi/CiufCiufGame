@@ -1,0 +1,336 @@
+:root {
+  --ink: #f4f1ea;
+  --accent: #f2c230;
+  --accent-ink: #2b2133;
+  --scelto: #ff6fb5;
+  --superficie: #3d3150;
+  /* Lo stesso colore del canvas: le bande del letterbox non si distinguono dal gioco. */
+  --background: #2b2133;
+  --font: system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Un gioco non si seleziona: niente evidenziazione al tocco lungo né menu di iOS. */
+html,
+body,
+* {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img,
+svg,
+a,
+button {
+  -webkit-user-drag: none;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--background);
+  color: var(--ink);
+  font: 500 18px/1.5 var(--font);
+}
+
+button {
+  font: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Pagine HTML: menu, fine partita. */
+.pixel {
+  image-rendering: pixelated;
+}
+
+.page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.titolo {
+  font-size: clamp(1.8rem, 6vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.icona {
+  width: 55%;
+  height: 55%;
+}
+
+.tasto-grande,
+.tasto-medio,
+.tasto-piccolo {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 6px 0 #b8901a;
+  transition: transform 80ms;
+}
+
+.tasto-grande:active,
+.tasto-medio:active,
+.tasto-piccolo:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b8901a;
+}
+
+.tasto-grande {
+  width: clamp(72px, 18vmin, 112px);
+  height: clamp(72px, 18vmin, 112px);
+}
+
+.tasto-medio {
+  width: clamp(52px, 12vmin, 72px);
+  height: clamp(52px, 12vmin, 72px);
+  background: var(--ink);
+  box-shadow: 0 5px 0 #b8b2a8;
+}
+
+.tasto-piccolo {
+  width: 48px;
+  height: 48px;
+  background: var(--superficie);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.tasto-piccolo[aria-pressed="false"] {
+  opacity: 0.6;
+}
+
+.azioni {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Menu: anteprima e ▶ da una parte, le tre righe di figure dall'altra. In verticale si impilano. */
+.menu {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 48px);
+  padding: 16px;
+  flex-wrap: wrap;
+}
+
+.menu__anteprima {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.anteprima {
+  width: clamp(128px, 22vmin, 192px);
+  aspect-ratio: 64 / 40;
+}
+
+.menu__scelte {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.riga {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.scelta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--superficie);
+  border: 3px solid transparent;
+}
+
+.scelta[aria-pressed="true"] {
+  border-color: var(--scelto);
+  background: #4d3d66;
+}
+
+.scelta canvas {
+  display: block;
+  width: clamp(80px, 13vmin, 112px);
+  height: auto;
+}
+
+.riga--colori .scelta {
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.riga--colori .didascalia {
+  /* Il colore si capisce dal campione; la parola resta per i lettori di schermo. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.campione {
+  display: block;
+  width: clamp(32px, 7vmin, 44px);
+  height: clamp(32px, 7vmin, 44px);
+  border-radius: 50%;
+  border: 2px solid var(--accent-ink);
+}
+
+.didascalia {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.esito__figura {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.esito__stazione {
+  width: 64px;
+  height: 64px;
+}
+
+.errori {
+  text-align: left;
+  font-size: 0.9rem;
+  max-width: 60ch;
+}
+
+/* Partita. */
+#game-wrapper {
+  position: relative;
+  width: 100%;
+  /* svh e non vh: su mobile 100vh include la barra degli indirizzi, e il canvas verrebbe tagliato. */
+  height: 100svh;
+  /* Il margine dell'indicatore home dell'iPhone sta dentro l'altezza (box-sizing: border-box), e
+     resize() misura #game-container, che ne resta fuori. */
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  #game-wrapper {
+    height: min(100dvh, 100svh);
+  }
+}
+
+#game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  display: block;
+  /* Larghezza e altezza le decide resize() in gamebootstrap.ts. Niente pan né zoom col doppio tocco. */
+  touch-action: none;
+}
+
+canvas.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* Pausa: il bottone sta sopra la partita, in alto a destra; il suo tocco non fa saltare. */
+.tasto-pausa {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(43 33 51 / 60%);
+  color: var(--ink);
+}
+
+.overlay-pausa {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgb(43 33 51 / 75%);
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.overlay-pausa.visible {
+  display: flex;
+}
+
+#orientation-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--background);
+  color: var(--ink);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 20px;
+}
+
+#orientation-overlay.visible {
+  display: flex;
+}
+
+.rotate-icon {
+  width: 4rem;
+  height: 4rem;
+  animation: rotate-hint 1.5s linear infinite;
+}
+
+@keyframes rotate-hint {
+  to {
+    transform: rotate(360deg);
+  }
+}

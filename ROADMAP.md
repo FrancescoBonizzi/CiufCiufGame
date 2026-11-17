@@ -116,41 +116,52 @@ in `try/catch`; un valore illeggibile torna ai default senza errori.
 ### 0. Repo e starter
 
 - [x] Repo pubblico `FrancescoBonizzi/CiufCiufGame`, licenza MIT, questa roadmap
-- [ ] Starter copiato in `Web/`, versioni delle librerie confrontate con quelle correnti
-- [ ] Rinomina (`nome-gioco` → `ciufciuf`), `base` di Vite con la `/` finale, risoluzione 480×270 pixel art
-- [ ] Demo dello starter giocata una volta: menu → partita → game over regge
-- [ ] `README.md`, `THIRD-PARTY-NOTICES.md`
+- [x] Starter copiato in `Web/`, versioni delle librerie confrontate con quelle correnti: pixi.js 8.23;
+      Vite 8 e TypeScript 7 sono major nuove e restano fuori finché non se ne legge la migrazione (Vite 7.3, TS 5.9)
+- [x] Rinomina (`nome-gioco` → `ciufciuf`), `base` di Vite con la `/` finale, risoluzione 480×270 pixel art
+- [x] Demo dello starter giocata una volta: menu → partita → game over regge
+- [x] `README.md`, `THIRD-PARTY-NOTICES.md`
 
 ### 1. La locomotiva che salta
 
-- [ ] Binario e terreno che scorrono (segnaposto, tile riciclati)
-- [ ] Locomotiva segnaposto ferma a x ≈ 80, salto a durata e altezza fisse, pressione anticipata ricordata
-- [ ] Input unico: spazio e tocco sul canvas, ignorato sul bottone di pausa
-- [ ] Un ostacolo segnaposto, collisione per hitbox, game over
-- [ ] `src/config/livelli.ts` con i valori della tabella, letti dalla logica
+- [x] Binario e terreno che scorrono (segnaposto, texture ripetute in `TilingSprite`)
+- [x] Locomotiva segnaposto ferma a x ≈ 80, salto a durata e altezza fisse, pressione anticipata ricordata
+- [x] Input unico: spazio e tocco sull'area di gioco, ignorato sul bottone di pausa
+- [x] Un ostacolo segnaposto, collisione per hitbox, game over
+- [x] `src/config/livelli.ts` con i valori della tabella, letti dalla logica
 
 ### 2. Livelli, generatore, durata
 
-- [ ] Curva di velocità configurabile (iniziale, massima, tempo per raggiungerla)
-- [ ] Generatore a sequenze omogenee con pesi, N per sequenza, distanze in secondi, attesa dello schermo vuoto
-- [ ] Ostacoli segnaposto di tutti gli 11 tipi, con le varianti di dimensione del difficile
-- [ ] `validaConfigurazione` e il suo test sulla configurazione rilasciata
-- [ ] Durata, fine generazione, stazione d'arrivo, frenata, schermata «Hai vinto!»
-- [ ] Game over con «Riprova» e «Menu»
+- [x] Curva di velocità configurabile (iniziale, massima, tempo per raggiungerla)
+- [x] Generatore a sequenze omogenee con pesi, N per sequenza, distanze in secondi, attesa dello schermo vuoto
+- [x] Ostacoli segnaposto di tutti gli 11 tipi, con le varianti di dimensione del difficile
+- [x] `validaConfigurazione` e il suo test sulla configurazione rilasciata
+- [x] Durata, fine generazione, stazione d'arrivo, frenata, schermata «Hai vinto!»
+- [x] Game over con «Riprova» e «Menu»
 
 ### 3. Regole speciali
 
-- [ ] Facile: ostacolo sbalzato via, frenata e ripresa, nessun game over
-- [ ] Difficile: trave metallica, passabile da terra, letale in salto
+- [x] Facile: ostacolo sbalzato via, frenata e ripresa, nessun game over
+- [x] Difficile: trave metallica, passabile da terra, letale in salto
 
 ### 4. Menu, HUD, mobile
 
-- [ ] Menu illustrato con anteprima dal vivo della locomotiva colorata (segnaposto fino alla fase 6)
-- [ ] Sostituzione di palette sulla carrozzeria
-- [ ] Preferenze salvate e ripristinate
-- [ ] Barra del percorso
-- [ ] Pausa (Esc, bottone, scheda nascosta)
-- [ ] Prova su tablet e telefono: tocco, overlay di rotazione, letterbox
+- [x] Menu illustrato con anteprima dal vivo della locomotiva colorata (segnaposto fino alla fase 6)
+- [x] Sostituzione di palette sulla carrozzeria
+- [x] Preferenze salvate e ripristinate
+- [x] Barra del percorso
+- [x] Pausa (Esc, bottone, scheda nascosta)
+- [ ] Prova su tablet e telefono: tocco, overlay di rotazione, letterbox (fatta su iPhone 13 emulato in
+      Chrome; resta la prova su un dispositivo vero)
+
+Come sono state provate le fasi 1–4: in sviluppo `Game` espone il suo stato in `window.__ciufciuf`
+(Vite lo toglie dal build), e una prova Playwright fa giocare un bot che salta al centro della finestra.
+Medio e difficile sono arrivati in stazione senza urti; il facile senza nessun input arriva in stazione
+sbalzando gli ostacoli. Non prova che siano *divertenti*: quello è la fase 5.
+
+Grafica ed effetti segnaposto sono prodotti nel repository: le figure disegnate a codice in
+`src/grafica/segnaposto.ts`, con le misure e la rampa magenta degli sprite veri, e gli effetti sintetizzati da
+`strumenti/genera-suoni.py`. Le fasi 6 e 7 cambiano da dove vengono le immagini e i suoni, non chi li usa.
 
 ### 5. Calibrazione
 
