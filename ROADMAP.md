@@ -35,7 +35,8 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 - **Tempo solo da `ticker.deltaMS`**: velocità in px/s, durate in secondi.
 - **Mondo con origine sul binario**, salire è y negativa. Locomotiva ferma a x ≈ 80; scorrono scenario e ostacoli.
 - **Distanze fra ostacoli in secondi di percorrenza**, non in pixel: con la velocità che sale la giocabilità
-  regge da sola. Il generatore converte con la velocità del momento.
+  regge da sola. Il generatore converte con la velocità di crociera del momento, senza il rallentamento
+  dell'urto del facile: con quella gli ostacoli nascerebbero vicini e, a treno ripartito, arriverebbero fitti.
 - **Colore della locomotiva per sostituzione di palette**: negli sprite la carrozzeria è disegnata in una
   rampa di magenta che nient'altro usa; al caricamento quei pixel prendono la rampa del colore scelto,
   mantenendo la luminosità. Un'immagine per locomotiva, nessuno strato separato.
@@ -158,6 +159,9 @@ Come sono state provate le fasi 1–4: in sviluppo `Game` espone il suo stato in
 (Vite lo toglie dal build), e una prova Playwright fa giocare un bot che salta al centro della finestra.
 Medio e difficile sono arrivati in stazione senza urti; il facile senza nessun input arriva in stazione
 sbalzando gli ostacoli. Non prova che siano *divertenti*: quello è la fase 5.
+
+Fatti in anticipo, perché costavano poco: polvere all'atterraggio (fase 6) e i meta SEO dello starter in
+`index.html` (fase 8; canonical e immagine puntano a pagine del sito che ancora non esistono).
 
 Grafica ed effetti segnaposto sono prodotti nel repository: le figure disegnate a codice in
 `src/grafica/segnaposto.ts`, con le misure e la rampa magenta degli sprite veri, e gli effetti sintetizzati da
