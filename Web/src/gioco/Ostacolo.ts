@@ -13,6 +13,8 @@ class Ostacolo {
   readonly variante: VarianteOstacolo;
 
   private readonly _figura: Sprite;
+  /** Quanto la scenografia (i piloni della trave) sporge ai lati della figura. */
+  private readonly _sporgenza: number;
   private _stato: StatoOstacolo = "libero";
   private _velocitaX = 0;
   private _velocitaY = 0;
@@ -23,11 +25,13 @@ class Ostacolo {
     indiceVariante: number,
   ) {
     this.variante = OSTACOLI[tipo][indiceVariante]!;
+    this._sporgenza = 0;
     if (tipo === "trave") {
       // I piloni sono scenografia: reggono la trave ma non urtano.
       const piloni = new Sprite(texturePiloni());
       piloni.anchor.set(0, 1);
-      piloni.x = -8;
+      this._sporgenza = (piloni.width - this.variante.larghezza) / 2;
+      piloni.x = -this._sporgenza;
       this.vista.addChild(piloni);
     }
     this._figura = new Sprite(textureOstacolo(tipo, indiceVariante));
@@ -43,14 +47,15 @@ class Ostacolo {
     return this._stato;
   }
 
-  /** Bordo destro della figura, in coordinate del mondo. */
+  /** Bordo destro di ciò che si vede, scenografia compresa, in coordinate del mondo. */
   get destra(): number {
-    return this.vista.x + this.variante.larghezza;
+    return this.vista.x + this.variante.larghezza + this._sporgenza;
   }
 
+  /** @param x dove comincia ciò che si vede, scenografia compresa: lo schermo lo vede entrare dal bordo. */
   nasci(x: number): void {
     this._stato = "in-corsa";
-    this.vista.x = x;
+    this.vista.x = x + this._sporgenza;
     this.vista.y = 0;
     this.vista.visible = true;
     this._figura.rotation = 0;

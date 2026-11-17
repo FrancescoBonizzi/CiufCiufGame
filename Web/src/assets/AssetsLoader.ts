@@ -3,6 +3,8 @@ import type GameAssets from "./GameAssets.ts";
 import { ASSETS_ROOT } from "./paths.ts";
 
 // Atlas JSON (formato hash di TexturePacker) in public/assets/images/spriteSheets, senza estensione.
+// Vuoto finché la fase 6 della roadmap non porta la pixel art: fino ad allora le texture vengono da
+// grafica/textures.ts, e getTexture/getAnimation restano pronti per gli atlas.
 const SPRITESHEETS: string[] = [];
 
 export const loadAssets = async (): Promise<GameAssets> => {

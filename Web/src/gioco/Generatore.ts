@@ -40,10 +40,12 @@ class Generatore {
 
   /**
    * @param velocita px/s del terreno in questo frame
+   * @param velocitaDiCrociera px/s senza il rallentamento dell'urto: converte le distanze in secondi. Con la
+   * velocità rallentata gli ostacoli nascerebbero vicini, e a treno ripartito arriverebbero troppo fitti.
    * @param progresso 0 → 1: la distanza fra ostacoli si stringe con la stessa curva della velocità
    * @param attivo false dopo la chiusura: gli ostacoli in corsa finiscono il loro giro, non ne nascono altri
    */
-  update(dt: number, tempo: number, velocita: number, progresso: number, attivo: boolean): void {
+  update(dt: number, tempo: number, velocita: number, velocitaDiCrociera: number, progresso: number, attivo: boolean): void {
     for (const ostacolo of this.ostacoli) ostacolo.update(dt, velocita, this._larghezzaSchermo);
     if (!attivo) return;
 
@@ -57,7 +59,7 @@ class Generatore {
         this._percorsoDallUltimo = eccedenza;
         const { inizio, fine } = this._livello.distanzaFraOstacoliSecondi;
         // In secondi di percorrenza, convertiti con la velocità del momento.
-        this._distanzaAlProssimo = Numbers.lerp(inizio, fine, progresso) * velocita;
+        this._distanzaAlProssimo = Numbers.lerp(inizio, fine, progresso) * velocitaDiCrociera;
         if (this._rimanenti === 0) this._schermoVuotoDa = Infinity;
       }
       return;

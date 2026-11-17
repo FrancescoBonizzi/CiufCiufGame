@@ -1,5 +1,6 @@
 import { Container, Graphics, Sprite, type Texture } from "pixi.js";
 import { textureIconaStazione } from "../grafica/textures.ts";
+import Numbers from "../services/Numbers.ts";
 
 const MARGINE = 40;
 const Y = 14;
@@ -37,7 +38,7 @@ class BarraPercorso {
   }
 
   set progresso(valore: number) {
-    this._miniatura.x = Math.round(this._inizio + (this._fine - this._inizio) * Math.min(1, Math.max(0, valore)));
+    this._miniatura.x = Math.round(this._inizio + (this._fine - this._inizio) * Numbers.clamp01(valore));
   }
 }
 

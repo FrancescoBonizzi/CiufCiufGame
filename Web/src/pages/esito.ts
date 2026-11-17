@@ -1,6 +1,6 @@
-import { ricolora } from "../grafica/palette.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, disegnaIconaStazione, disegnaLocomotiva } from "../grafica/segnaposto.ts";
-import { COLORI, leggiPreferenze } from "../preferenze.ts";
+import { foglioLocomotiva } from "../grafica/locomotive.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, disegnaIconaStazione } from "../grafica/segnaposto.ts";
+import { leggiPreferenze } from "../preferenze.ts";
 import { TESTI } from "../testi.ts";
 import { ICONE } from "../ui/icone.ts";
 import router from "./router.ts";
@@ -33,7 +33,7 @@ export function renderEsitoPage(container: HTMLElement, esito: Esito): void {
   locomotiva.className = "pixel anteprima";
   locomotiva
     .getContext("2d")!
-    .drawImage(ricolora(disegnaLocomotiva(preferenze.locomotiva), COLORI[preferenze.colore]), 0, 0, larghezza, altezza, 0, 0, larghezza, altezza);
+    .drawImage(foglioLocomotiva(preferenze.locomotiva, preferenze.colore), 0, 0, larghezza, altezza, 0, 0, larghezza, altezza);
   figura.appendChild(locomotiva);
   if (esito === "vittoria") {
     const stazione = disegnaIconaStazione();

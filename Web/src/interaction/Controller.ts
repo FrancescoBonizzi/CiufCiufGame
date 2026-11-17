@@ -22,7 +22,8 @@ class Controller {
 
   private keyDownHandler = (e: KeyboardEvent) => {
     if (e.code !== "Space") return;
-    // Senza preventDefault lo spazio attiverebbe il bottone col fuoco (la pausa appena toccata).
+    // Su un bottone col fuoco (Riprendi, Menu raggiunti con Tab) lo spazio lo attiva e non fa saltare.
+    if (e.target instanceof HTMLButtonElement) return;
     e.preventDefault();
     // L'autorepeat della tastiera non è una nuova pressione.
     if (e.repeat) return;

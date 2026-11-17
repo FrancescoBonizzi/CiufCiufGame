@@ -70,12 +70,22 @@ export const validaLivello = (id: string, livello: Livello): string[] => {
     err(`distanza fra ostacoli ${distanzaMinima} s, sotto durata del salto + recupero (${servePerSalto.toFixed(2)} s)`);
   }
 
+  const piuLargo = Math.max(...livello.tipi.flatMap(({ tipo }) => OSTACOLI[tipo].map((v) => v.larghezza)));
+
+  // Velocità che sale e distanza che scende con lo stesso progresso: il prodotto è minimo agli estremi.
+  if (livello.unoAllaVolta) {
+    const { inizio, fine } = livello.distanzaFraOstacoliSecondi;
+    const minimoPx = Math.min(inizio * iniziale, fine * massima);
+    if (minimoPx < GAME.width + piuLargo) {
+      err(`unoAllaVolta: distanza minima ${minimoPx.toFixed(0)} px, sotto schermo + ostacolo più largo (${GAME.width + piuLargo} px)`);
+    }
+  }
+
   const anticipo = (GAME.width - COMUNE.locomotivaX) / massima;
   if (anticipo < livello.verifica.anticipoMinimoSecondi) {
     err(`anticipo ${anticipo.toFixed(2)} s a ${massima} px/s, sotto ${livello.verifica.anticipoMinimoSecondi} s`);
   }
 
-  const piuLargo = Math.max(...livello.tipi.flatMap(({ tipo }) => OSTACOLI[tipo].map((v) => v.larghezza)));
   const perUscire = (GAME.width + piuLargo) / iniziale;
   if (livello.chiusuraSecondi < perUscire) {
     err(`chiusura ${livello.chiusuraSecondi} s: l'ultimo ostacolo può servirne ${perUscire.toFixed(2)} per uscire prima della stazione`);

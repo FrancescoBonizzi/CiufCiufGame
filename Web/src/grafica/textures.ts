@@ -1,14 +1,13 @@
 import { Rectangle, Texture } from "pixi.js";
 import type { IdLivello } from "../config/livelli.ts";
 import { OSTACOLI, type TipoOstacolo } from "../config/ostacoli.ts";
-import { COLORI, type IdColore, type IdLocomotiva } from "../preferenze.ts";
-import { ricolora } from "./palette.ts";
+import type { IdColore, IdLocomotiva } from "../preferenze.ts";
+import { foglioLocomotiva } from "./locomotive.ts";
 import {
   FOTOGRAMMA_LOCOMOTIVA,
   disegnaBinario,
   disegnaCielo,
   disegnaIconaStazione,
-  disegnaLocomotiva,
   disegnaOstacolo,
   disegnaPiloni,
   disegnaStazione,
@@ -40,7 +39,7 @@ export const texturesLocomotiva = (tipo: IdLocomotiva, colore: IdColore): Textur
   const chiave = `locomotiva:${tipo}:${colore}`;
   let frames = cacheFotogrammi.get(chiave);
   if (!frames) {
-    const foglio = daCanvas(chiave, () => ricolora(disegnaLocomotiva(tipo), COLORI[colore]));
+    const foglio = daCanvas(chiave, () => foglioLocomotiva(tipo, colore));
     const { larghezza, altezza, numero } = FOTOGRAMMA_LOCOMOTIVA;
     frames = fotogrammi(foglio, larghezza, altezza, numero);
     cacheFotogrammi.set(chiave, frames);
@@ -53,7 +52,7 @@ export const textureOstacolo = (tipo: TipoOstacolo, indice: number): Texture =>
 
 export const texturePiloni = () => daCanvas("piloni", disegnaPiloni);
 export const textureCielo = (livello: IdLivello, l: number, a: number) =>
-  daCanvas(`cielo:${livello}`, () => disegnaCielo(livello, l, a));
+  daCanvas(`cielo:${livello}:${l}x${a}`, () => disegnaCielo(livello, l, a));
 export const textureStrato = (livello: IdLivello, quale: "lontano" | "vicino") =>
   daCanvas(`strato:${livello}:${quale}`, () => disegnaStrato(livello, quale));
 export const textureBinario = (livello: IdLivello) => daCanvas(`binario:${livello}`, () => disegnaBinario(livello));

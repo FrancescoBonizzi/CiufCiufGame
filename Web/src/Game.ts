@@ -154,7 +154,8 @@ class Game {
     const velocita = this.velocitaCurva * this._fattoreUrto;
 
     this.muoviLocomotiva(dt, velocita, this._controller.consumePress());
-    this._generatore.update(dt, this._tempo, velocita, this.progressoCurva, this._tempo < durataSecondi - chiusuraSecondi);
+    const generazioneAttiva = this._tempo < durataSecondi - chiusuraSecondi;
+    this._generatore.update(dt, this._tempo, velocita, this.velocitaCurva, this.progressoCurva, generazioneAttiva);
     this._scenario.update(dt, velocita);
     this._barra.progresso = this._tempo / durataSecondi;
     this.controllaUrti();
@@ -174,10 +175,11 @@ class Game {
     const velocita = dt > 0 ? passo / dt : 0;
     this._stazione.x -= passo;
 
-    // Le pressioni durante l'arrivo si scartano: niente salti in stazione.
+    // Le pressioni durante l'arrivo si scartano, anche quella ricordata in volo: niente salti in stazione.
     this._controller.consumePress();
+    this._locomotiva.dimenticaPressioneInVolo();
     this.muoviLocomotiva(dt, velocita, false);
-    this._generatore.update(dt, this._tempo, velocita, 1, false);
+    this._generatore.update(dt, this._tempo, velocita, velocita, 1, false);
     this._scenario.update(dt, velocita);
     this._barra.progresso = 1;
 

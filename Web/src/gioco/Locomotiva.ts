@@ -70,6 +70,10 @@ class Locomotiva {
     return evento;
   }
 
+  dimenticaPressioneInVolo(): void {
+    this._pressioneInVolo = -Infinity;
+  }
+
   /** y della base: 0 sul binario, negativa in salto. */
   private get quota(): number {
     if (this._tempoInSalto === null) return 0;

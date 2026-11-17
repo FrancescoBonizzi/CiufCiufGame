@@ -66,7 +66,11 @@ export async function initGame(container: HTMLElement) {
     (e.currentTarget as HTMLElement).blur();
     setPausedByPlayer(true);
   });
-  container.querySelector("#btn-riprendi")?.addEventListener("click", () => setPausedByPlayer(false));
+  container.querySelector("#btn-riprendi")?.addEventListener("click", (e) => {
+    // Con il fuoco su Riprendi lo spazio attiverebbe il bottone invece di far saltare.
+    (e.currentTarget as HTMLElement).blur();
+    setPausedByPlayer(false);
+  });
   container.querySelector("#btn-pausa-menu")?.addEventListener("click", () => router.navigate("/"));
 
   if (GAME.pixelArt) {
@@ -94,9 +98,10 @@ export async function initGame(container: HTMLElement) {
     app.canvas.classList.toggle("pixel-art", GAME.pixelArt);
     gameContainer.appendChild(app.canvas);
 
-    // Esiste su Android Chrome; iOS Safari non la implementa, e lì resta l'overlay. Non si attende:
+    // Esiste su Android Chrome; iOS Safari non la implementa, e lì resta l'overlay. Prima della 16.4 Safari
+    // non ha nemmeno screen.orientation: senza il ?. la lettura lancia e la partita non parte. Non si attende:
     // ogni await in più è un punto in cui l'uscita dalla partita può arrivare a metà.
-    (screen.orientation as unknown as { lock(o: string): Promise<void> }).lock?.(GAME.orientation)?.catch(() => {});
+    (screen.orientation as unknown as { lock?(o: string): Promise<void> } | undefined)?.lock?.(GAME.orientation)?.catch(() => {});
 
     // ResizeObserver e non window.resize: su mobile la barra degli indirizzi che compare e scompare
     // non sempre emette resize, ma cambia la misura del contenitore.

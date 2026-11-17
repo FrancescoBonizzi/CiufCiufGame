@@ -38,6 +38,8 @@ export interface Livello {
   tipi: { tipo: TipoOstacolo; peso: number }[];
   /** Lo stesso tipo non compare in due sequenze di fila. */
   nonRipetereTipo: boolean;
+  /** Il prossimo ostacolo nasce solo dopo che il precedente è uscito dallo schermo (validaConfigurazione). */
+  unoAllaVolta: boolean;
   urto: Urto;
   /** Soglie di validaConfigurazione. */
   verifica: {
@@ -73,8 +75,8 @@ export const LIVELLI: Record<IdLivello, Livello> = {
     salto: { durataSecondi: 1.3, altezza: 80, pressioneRicordataSecondi: 0.25 },
     hitboxLocomotiva: { larghezza: 40, altezza: 28 },
     ostacoliPerSequenza: { min: 1, max: 3 },
-    // ≥ larghezza dello schermo anche alla massima (3,6 s × 140 px/s = 504 px): un ostacolo alla volta.
-    distanzaFraOstacoliSecondi: { inizio: 4.4, fine: 3.6 },
+    // Un ostacolo alla volta: 4,8 s × 110 px/s = 528 px e 3,8 s × 140 px/s = 532 px, oltre schermo + ostacolo (520 px).
+    distanzaFraOstacoliSecondi: { inizio: 4.8, fine: 3.8 },
     pausaFraSequenzeSecondi: 3,
     tipi: [
       { tipo: "legna", peso: 1 },
@@ -82,6 +84,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
       { tipo: "staccionata", peso: 1 },
     ],
     nonRipetereTipo: true,
+    unoAllaVolta: true,
     urto: { effetto: "sbalzo", fattoreVelocita: 0.4, recuperoSecondi: 2 },
     verifica: { finestraMinimaSecondi: 0.35, anticipoMinimoSecondi: 2.5 },
   },
@@ -101,6 +104,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
       { tipo: "segnale", peso: 1 },
     ],
     nonRipetereTipo: true,
+    unoAllaVolta: false,
     urto: { effetto: "gameOver" },
     verifica: { finestraMinimaSecondi: 0.2, anticipoMinimoSecondi: 1.2 },
   },
@@ -121,6 +125,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
       { tipo: "trave", peso: 0.7 },
     ],
     nonRipetereTipo: true,
+    unoAllaVolta: false,
     urto: { effetto: "gameOver" },
     verifica: { finestraMinimaSecondi: 0.12, anticipoMinimoSecondi: 1 },
   },

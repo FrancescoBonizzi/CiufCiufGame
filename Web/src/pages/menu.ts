@@ -1,6 +1,6 @@
 import type { IdLivello } from "../config/livelli.ts";
-import { ricolora } from "../grafica/palette.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, disegnaLocomotiva, disegnaMiniatura } from "../grafica/segnaposto.ts";
+import { foglioLocomotiva } from "../grafica/locomotive.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, disegnaMiniatura } from "../grafica/segnaposto.ts";
 import {
   COLORI,
   LIVELLI_IN_ORDINE,
@@ -66,18 +66,15 @@ export function renderMenuPage(container: HTMLElement): void {
     segnaposto.replaceWith(miniatura);
   }
 
-  const fogli = new Map<IdLocomotiva, HTMLCanvasElement>(LOCOMOTIVE.map((id) => [id, disegnaLocomotiva(id)]));
   const anteprima = container.querySelector<HTMLCanvasElement>("#anteprima")!;
-  let colorati = new Map<IdLocomotiva, HTMLCanvasElement>();
 
   // Le figure delle locomotive si ridipingono col colore scelto: l'anteprima dal vivo è la stessa
   // sostituzione di palette della partita.
   const ridipingi = () => {
-    colorati = new Map(LOCOMOTIVE.map((id) => [id, ricolora(fogli.get(id)!, COLORI[preferenze.colore])]));
     for (const figura of container.querySelectorAll<HTMLCanvasElement>(".figura-locomotiva")) {
       const ctx = figura.getContext("2d")!;
       ctx.clearRect(0, 0, larghezza, altezza);
-      ctx.drawImage(colorati.get(figura.dataset["locomotiva"] as IdLocomotiva)!, 0, 0, larghezza, altezza, 0, 0, larghezza, altezza);
+      ctx.drawImage(foglioLocomotiva(figura.dataset["locomotiva"] as IdLocomotiva, preferenze.colore), 0, 0, larghezza, altezza, 0, 0, larghezza, altezza);
     }
   };
   ridipingi();
@@ -88,7 +85,7 @@ export function renderMenuPage(container: HTMLElement): void {
     if (!anteprima.isConnected) return;
     const fotogramma = Math.floor((ora / 1000) * FOTOGRAMMI_AL_SECONDO) % FOTOGRAMMA_LOCOMOTIVA.numero;
     ctxAnteprima.clearRect(0, 0, larghezza, altezza);
-    ctxAnteprima.drawImage(colorati.get(preferenze.locomotiva)!, fotogramma * larghezza, 0, larghezza, altezza, 0, 0, larghezza, altezza);
+    ctxAnteprima.drawImage(foglioLocomotiva(preferenze.locomotiva, preferenze.colore), fotogramma * larghezza, 0, larghezza, altezza, 0, 0, larghezza, altezza);
     requestAnimationFrame(anima);
   };
   requestAnimationFrame(anima);
