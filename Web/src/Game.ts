@@ -1,0 +1,237 @@
+import { Application, Container, Sprite, Texture, Ticker } from "pixi.js";
+import type GameAssets from "./assets/GameAssets.ts";
+import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
+import BarraPercorso from "./gioco/BarraPercorso.ts";
+import Generatore from "./gioco/Generatore.ts";
+import Locomotiva from "./gioco/Locomotiva.ts";
+import Scenario from "./gioco/Scenario.ts";
+import { texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
+import Controller from "./interaction/Controller.ts";
+import ParticleSystem from "./particles/ParticleSystem.ts";
+import type { Preferenze } from "./preferenze.ts";
+import Numbers from "./services/Numbers.ts";
+import SoundManager from "./services/SoundManager.ts";
+import Camera from "./world/Camera.ts";
+
+// viaggio → arrivo (la stazione entra, la locomotiva frena) → fermo (fischio, attesa) → vittoria.
+// viaggio → schianto (medio e difficile) → sconfitta.
+type Stato = "viaggio" | "arrivo" | "fermo" | "schianto" | "finita";
+
+/** La riga del binario sta a questa distanza dal bordo basso dello schermo. */
+const BINARIO_DAL_BASSO = 36;
+
+export interface EsitiPartita {
+  onVittoria: () => void;
+  onSconfitta: () => void;
+}
+
+class Game {
+  private readonly _livello: Livello;
+  private readonly _camera: Camera;
+  private readonly _controller: Controller;
+  private readonly _scenario: Scenario;
+  private readonly _generatore: Generatore;
+  private readonly _locomotiva: Locomotiva;
+  private readonly _stazione: Sprite;
+  private readonly _barra: BarraPercorso;
+  private readonly _polvere: ParticleSystem;
+
+  private _stato: Stato = "viaggio";
+  private _tempo = 0;
+  /** Moltiplica la velocità: scende all'urto nel facile e risale in recuperoSecondi. */
+  private _fattoreUrto = 1;
+  private _attesa = 0;
+
+  constructor(
+    app: Application,
+    _assets: GameAssets,
+    private readonly _sounds: SoundManager,
+    preferenze: Preferenze,
+    areaInput: HTMLElement,
+    // Callback e non il router: Game non sa in quale pagina vive.
+    private readonly _esiti: EsitiPartita,
+  ) {
+    this._livello = LIVELLI[preferenze.livello];
+    this._controller = new Controller(areaInput);
+    this._camera = new Camera(app);
+    this._camera.y = BINARIO_DAL_BASSO;
+    const mondo = this._camera.world;
+    const { width, height } = app.screen;
+
+    this._scenario = new Scenario(app.stage, mondo, preferenze.livello, width, height);
+
+    this._stazione = new Sprite(textureStazione());
+    this._stazione.anchor.set(0, 1);
+    this._stazione.visible = false;
+    mondo.addChild(this._stazione);
+
+    const strato = new Container();
+    mondo.addChild(strato);
+    this._generatore = new Generatore(strato, this._livello, width, COMUNE.attesaInizialeSecondi);
+
+    const fotogrammi = texturesLocomotiva(preferenze.locomotiva, preferenze.colore);
+    this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello);
+
+    // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
+    const particelle = new Container();
+    mondo.addChild(particelle);
+    this._polvere = new ParticleSystem(particelle, {
+      texture: Texture.WHITE,
+      density: 2,
+      numParticles: { min: 6, max: 10 },
+      speed: { min: 20, max: 60 },
+      acceleration: { min: -40, max: -10 },
+      rotationSpeed: { min: 0, max: 0 },
+      lifetimeSeconds: { min: 0.25, max: 0.45 },
+      scale: { min: 2, max: 3 }, // Texture.WHITE è un pixel solo: la scala è il lato in px
+      spawnAngleDegrees: { min: 100, max: 170 },
+      colors: [0xd8cbb0, 0xb8a888, 0xf4f1ea],
+    });
+
+    this._barra = new BarraPercorso(app.stage, width, fotogrammi[0]!);
+
+    // Solo in sviluppo (Vite lo toglie dal build): lo stato che legge il bot della prova automatica.
+    if (import.meta.env.DEV) {
+      (window as unknown as Record<string, unknown>)["__ciufciuf"] = () => ({
+        stato: this._stato,
+        tempo: this._tempo,
+        velocita: this.velocitaCurva * this._fattoreUrto,
+        aTerra: this._locomotiva.aTerra,
+        locomotiva: { x: this._locomotiva.hitbox.x, larghezza: this._locomotiva.hitbox.width },
+        salto: this._livello.salto,
+        ostacoli: this._generatore.ostacoli
+          .filter((o) => o.stato === "in-corsa")
+          .map((o) => ({ tipo: o.tipo, x: o.hitbox.x, larghezza: o.hitbox.width, sollevamento: o.variante.sollevamento })),
+      });
+    }
+  }
+
+  /** Alla ripresa dalla pausa: una pressione fatta mentre il gioco era fermo non deve far saltare. */
+  dimenticaPressioni(): void {
+    this._controller.reset();
+  }
+
+  update(ticker: Ticker): void {
+    // NOTE: sempre deltaMS. elapsedMS non è limitato: dopo una scheda rimasta nascosta vale minuti.
+    const dt = ticker.deltaMS / 1000;
+    this._camera.update(dt);
+    this._polvere.update(dt);
+    if (this._stato === "finita") return;
+    this._tempo += dt;
+
+    switch (this._stato) {
+      case "viaggio":
+        this.viaggia(dt);
+        break;
+      case "arrivo":
+        this.arriva(dt);
+        break;
+      case "fermo":
+        this.aspettaEPoi(dt, COMUNE.attesaDopoArrivoSecondi, this._esiti.onVittoria);
+        break;
+      case "schianto":
+        this.aspettaEPoi(dt, COMUNE.attesaDopoSchiantoSecondi, this._esiti.onSconfitta);
+        break;
+    }
+  }
+
+  /** 0 → 1 lungo la curva della velocità; la stessa fa stringere le distanze fra ostacoli. */
+  private get progressoCurva(): number {
+    const { durataSecondi, velocita } = this._livello;
+    return Numbers.clamp01(this._tempo / (durataSecondi * velocita.quotaDurataAlMassimo));
+  }
+
+  private get velocitaCurva(): number {
+    const { iniziale, massima } = this._livello.velocita;
+    return Numbers.lerp(iniziale, massima, this.progressoCurva);
+  }
+
+  private viaggia(dt: number): void {
+    const { durataSecondi, chiusuraSecondi, urto } = this._livello;
+    if (urto.effetto === "sbalzo" && this._fattoreUrto < 1) {
+      this._fattoreUrto = Math.min(1, this._fattoreUrto + ((1 - urto.fattoreVelocita) / urto.recuperoSecondi) * dt);
+    }
+    const velocita = this.velocitaCurva * this._fattoreUrto;
+
+    this.muoviLocomotiva(dt, velocita, this._controller.consumePress());
+    const generazioneAttiva = this._tempo < durataSecondi - chiusuraSecondi;
+    this._generatore.update(dt, this._tempo, velocita, this.velocitaCurva, this.progressoCurva, generazioneAttiva);
+    this._scenario.update(dt, velocita);
+    this._barra.progresso = this._tempo / durataSecondi;
+    this.controllaUrti();
+
+    if (this._stato === "viaggio" && this._tempo >= durataSecondi) {
+      this._stato = "arrivo";
+      this._stazione.x = this._camera.width;
+      this._stazione.visible = true;
+    }
+  }
+
+  private arriva(dt: number): void {
+    // Il centro della stazione si ferma sotto la locomotiva.
+    const distanza = this._stazione.x - (COMUNE.locomotivaX - this._stazione.width / 2);
+    // Frenata dolce e indipendente dal frame rate: il passo si accorcia con la distanza che resta.
+    const passo = Math.min(this.velocitaCurva * dt, distanza * Numbers.damp(COMUNE.frenataInStazione, dt));
+    const velocita = dt > 0 ? passo / dt : 0;
+    this._stazione.x -= passo;
+
+    // Le pressioni durante l'arrivo si scartano, anche quella ricordata in volo: niente salti in stazione.
+    this._controller.consumePress();
+    this._locomotiva.dimenticaPressioneInVolo();
+    this.muoviLocomotiva(dt, velocita, false);
+    this._generatore.update(dt, this._tempo, velocita, velocita, 1, false);
+    this._scenario.update(dt, velocita);
+    this._barra.progresso = 1;
+
+    if (distanza - passo <= COMUNE.tolleranzaArrivoPx && this._locomotiva.aTerra) {
+      this._stato = "fermo";
+      this._attesa = 0;
+      this._sounds.play("fischio");
+    }
+  }
+
+  private muoviLocomotiva(dt: number, velocita: number, premuto: boolean): void {
+    const evento = this._locomotiva.update(dt, velocita, premuto, this._tempo);
+    if (evento === "salto") this._sounds.play("salto");
+    if (evento === "atterraggio") {
+      this._sounds.play("atterraggio");
+      this._polvere.emit(this._locomotiva.sprite.x - 8, 0);
+    }
+  }
+
+  private controllaUrti(): void {
+    const urto = this._livello.urto;
+    for (const ostacolo of this._generatore.ostacoli) {
+      if (ostacolo.stato !== "in-corsa" || !this._locomotiva.hitbox.intersects(ostacolo.hitbox)) continue;
+      if (urto.effetto === "sbalzo") {
+        ostacolo.sbalza();
+        this._fattoreUrto = urto.fattoreVelocita;
+        this._sounds.play("urto");
+        this._camera.shake(3);
+      } else {
+        this._stato = "schianto";
+        this._attesa = 0;
+        this._sounds.play("schianto");
+        this._camera.shake(8);
+        return;
+      }
+    }
+  }
+
+  // I ritardi si contano qui e non con setTimeout: la pausa li ferma, e l'uscita non lascia timer appesi.
+  private aspettaEPoi(dt: number, secondi: number, poi: () => void): void {
+    this._attesa += dt;
+    if (this._attesa < secondi) return;
+    // Una volta sola: se l'uscita dalla pagina non è immediata, update gira ancora qualche frame.
+    this._stato = "finita";
+    poi();
+  }
+
+  destroy(): void {
+    if (import.meta.env.DEV) delete (window as unknown as Record<string, unknown>)["__ciufciuf"];
+    this._controller.dispose();
+    this._polvere.destroy();
+  }
+}
+
+export default Game;
