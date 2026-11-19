@@ -93,7 +93,7 @@ salto ed è il primo valore da provare.
   (N fra minimo e massimo del livello), e sceglie il tipo successivo **solo quando l'ultimo ostacolo della
   sequenza è uscito dallo schermo**. Due tipi diversi non sono mai visibili insieme.
 - Lo stesso tipo non si ripete in due sequenze di fila (parametro, acceso di default): varietà controllata.
-- Nel difficile la varietà di dimensioni sta **dentro il tipo** (casse a 1, 2 o 3 piani; barili singoli o
+- Nel difficile la varietà di dimensioni sta **dentro il tipo** (container a 1, 2 o 3 piani; barili singoli o
   doppi), sempre entro l'altezza saltabile verificata all'avvio.
 - **Trave metallica** (solo difficile): bordo inferiore a 48 px dal binario, locomotiva alta 40 px. Da
   terra passa, in salto la colpisce. Una sequenza di travi si supera non premendo niente.

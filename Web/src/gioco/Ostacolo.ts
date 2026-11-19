@@ -13,8 +13,6 @@ class Ostacolo {
   readonly variante: VarianteOstacolo;
 
   private readonly _figura: Sprite;
-  /** Quanto la scenografia (il cavo della trave) sporge ai lati della figura. */
-  private readonly _sporgenza: number;
   private _stato: StatoOstacolo = "libero";
   private _velocitaX = 0;
   private _velocitaY = 0;
@@ -25,13 +23,11 @@ class Ostacolo {
     indiceVariante: number,
   ) {
     this.variante = OSTACOLI[tipo][indiceVariante]!;
-    this._sporgenza = 0;
     if (tipo === "trave") {
       // Il cavo è scenografia: regge la trave ma non urta.
       const cavo = new Sprite(textureCavo());
       cavo.anchor.set(0, 1);
-      this._sporgenza = (cavo.width - this.variante.larghezza) / 2;
-      cavo.position.set(-this._sporgenza, -this.variante.sollevamento - this.variante.altezza);
+      cavo.y = -this.variante.sollevamento - this.variante.altezza;
       this.vista.addChild(cavo);
     }
     this._figura = new Sprite(textureOstacolo(tipo, indiceVariante));
@@ -49,13 +45,13 @@ class Ostacolo {
 
   /** Bordo destro di ciò che si vede, scenografia compresa, in coordinate del mondo. */
   get destra(): number {
-    return this.vista.x + this.variante.larghezza + this._sporgenza;
+    return this.vista.x + this.variante.larghezza;
   }
 
   /** @param x dove comincia ciò che si vede, scenografia compresa: lo schermo lo vede entrare dal bordo. */
   nasci(x: number): void {
     this._stato = "in-corsa";
-    this.vista.x = x + this._sporgenza;
+    this.vista.x = x;
     this.vista.y = 0;
     this.vista.visible = true;
     this._figura.rotation = 0;

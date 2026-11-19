@@ -28,9 +28,11 @@ locomotive. Un generatore che legge un nome noto tende a riprodurne i personaggi
   che si tocca si stacca da ciò che si guarda.
 - Ogni strato di sfondo sfuma verso il colore dell'orizzonte, di più quanto è lontano; gli ostacoli restano
   saturi.
-- Nello sfondo niente che somigli a un ostacolo dello stesso livello: niente staccionate o balle di fieno in
-  campagna, niente casse o segnali vicino al binario in cittadina, nessun container sulla banchina in primo
-  piano al porto.
+- Nello strato vicino al binario niente che somigli a un ostacolo dello stesso livello: niente staccionate o
+  balle di fieno in campagna, niente casse o segnali sul marciapiede in cittadina, nessun container né barile
+  sulla banchina al porto. Negli strati lontani ciò che gli somiglia (le pile di container dietro le gru) è
+  ammesso solo attenuato verso il cielo.
+- Il cavo che regge la trave è scenografia: acciaio grigio, senza contorno scuro.
 
 ## Locomotive
 
@@ -137,12 +139,12 @@ round head with one red light on. Transparent background.
 Saturi e col contorno scuro: dietro ci sono pile di container colorati, che sullo sfondo restano attenuate.
 
 ```
-A stack of two wooden industrial pallets, side view, 36x16 pixels, pale wood planks with dark gaps.
+A stack of two wooden pallets, side view, 36x16 pixels, pale wood planks with dark gaps.
 Transparent background.
 ```
 
 ```
-Industrial oil barrels, side view: sprite sheet with two variants side by side —
+Blue steel oil barrels, side view: sprite sheet with two variants side by side —
 a single blue steel barrel 18x26 pixels and two barrels side by side 36x26 pixels —
 with metal rims and a small hazard label. Transparent background, 56x26 total.
 ```
@@ -162,9 +164,9 @@ and a yellow-black warning stripe at both ends. Transparent background.
 ```
 
 ```
-A crane cable holding a load, side view, 96x200 pixels: a single thin dark steel cable coming from the top
-edge down to a small yellow crane hook at about 175 pixels, then two straight slings from the hook down to
-the bottom corners at 18 and 78 pixels. Nothing else. Transparent background.
+A crane cable holding a load, side view, 96x200 pixels, no dark outline: a single thin grey steel cable
+coming from the top edge down to a small yellow crane hook at about 176 pixels, then two straight slings
+from the hook down to the bottom edge at x = 18 and x = 77. Nothing else. Transparent background.
 ```
 
 ## Sfondi in parallasse
