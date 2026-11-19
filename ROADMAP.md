@@ -72,7 +72,7 @@ L'altro vincolo è l'anticipo: con la locomotiva a x ≈ 80 restano circa 400 px
 
 | Parametro | Facile – Campagna | Medio – Cittadina | Difficile – Porto |
 | --- | --- | --- | --- |
-| Durata partita | 60 s | 90 s | 120 s |
+| Durata partita | 40 s | 60 s | 80 s |
 | Velocità iniziale → massima | 110 → 140 px/s | 200 → 300 px/s | 260 → 380 px/s |
 | Velocità massima raggiunta a | 80 % della durata | 80 % | 80 % |
 | Anticipo a velocità massima | ≈ 2,9 s | ≈ 1,3 s | ≈ 1,05 s |

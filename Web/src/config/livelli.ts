@@ -69,7 +69,7 @@ export const COMUNE = {
 
 export const LIVELLI: Record<IdLivello, Livello> = {
   facile: {
-    durataSecondi: 60,
+    durataSecondi: 40,
     chiusuraSecondi: 6,
     velocita: { iniziale: 110, massima: 140, quotaDurataAlMassimo: 0.8 },
     salto: { durataSecondi: 1.3, altezza: 80, pressioneRicordataSecondi: 0.25 },
@@ -89,7 +89,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
     verifica: { finestraMinimaSecondi: 0.35, anticipoMinimoSecondi: 2.5 },
   },
   medio: {
-    durataSecondi: 90,
+    durataSecondi: 60,
     chiusuraSecondi: 4,
     velocita: { iniziale: 200, massima: 300, quotaDurataAlMassimo: 0.8 },
     salto: { durataSecondi: 0.8, altezza: 64, pressioneRicordataSecondi: 0.12 },
@@ -109,7 +109,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
     verifica: { finestraMinimaSecondi: 0.2, anticipoMinimoSecondi: 1.2 },
   },
   difficile: {
-    durataSecondi: 120,
+    durataSecondi: 80,
     chiusuraSecondi: 3.5,
     velocita: { iniziale: 260, massima: 380, quotaDurataAlMassimo: 0.8 },
     salto: { durataSecondi: 0.7, altezza: 64, pressioneRicordataSecondi: 0.08 },

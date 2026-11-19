@@ -58,19 +58,21 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
   elettrica: {
     file: "scintilla",
     origine: { x: -6, y: -20 },
-    ogniPx: 90,
-    probabilita: 0.35,
+    ogniPx: 40,
+    probabilita: 0.6,
     segueIlTerreno: false,
+    // Uno sprazzo di 3-5 scintille che schizzano dal pantografo: visibili quanto il fumo delle altre due.
     particelle: {
-      density: 3,
-      numParticles: { min: 1, max: 1 },
-      speed: { min: 0, max: 10 },
-      acceleration: { min: 0, max: 0 },
+      density: 24,
+      numParticles: { min: 3, max: 5 },
+      // Vita massima sotto velocità minima / frenata massima (60 / 150 = 0,4 s): non tornano indietro.
+      speed: { min: 60, max: 110 },
+      acceleration: { min: -150, max: -100 },
       rotationSpeed: { min: 0, max: 0 },
-      lifetimeSeconds: { min: 0.12, max: 0.2 },
+      lifetimeSeconds: { min: 0.25, max: 0.4 },
       scale: { min: 1, max: 1 },
       crescita: false,
-      spawnAngleDegrees: { min: 0, max: 360 },
+      spawnAngleDegrees: { min: 20, max: 160 },
     },
   },
 };

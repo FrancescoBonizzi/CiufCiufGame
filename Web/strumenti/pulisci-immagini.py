@@ -484,10 +484,31 @@ def foschia(im: Image.Image, cielo_im: Image.Image, quota: float) -> Image.Image
     return out
 
 
+# Strato vicino di cittadina e porto: muri e banchine pieni di dettaglio dietro ostacoli dello stesso tono.
+# Desaturato e schiarito verso un grigio caldo, lascia gli ostacoli come unici oggetti saturi.
+ATTENUA_VICINO = {"medio": 0.35, "difficile": 0.35}
+GRIGIO_CALDO = (238, 234, 226)
+
+
+def attenua(im: Image.Image, quota: float) -> Image.Image:
+    out = im.copy()
+    p = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = p[x, y]
+            if a:
+                grigio = (r * 30 + g * 59 + b * 11) // 100
+                spento = [c * 0.6 + grigio * 0.4 for c in (r, g, b)]
+                p[x, y] = tuple(round(c * (1 - quota) + t * quota) for c, t in zip(spento, GRIGIO_CALDO)) + (a,)
+    return out
+
+
 def scenario(livello: str) -> None:
     livelli = {"cielo": cielo(f"{livello}-cielo"), "lontano": strato(f"{livello}-lontano", "lontano"),
                "vicino": strato(f"{livello}-vicino", "vicino"), "binario": binario(BINARI[livello])}
     livelli["lontano"] = foschia(livelli["lontano"], livelli["cielo"], FOSCHIA[livello])
+    if livello in ATTENUA_VICINO:
+        livelli["vicino"] = attenua(livelli["vicino"], ATTENUA_VICINO[livello])
     for nome, im in livelli.items():
         salva(im, f"scenari/{livello}-{nome}.png")
     miniatura(livello, livelli)
