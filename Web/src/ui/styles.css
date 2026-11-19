@@ -156,7 +156,14 @@ button {
 /* Menu: anteprima e ▶ da una parte, le tre righe di figure dall'altra. In verticale si impilano. */
 /* Misure fisse a pixel interi: in una finestra troppo bassa il menu scorre invece di uscire dallo schermo
    ("safe" tiene visibile l'inizio quando il contenuto è più alto della finestra). */
+/* Il paesaggio si scurisce dietro il menu e resta luminoso ai bordi: bottoni, pannelli e titolo ne emergono. */
 .menu {
+  background-image:
+    radial-gradient(ellipse 60% 70% at 50% 55%, rgb(43 33 51 / 55%), rgb(43 33 51 / 10%)),
+    var(--img-menu-sfondo);
+  background-size:
+    100% 100%,
+    calc(480px * var(--scala-sfondo, 3)) calc(270px * var(--scala-sfondo, 3));
   height: 100svh;
   overflow-y: auto;
   display: flex;
@@ -170,6 +177,21 @@ button {
   .menu {
     flex-direction: column;
   }
+}
+
+/* Ombra netta di un pixel d'interfaccia, senza sfocatura: ogni elemento sembra uno sprite appoggiato. Vale in
+   menu, fine partita e pausa. Il bottone premuto scende sulla sua ombra, che resta ferma. */
+.titolo-logo img,
+.tasto-grande,
+.tasto-medio,
+.scelta,
+.anteprima {
+  filter: drop-shadow(var(--pixel) var(--pixel) 0 var(--accent-ink));
+}
+
+.tasto-grande:active,
+.tasto-medio:active {
+  filter: drop-shadow(var(--pixel) 0 0 var(--accent-ink));
 }
 
 .menu__anteprima {
