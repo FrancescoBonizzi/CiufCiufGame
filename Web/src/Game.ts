@@ -2,6 +2,7 @@ import { Application, Container, Sprite, Texture, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
 import BarraPercorso from "./gioco/BarraPercorso.ts";
+import Fumo from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
@@ -35,6 +36,7 @@ class Game {
   private readonly _stazione: Sprite;
   private readonly _barra: BarraPercorso;
   private readonly _polvere: ParticleSystem;
+  private readonly _fumo: Fumo;
 
   private _stato: Stato = "viaggio";
   private _tempo = 0;
@@ -70,6 +72,10 @@ class Game {
     this._generatore = new Generatore(strato, this._livello, width, COMUNE.attesaInizialeSecondi);
 
     const fotogrammi = texturesLocomotiva(preferenze.locomotiva, preferenze.colore);
+    // Prima della locomotiva, quindi dietro: ricadendo dopo un salto passa attraverso il fumo, non sotto.
+    const fumo = new Container();
+    mondo.addChild(fumo);
+    this._fumo = new Fumo(fumo, preferenze.locomotiva);
     this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello);
 
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
@@ -116,6 +122,7 @@ class Game {
     const dt = ticker.deltaMS / 1000;
     this._camera.update(dt);
     this._polvere.update(dt);
+    this._fumo.update(dt);
     if (this._stato === "finita") return;
     this._tempo += dt;
 
@@ -192,6 +199,7 @@ class Game {
 
   private muoviLocomotiva(dt: number, velocita: number, premuto: boolean): void {
     const evento = this._locomotiva.update(dt, velocita, premuto, this._tempo);
+    this._fumo.avanza(velocita * dt, this._locomotiva.sprite.x, this._locomotiva.sprite.y);
     if (evento === "salto") this._sounds.play("salto");
     if (evento === "atterraggio") {
       this._sounds.play("atterraggio");
@@ -231,6 +239,7 @@ class Game {
     if (import.meta.env.DEV) delete (window as unknown as Record<string, unknown>)["__ciufciuf"];
     this._controller.dispose();
     this._polvere.destroy();
+    this._fumo.destroy();
   }
 }
 

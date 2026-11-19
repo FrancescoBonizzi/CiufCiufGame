@@ -2,7 +2,7 @@
 // rampa di magenta, che nient'altro usa. Al caricamento quei pixel prendono la rampa del colore scelto,
 // con la stessa luminosità gradino per gradino. Un'immagine per locomotiva, nessuno strato separato.
 
-/** Dalla luce all'ombra. Le stesse tinte dei prompt in docs/prompt-pixel-art.md. */
+/** Dalla luce all'ombra. Le stesse tinte di RAMPA in strumenti/pulisci-immagini.py e dei suoi prompt. */
 export const RAMPA_MAGENTA = ["#ff9cff", "#ff3dff", "#c400c4", "#7a007a"] as const;
 
 type Rgb = [number, number, number];

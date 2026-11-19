@@ -1,23 +1,22 @@
 import { COLORI, type IdColore, type IdLocomotiva } from "../preferenze.ts";
 import { ricolora } from "./palette.ts";
-import { disegnaLocomotiva } from "./segnaposto.ts";
+import { canvasDa } from "./immagini.ts";
 
-// Unico punto da cui partita, menu e fine partita prendono il foglio della locomotiva colorata: con gli
-// sprite veri (fase 6) cambia solo la sorgente qui.
-const sorgenti = new Map<IdLocomotiva, HTMLCanvasElement>();
+/**
+ * Fotogrammi del foglio: le ruote fanno un giro in 8 passi. Carrozzeria generata, ruote e bielle disegnate da
+ * strumenti/pulisci-immagini.py, che ne fissa le misure.
+ */
+export const FOTOGRAMMA_LOCOMOTIVA = { larghezza: 64, altezza: 40, numero: 8 };
+
+// Unico punto da cui partita, menu e fine partita prendono il foglio della locomotiva colorata.
 const colorati = new Map<string, HTMLCanvasElement>();
 
-/** Foglio di 4 fotogrammi (FOTOGRAMMA_LOCOMOTIVA) con la carrozzeria nel colore scelto. Non va modificato. */
+/** Foglio di 8 fotogrammi (FOTOGRAMMA_LOCOMOTIVA) con la carrozzeria nel colore scelto. Non va modificato. */
 export const foglioLocomotiva = (tipo: IdLocomotiva, colore: IdColore): HTMLCanvasElement => {
   const chiave = `${tipo}:${colore}`;
   let foglio = colorati.get(chiave);
   if (!foglio) {
-    let sorgente = sorgenti.get(tipo);
-    if (!sorgente) {
-      sorgente = disegnaLocomotiva(tipo);
-      sorgenti.set(tipo, sorgente);
-    }
-    foglio = ricolora(sorgente, COLORI[colore]);
+    foglio = ricolora(canvasDa(`locomotive/${tipo}`), COLORI[colore]);
     colorati.set(chiave, foglio);
   }
   return foglio;

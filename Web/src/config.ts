@@ -4,7 +4,7 @@ export const GAME = {
   // Prefisso delle chiavi di localStorage: due giochi sullo stesso dominio non devono pestarsi le preferenze.
   storagePrefix: "ciufciuf",
   // Risoluzione logica: il mondo di gioco non cambia mai, a schermo si scala solo il canvas.
-  // 480×270 inchioda la misura di tutti gli asset di docs/prompt-pixel-art.md.
+  // 480×270 inchioda la misura di tutti gli asset prodotti da strumenti/pulisci-immagini.py.
   width: 480,
   height: 270,
   orientation: "landscape" as "landscape" | "portrait",

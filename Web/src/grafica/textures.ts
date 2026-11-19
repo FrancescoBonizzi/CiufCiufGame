@@ -1,18 +1,10 @@
 import { Rectangle, Texture } from "pixi.js";
 import type { IdLivello } from "../config/livelli.ts";
-import { OSTACOLI, type TipoOstacolo } from "../config/ostacoli.ts";
+import type { TipoOstacolo } from "../config/ostacoli.ts";
 import type { IdColore, IdLocomotiva } from "../preferenze.ts";
-import { foglioLocomotiva } from "./locomotive.ts";
-import {
-  FOTOGRAMMA_LOCOMOTIVA,
-  disegnaBinario,
-  disegnaCavo,
-  disegnaCielo,
-  disegnaIconaStazione,
-  disegnaOstacolo,
-  disegnaStazione,
-  disegnaStrato,
-} from "./segnaposto.ts";
+import { canvasDa } from "./immagini.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "./locomotive.ts";
+import { disegnaCavo } from "./cavo.ts";
 
 // Le texture si creano una volta e restano per le partite successive, come quelle nella cache di Assets:
 // ogni partita nuova crea solo le Sprite. Va chiamato dopo aver impostato lo scaleMode "nearest".
@@ -48,13 +40,17 @@ export const texturesLocomotiva = (tipo: IdLocomotiva, colore: IdColore): Textur
 };
 
 export const textureOstacolo = (tipo: TipoOstacolo, indice: number): Texture =>
-  daCanvas(`ostacolo:${tipo}:${indice}`, () => disegnaOstacolo(tipo, OSTACOLI[tipo][indice]!, indice));
+  daCanvas(`ostacolo:${tipo}:${indice}`, () => canvasDa(`ostacoli/${tipo}-${indice}`));
 
 export const textureCavo = () => daCanvas("cavo", disegnaCavo);
-export const textureCielo = (livello: IdLivello, l: number, a: number) =>
-  daCanvas(`cielo:${livello}:${l}x${a}`, () => disegnaCielo(livello, l, a));
+// Il cielo è fermo e largo quanto lo schermo; strati e binario si ripetono in orizzontale (TilingSprite).
+export const textureCielo = (livello: IdLivello) => daCanvas(`cielo:${livello}`, () => canvasDa(`scenari/${livello}-cielo`));
 export const textureStrato = (livello: IdLivello, quale: "lontano" | "vicino") =>
-  daCanvas(`strato:${livello}:${quale}`, () => disegnaStrato(livello, quale));
-export const textureBinario = (livello: IdLivello) => daCanvas(`binario:${livello}`, () => disegnaBinario(livello));
-export const textureStazione = () => daCanvas("stazione", disegnaStazione);
-export const textureIconaStazione = () => daCanvas("icona-stazione", disegnaIconaStazione);
+  daCanvas(`strato:${livello}:${quale}`, () => canvasDa(`scenari/${livello}-${quale}`));
+/** La cima delle rotaie è la riga 0, dove poggiano le ruote. */
+export const textureBinario = (livello: IdLivello) =>
+  daCanvas(`binario:${livello}`, () => canvasDa(`scenari/${livello}-binario`));
+export const textureStazione = () => daCanvas("stazione", () => canvasDa("stazione"));
+export const textureEffetto = (nome: "fumo" | "scarico" | "scintilla") =>
+  daCanvas(`effetto:${nome}`, () => canvasDa(`effetti/${nome}`));
+export const textureIconaStazione = () => daCanvas("icona-stazione", () => canvasDa("icona-stazione"));

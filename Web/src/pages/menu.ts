@@ -1,6 +1,6 @@
 import type { IdLivello } from "../config/livelli.ts";
-import { foglioLocomotiva } from "../grafica/locomotive.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, disegnaMiniatura } from "../grafica/segnaposto.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "../grafica/locomotive.ts";
+import { canvasDa } from "../grafica/immagini.ts";
 import {
   COLORI,
   LIVELLI_IN_ORDINE,
@@ -18,7 +18,7 @@ import { ICONE } from "../ui/icone.ts";
 import router from "./router.ts";
 
 /** Fotogrammi al secondo dell'anteprima: le ruote girano come a velocità moderata. */
-const FOTOGRAMMI_AL_SECONDO = 10;
+const FOTOGRAMMI_AL_SECONDO = 20;
 
 // Menu illustrato, usabile da chi non legge: tre righe di figure e un grande bottone ▶. Le parole sono
 // didascalie. Ogni scelta si salva subito, così la prossima visita riparte da lì.
@@ -61,7 +61,7 @@ export function renderMenuPage(container: HTMLElement): void {
   `;
 
   for (const segnaposto of container.querySelectorAll<HTMLElement>(".figura-scenario")) {
-    const miniatura = disegnaMiniatura(segnaposto.dataset["scenario"] as IdLivello);
+    const miniatura = canvasDa(`scenari/${segnaposto.dataset["scenario"] as IdLivello}-miniatura`);
     miniatura.classList.add("pixel");
     segnaposto.replaceWith(miniatura);
   }

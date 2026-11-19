@@ -2,7 +2,7 @@ import { Container, Rectangle, Sprite, type Texture } from "pixi.js";
 import { COMUNE, type Livello } from "../config/livelli.ts";
 
 /** Ogni quanti px percorsi le ruote passano al fotogramma successivo. */
-const PX_PER_FOTOGRAMMA = 8;
+const PX_PER_FOTOGRAMMA = 4;
 
 // Ferma in orizzontale: scorrono scenario e ostacoli. Il salto ha durata e altezza fisse, quindi il ritmo
 // della pressione non cambia con la velocità.
