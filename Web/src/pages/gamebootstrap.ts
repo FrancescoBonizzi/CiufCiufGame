@@ -83,6 +83,9 @@ export async function initGame(container: HTMLElement) {
       height: GAME.height,
       background: GAME.background,
       antialias: !GAME.pixelArt,
+      // Sprite e particelle a coordinate intere: a risoluzione 2 una posizione frazionaria li metterebbe a
+      // mezzo pixel di gioco, fuori dalla griglia degli altri.
+      roundPixels: GAME.pixelArt,
       autoDensity: true,
       // Oltre 2x la memoria del canvas cresce col quadrato senza differenza visibile.
       resolution: Math.min(window.devicePixelRatio || 1, 2),

@@ -93,6 +93,7 @@ class Game {
       rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.25, max: 0.45 },
       scale: { min: 1, max: 1 },
+      crescita: false,
       spawnAngleDegrees: { min: 100, max: 170 },
     });
 
@@ -209,7 +210,8 @@ class Game {
     if (evento === "salto") this._sounds.play("salto");
     if (evento === "atterraggio") {
       this._sounds.play("atterraggio");
-      this._polvere.emit(this._locomotiva.sprite.x - 8, 0);
+      // Mezzo sbuffo (8×8) sopra la rotaia, che altrimenti coprirebbe per un attimo.
+      this._polvere.emit(this._locomotiva.sprite.x - 8, -4);
     }
   }
 

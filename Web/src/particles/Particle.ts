@@ -13,6 +13,8 @@ export interface ParticleLaunch {
   scale: number;
   lifetimeSeconds: number;
   randomizedSpawnAngle: boolean;
+  /** Da 0,75 a 1 della scala lungo la vita. */
+  crescita: boolean;
   /** 0 = nessuna prospettiva */
   focalLength: number;
   z0: number;
@@ -30,6 +32,7 @@ class Particle {
   private _ageSeconds = 0;
   private _lifetimeSeconds = 0;
   private _initialScale = 1;
+  private _crescita = true;
   private _focalLength = 0;
   private _z = 0;
   private _vz = 0;
@@ -55,6 +58,7 @@ class Particle {
     this._lifetimeSeconds = launch.lifetimeSeconds;
     this._ageSeconds = 0;
     this._initialScale = launch.scale;
+    this._crescita = launch.crescita;
     this._focalLength = launch.focalLength;
     this._z = launch.z0;
     this._vz = launch.vz;
@@ -78,7 +82,7 @@ class Particle {
     const t = Math.min(1, this._ageSeconds / this._lifetimeSeconds);
     // Parabola 4t(1-t): compare e svanisce senza scatti, al massimo a metà vita.
     this._sprite.alpha = 4 * t * (1 - t);
-    let scale = this._initialScale * (0.75 + 0.25 * t);
+    let scale = this._crescita ? this._initialScale * (0.75 + 0.25 * t) : this._initialScale;
 
     if (this._focalLength > 0) {
       // Uno Z finto con proiezione prospettica: sprite piatti che sembrano una nuvola con volume, senza shader.

@@ -30,7 +30,14 @@ Ogni pixel dello schermo deve avere la stessa misura: sprite, sfondi e interfacc
 
 - Di suo il generatore disegna «pixel» di circa 16 px. Ridotti a 480 di larghezza diventerebbero 5 pixel di
   gioco, cinque volte quelli degli sprite. Gli sfondi si chiedono quindi con `GRANA_FINE`, come se l'immagine
-  fosse larga 480 pixel, e si usano a scala 1.
+  fosse larga 480 pixel, e i cieli con `GRANA_FINISSIMA`, perché coprono lo schermo a scala 1. Così ridotti a
+  qualunque scala fino a 1 ogni pixel resta un pixel di gioco; la scala degli strati (`SCALA` in
+  `pulisci-immagini.py`) la decide la misura dei loro oggetti accanto alla locomotiva.
+- Una sola istruzione di grana per prompt: `STILE` per gli sprite, `GRANA_FINE` o `GRANA_FINISSIMA` per gli
+  sfondi.
+- Le particelle pixel art non crescono né ruotano (`crescita: false`), e Pixi arrotonda le posizioni ai pixel
+  (`roundPixels`). Limite: su schermi con densità non intera (1,5×, 2,625×) nessun ingrandimento dà pixel tutti
+  uguali, partita compresa.
 - Il fondo di menu e pagine si ingrandisce del fattore intero più piccolo che copre la finestra, mai con
   `cover`.
 - La miniatura della barra del percorso è disegnata a 32×20, non rimpicciolita dallo sprite.

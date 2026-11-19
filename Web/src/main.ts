@@ -33,6 +33,8 @@ if (errori.length > 0) {
     radice.setProperty("--scala-sfondo", String(Math.ceil(Math.max(innerWidth / 480, innerHeight / 270))));
   scalaSfondo();
   addEventListener("resize", scalaSfondo);
+  // Su mobile la barra degli indirizzi che compare e scompare non sempre emette resize sulla finestra.
+  visualViewport?.addEventListener("resize", scalaSfondo);
   const font = new FontFace("Pixelify Sans", `url("${ASSETS_ROOT}fonts/pixelify-sans-latin.woff2")`, { weight: "400 700" });
   document.fonts.add(font);
 

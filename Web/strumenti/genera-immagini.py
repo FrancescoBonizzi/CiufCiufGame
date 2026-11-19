@@ -28,13 +28,16 @@ MODELLO = "gpt-image-2.6-sunburst"
 CHIAVE = Path.home() / ".config" / "ciufciuf" / "openai.key"
 GREZZE = Path(__file__).resolve().parent / ".grezze"
 
-STILE = (
+STILE_BASE = (
     "Pixel art game asset, 16-bit era style, clean and readable for a 4-year-old child. "
     "Side view, orthographic, no perspective. Thick dark outline (#2b2133) around every object. "
     "Flat shading with at most 3 tones per material, light coming from the top-left. "
     "Limited palette, no gradients, no dithering, no anti-aliasing, no blur, no glow, no text, no watermark. "
-    "Friendly, rounded, cartoon shapes. Big chunky pixels on a coarse, perfectly regular pixel grid. "
+    "Friendly, rounded, cartoon shapes. "
 )
+# Sprite piccoli: pixel grossi, che ridotti a 64 px diventano comunque un pixel di gioco. Una sola istruzione di
+# grana per prompt: STILE per gli sprite, GRANA_FINE o GRANA_FINISSIMA per gli sfondi.
+STILE = STILE_BASE + "Big chunky pixels on a coarse, perfectly regular pixel grid. "
 OGGETTO = "A single object, centered, on a fully transparent background, nothing else in the image, no ground shadow. "
 # Grana degli sfondi: il generatore di suo disegna "pixel" di circa 16 px, che ridotti a 480 di larghezza
 # diventano 5 pixel di gioco, cinque volte quelli degli sprite. Gli si chiede la griglia di 480.
@@ -53,7 +56,11 @@ STRATO = (
     "Pixel art game background layer, 16-bit era style, for a cheerful children's side-scrolling train game. "
     "Side view, orthographic. NO dark outlines anywhere: soft flat color shapes only. "
     "Flat shading, limited palette, no gradients, no dithering, no anti-aliasing, no text, no people, no vehicles. "
-    "The image is a wide horizontal strip. " + GRANA_FINE
+    "The image is a wide horizontal strip. "
+)
+VICINO = (
+    "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no "
+    "horizon; everything above it is fully transparent (no sky). "
 )
 
 MAGENTA = (
@@ -195,24 +202,22 @@ ASSET = {
     # --- Sfondi (strisce larghe: le rende ripetibili pulisci-immagini.py) ---
     "facile-cielo": (STRATO + GRANA_FINISSIMA + "A bright clear blue sky with a few big fluffy white clouds spread across the width, "
                      "lighter near the bottom. Only sky, no ground, no hills.", "1536x1024"),
-    "facile-lontano": (STRATO + "Soft rolling green hills far away under a light-blue sky: a windmill, a patchwork of "
+    "facile-lontano": (STRATO + GRANA_FINE + "Soft rolling green hills far away under a light-blue sky: a windmill, a patchwork of "
                        "fields, round trees, a small farmhouse with a red roof and a red barn. Muted colors, slightly "
                        "hazed toward light blue. The scenery fills the bottom 40% of the image; above it "
                        "the image is fully transparent (no sky).", "1536x1024"),
-    "facile-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
-                      "A low, close bright green grassy bank seen from the side, with small pink, yellow "
+    "facile-vicino": (STRATO + GRANA_FINE + VICINO + "A low, close bright green grassy bank seen from the side, with small pink, yellow "
                       "and white flowers and tiny tufts of grass; only a few very low, small round bushes. No "
                       "fences, no hay, no rocks, no tall plants. The grass is a thin strip filling only the bottom "
                       "12% of the image; above it the image is fully transparent (no sky).", "1536x1024"),
     "medio-cielo": (STRATO + GRANA_FINISSIMA + "A light afternoon sky turning warm cream near the horizon, soft cream clouds, and far "
                     "away along the bottom the pale blue-grey silhouette of a small town: rooftops, a church spire "
                     "and a clock tower. No ground.", "1536x1024"),
-    "medio-lontano": (STRATO + "A row of colorful terraced houses (brick red, ochre, cream, teal) with pitched slate "
+    "medio-lontano": (STRATO + GRANA_FINE + "A row of colorful terraced houses (brick red, ochre, cream, teal) with pitched slate "
                       "roofs, chimneys and white windows, and a stone railway station with arched windows and a big "
                       "round clock. Slightly hazed colors. The buildings fill the bottom 45% of the image; above them "
                       "the image is fully transparent (no sky).", "1536x1024"),
-    "medio-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
-                      "A stone railway station platform seen from the side, with a yellow safety line along "
+    "medio-vicino": (STRATO + GRANA_FINE + VICINO + "A stone railway station platform seen from the side, with a yellow safety line along "
                      "its top edge, green lamp posts and wooden benches. No crates, no signals, no people. The "
                      "platform fills the bottom 20% of the image, lamp posts rise above it; behind and "
                      "above them the image is fully transparent (no sky).", "1536x1024"),
@@ -220,20 +225,19 @@ ASSET = {
                         "two small cargo ships loaded with tiny colorful containers, and a red-and-white lighthouse "
                         "on a stone breakwater. The sea fills the bottom third. Pale hazy colors for distance.",
                         "1536x1024"),
-    "difficile-lontano": (STRATO + "A harbour: tall ship-to-shore gantry cranes (one orange, one blue) with long "
+    "difficile-lontano": (STRATO + GRANA_FINE + "A harbour: tall ship-to-shore gantry cranes (one orange, one blue) with long "
                           "horizontal booms, and stacks of corrugated shipping containers in many colors. Colors "
                           "noticeably hazed toward light blue. The scenery fills the bottom 50% of the image; above "
                           "it the image is fully transparent (no sky).", "1536x1024"),
-    "difficile-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
-                      "A concrete harbour quay seen from the side, light grey concrete with vertical "
+    "difficile-vicino": (STRATO + GRANA_FINE + VICINO + "A concrete harbour quay seen from the side, light grey concrete with vertical "
                          "expansion joints and a few small dark mooring bollards on top. No containers, no barrels. "
                          "The quay fills the bottom 20% of the image; above it the image is fully transparent (no sky).",
                          "1536x1024"),
-    "binario-campagna": (STILE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: "
+    "binario-campagna": (STILE_BASE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: "
                          "one shiny steel rail on top, the ends of wooden sleepers just below it, and brown-grey "
                          "gravel ballast underneath filling the bottom. Transparent above the rail. Uniform along "
                          "the width.", "1536x1024"),
-    "binario-porto": (STILE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: one "
+    "binario-porto": (STILE_BASE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: one "
                       "shiny steel rail on top, the ends of dark wooden sleepers just below it, and grey gravel "
                       "ballast underneath filling the bottom. Transparent above the rail. Uniform along the width.",
                       "1536x1024"),

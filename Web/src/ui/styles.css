@@ -79,6 +79,8 @@ button {
 #orientation-overlay {
   background: var(--background) var(--img-menu-sfondo) center bottom no-repeat;
   background-size: calc(480px * var(--scala-sfondo, 3)) calc(270px * var(--scala-sfondo, 3));
+  /* Fermo sulla finestra, su cui è calcolato: una pagina più alta scorre sopra il paesaggio, che la copre. */
+  background-attachment: fixed;
   image-rendering: pixelated;
 }
 

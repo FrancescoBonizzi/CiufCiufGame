@@ -9,6 +9,7 @@ const MATERIALE: Partial<Record<TipoOstacolo, Pezzo>> = { legna: "legna", fieno:
 
 // Pezzi dell'ostacolo sbalzato e una stellina d'urto: l'urto si vede e fa ridere, non spaventa. Nascono in
 // un contenitore che scorre col binario, come il fumo: restano indietro con l'ostacolo, non sul muso del treno.
+// Niente rotazione né crescita: uno sprite pixel art ruotato o ingrandito di una frazione perde la griglia.
 // WARNING: ParticleSystem non ferma la frenata a zero: la vita non supera mai velocità / decelerazione minime,
 // o i pezzi tornerebbero indietro prima di sparire.
 class Pezzi {
@@ -27,9 +28,10 @@ class Pezzi {
           numParticles: { min: 4, max: 6 },
           speed: { min: 70, max: 140 },
           acceleration: { min: -120, max: -60 },
-          rotationSpeed: { min: -8, max: 8 },
+          rotationSpeed: { min: 0, max: 0 },
           lifetimeSeconds: { min: 0.4, max: 0.55 },
           scale: { min: 1, max: 1 },
+          crescita: false,
           spawnAngleDegrees: { min: 20, max: 160 },
         }),
       );
@@ -40,9 +42,10 @@ class Pezzi {
       numParticles: { min: 2, max: 3 },
       speed: { min: 30, max: 60 },
       acceleration: { min: -40, max: -20 },
-      rotationSpeed: { min: -3, max: 3 },
+      rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.5, max: 0.7 },
       scale: { min: 1, max: 1 },
+      crescita: false,
       spawnAngleDegrees: { min: 60, max: 120 },
     });
   }

@@ -99,7 +99,7 @@ def riduci(im: Image.Image, larghezza: int, altezza: int, distanza: float = 40, 
             c = min(RAMPA, key=lambda m: abs(luminanza(m) - luminanza(c)))
         elif c in RAMPA:
             c = (c[0], c[1] - 1 if c[1] else 1, c[2])  # la rampa resta riservata alla carrozzeria
-        elif luminanza(c) < 50:
+        elif contorno and luminanza(c) < 50:
             c = CONTORNO
         finali.append(c)
 
@@ -451,10 +451,15 @@ def binario(id_asset: str) -> Image.Image:
         return piccolo
     # Massicciata allungata verso il basso fino al bordo dello schermo, specchiata a ogni ripetizione: una
     # fascia ripetuta uguale disegna righe regolari, come un muro di mattoni.
-    pezzo = piccolo.crop((0, piccolo.height // 2, larghezza, piccolo.height))
+    # Senza le ultime righe di solo contorno: specchiate, farebbero una striscia scura in mezzo alla ghiaia.
+    fondo = piccolo.height
+    while fondo > piccolo.height // 2 and all(
+            piccolo.getpixel((x, fondo - 1))[:3] == CONTORNO for x in range(0, larghezza, 7)):
+        fondo -= 1
+    pezzo = piccolo.crop((0, piccolo.height // 2, larghezza, fondo))
     out = Image.new("RGBA", (larghezza, BINARIO_ALTEZZA), (0, 0, 0, 0))
-    out.alpha_composite(piccolo, (0, 0))
-    y, specchio = piccolo.height, True
+    out.alpha_composite(piccolo.crop((0, 0, larghezza, fondo)), (0, 0))
+    y, specchio = fondo, True
     while y < BINARIO_ALTEZZA:
         out.alpha_composite(pezzo.transpose(Image.FLIP_TOP_BOTTOM) if specchio else pezzo, (0, y))
         y, specchio = y + pezzo.height, not specchio
@@ -543,7 +548,8 @@ def figura_quadrata(id_asset: str, lato: int, contorno: bool = True) -> Image.Im
 
 
 def pezzo(id_asset: str) -> None:
-    salva(figura_quadrata(id_asset, 8), f"pezzi/{id_asset.split('-', 1)[1]}.png")
+    # La polvere è un effetto, come il fumo: niente contorno scuro, che la farebbe sembrare un sasso.
+    salva(figura_quadrata(id_asset, 8, contorno=id_asset != "pezzo-polvere"), f"pezzi/{id_asset.split('-', 1)[1]}.png")
 
 
 BIANCO, GRIGIO_ICONA = (0xFF, 0xFF, 0xFF), (0xC9, 0xC6, 0xD1)
