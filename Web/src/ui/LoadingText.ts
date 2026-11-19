@@ -1,7 +1,8 @@
 import { Application, Text } from "pixi.js";
 import { GAME } from "../config.ts";
 
-// Mostrato sul canvas mentre gli asset si caricano: alla prima partita, con atlas da qualche MB, servono secondi.
+// Mostrato sul canvas mentre gli atlas si caricano. Oggi non ce ne sono (la pixel art si carica prima del
+// menu, grafica/immagini.ts): resta a schermo un frame, e servirà se un giorno arriveranno atlas pesanti.
 class LoadingText {
   private readonly _text: Text;
 

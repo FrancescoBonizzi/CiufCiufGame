@@ -188,7 +188,7 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
       fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
 - [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, polvere
       all'atterraggio in pixel art
-- [ ] Niente atlas: 53 PNG singoli per 336 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [ ] Niente atlas: 53 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio
