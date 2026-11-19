@@ -30,7 +30,10 @@ per gli asset finali (Flare è quella veloce).
   pixel il colore **prevalente** del suo blocco. Una media (ridimensionamento BOX) trasforma una campana dorata
   piccola in una macchia beige.
 - Rifà il contorno scuro `#2b2133` di 1 px su locomotive e ostacoli. Gli sfondi restano senza contorno.
-- Riporta ogni ostacolo alla misura esatta di `src/config/ostacoli.ts`, da cui dipendono le hitbox.
+- Riporta ogni ostacolo alla misura esatta di `src/config/ostacoli.ts`, da cui dipendono le hitbox. Lo script
+  ne tiene una copia (tabella `OSTACOLI`, più barili e container): chi cambia una misura aggiorna anche
+  quella e rigenera lo sprite. All'avvio il gioco confronta ogni PNG con `ostacoli.ts` e si ferma se non
+  coincidono.
 
 ## Locomotive
 

@@ -2,3 +2,5 @@ node_modules
 dist
 *.local
 .DS_Store
+# Immagini grezze e consumi di strumenti/genera-immagini.py
+strumenti/.grezze/

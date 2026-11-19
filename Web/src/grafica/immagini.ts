@@ -1,25 +1,35 @@
 import { ASSETS_ROOT } from "../assets/paths.ts";
+import type { IdLivello } from "../config/livelli.ts";
 import { OSTACOLI, type TipoOstacolo } from "../config/ostacoli.ts";
-import { LOCOMOTIVE } from "../preferenze.ts";
+import { LIVELLI_IN_ORDINE, LOCOMOTIVE, type IdLocomotiva } from "../preferenze.ts";
 
 // La pixel art (public/assets/images, prodotta da strumenti/pulisci-immagini.py) si carica una volta sola,
 // prima del menu: chi disegna (menu, partita, fine partita) la trova pronta e resta sincrono.
 
+export type Effetto = "fumo" | "scarico" | "scintilla";
+const EFFETTI: Effetto[] = ["fumo", "scarico", "scintilla"];
+type StratoScenario = "cielo" | "lontano" | "vicino" | "binario" | "miniatura";
+const STRATI: StratoScenario[] = ["cielo", "lontano", "vicino", "binario", "miniatura"];
+
+export type NomeImmagine =
+  | `locomotive/${IdLocomotiva}`
+  | `ostacoli/${TipoOstacolo}-${number}`
+  | `effetti/${Effetto}`
+  | `scenari/${IdLivello}-${StratoScenario}`
+  | "stazione"
+  | "icona-stazione";
+
 // Un file per variante di ostacolo: ostacoli/<tipo>-<indice>, come le varianti di OSTACOLI.
-const NOMI = [
-  ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}`),
-  ...(Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) => OSTACOLI[tipo].map((_, i) => `ostacoli/${tipo}-${i}`)),
+const NOMI: NomeImmagine[] = [
+  ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}` as const),
+  ...(Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) =>
+    OSTACOLI[tipo].map((_, i) => `ostacoli/${tipo}-${i}` as const),
+  ),
   "stazione",
   "icona-stazione",
-  "effetti/fumo",
-  "effetti/scarico",
-  "effetti/scintilla",
-  ...(["facile", "medio", "difficile"] as const).flatMap((livello) =>
-    ["cielo", "lontano", "vicino", "binario", "miniatura"].map((quale) => `scenari/${livello}-${quale}`),
-  ),
+  ...EFFETTI.map((nome) => `effetti/${nome}` as const),
+  ...LIVELLI_IN_ORDINE.flatMap((livello) => STRATI.map((quale) => `scenari/${livello}-${quale}` as const)),
 ];
-
-export type NomeImmagine = string;
 
 const caricate = new Map<NomeImmagine, HTMLImageElement>();
 
@@ -36,6 +46,17 @@ const carica = (nome: NomeImmagine) =>
 
 export const caricaImmagini = async (): Promise<void> => {
   await Promise.all(NOMI.map(carica));
+  // La hitbox si calcola dalla misura in ostacoli.ts: uno sprite di misura diversa farebbe urtare l'aria.
+  // pulisci-immagini.py ne tiene una copia (OSTACOLI): chi cambia una misura rigenera lo sprite.
+  const sbagliate = (Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) =>
+    OSTACOLI[tipo].flatMap(({ larghezza, altezza }, i) => {
+      const img = caricate.get(`ostacoli/${tipo}-${i}`)!;
+      return img.width === larghezza && img.height === altezza
+        ? []
+        : [`ostacoli/${tipo}-${i}: ${img.width}×${img.height} invece di ${larghezza}×${altezza}`];
+    }),
+  );
+  if (sbagliate.length > 0) throw new Error(`Sprite fuori misura: ${sbagliate.join("; ")}`);
 };
 
 /** Copia su canvas, da ricolorare o ritagliare senza toccare l'originale. */

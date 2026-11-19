@@ -184,7 +184,7 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
 - [ ] Particelle: pezzi dell'ostacolo sbalzato
 - [x] Hitbox: gli ostacoli escono alla misura esatta di `ostacoli.ts`, quindi le hitbox restano valide;
       quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
-- [ ] Niente atlas: 37 PNG singoli per 156 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [ ] Niente atlas: 38 PNG singoli per 156 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio

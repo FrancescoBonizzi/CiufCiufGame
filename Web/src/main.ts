@@ -22,8 +22,10 @@ if (errori.length > 0) {
   // Prima lo sblocco audio: il router disegna subito il menu.
   wireAudioUnlockOnce();
   // Le immagini prima del router: menu e partita le disegnano senza attese.
-  caricaImmagini().then(initializeRouter, (e) => {
-    console.error(e);
-    document.getElementById("app")!.innerHTML = `<main class="page"><h1>${TESTI.erroreCaricamento}</h1></main>`;
-  });
+  caricaImmagini()
+    .then(initializeRouter)
+    .catch((e: unknown) => {
+      console.error(e);
+      document.getElementById("app")!.innerHTML = `<main class="page"><h1>${TESTI.erroreCaricamento}</h1></main>`;
+    });
 }

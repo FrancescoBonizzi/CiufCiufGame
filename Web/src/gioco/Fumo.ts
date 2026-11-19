@@ -1,16 +1,19 @@
-import type { Container } from "pixi.js";
+import { Container } from "pixi.js";
+import type { Effetto as FileEffetto } from "../grafica/immagini.ts";
 import { textureEffetto } from "../grafica/textures.ts";
 import ParticleSystem, { type ParticleSystemOptions } from "../particles/ParticleSystem.ts";
 import type { IdLocomotiva } from "../preferenze.ts";
 
 interface Effetto {
-  file: "fumo" | "scarico" | "scintilla";
+  file: FileEffetto;
   /** Bocca della ciminiera o del pantografo, rispetto alla base al centro dello sprite (anchor 0.5, 1). */
   origine: { x: number; y: number };
   /** Ogni quanti px percorsi parte uno sbuffo: il ritmo segue la velocità, come il ciuf-ciuf. */
   ogniPx: number;
   /** Probabilità che uno sbuffo parta davvero: le scintille sono rare e irregolari. */
   probabilita: number;
+  /** Il fumo resta indietro col terreno; la scintilla, che dura un attimo, resta sul pantografo. */
+  segueIlTerreno: boolean;
   particelle: Omit<ParticleSystemOptions, "texture">;
 }
 
@@ -21,15 +24,16 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
     origine: { x: 14, y: -38 },
     ogniPx: 48,
     probabilita: 1,
+    segueIlTerreno: true,
     particelle: {
-      density: 6,
+      density: 12,
       numParticles: { min: 1, max: 2 },
-      speed: { min: 40, max: 70 },
+      speed: { min: 30, max: 55 },
       acceleration: { min: -30, max: -10 },
       rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.7, max: 1.0 },
       scale: { min: 0.7, max: 1 },
-      spawnAngleDegrees: { min: 110, max: 140 },
+      spawnAngleDegrees: { min: 80, max: 110 },
     },
   },
   diesel: {
@@ -37,15 +41,16 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
     origine: { x: 10, y: -34 },
     ogniPx: 28,
     probabilita: 1,
+    segueIlTerreno: true,
     particelle: {
-      density: 8,
+      density: 16,
       numParticles: { min: 1, max: 1 },
-      speed: { min: 50, max: 80 },
+      speed: { min: 30, max: 50 },
       acceleration: { min: -40, max: -20 },
       rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.4, max: 0.6 },
       scale: { min: 0.6, max: 0.9 },
-      spawnAngleDegrees: { min: 120, max: 150 },
+      spawnAngleDegrees: { min: 85, max: 115 },
     },
   },
   elettrica: {
@@ -53,6 +58,7 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
     origine: { x: -2, y: -37 },
     ogniPx: 90,
     probabilita: 0.35,
+    segueIlTerreno: false,
     particelle: {
       density: 3,
       numParticles: { min: 1, max: 1 },
@@ -67,14 +73,18 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
 };
 
 // Fumo del vapore, scarico del diesel, scintille del pantografo: la locomotiva si riconosce anche così.
+// Il mondo è fermo in orizzontale e scorre lo scenario: gli sbuffi nascono in un contenitore che scorre col
+// binario, così restano indietro alla velocità del terreno invece di seguire la locomotiva.
 class Fumo {
   private readonly _effetto: Effetto;
+  private readonly _scorre = new Container();
   private readonly _particelle: ParticleSystem;
   private _distanza = 0;
 
   constructor(parent: Container, tipo: IdLocomotiva) {
     this._effetto = EFFETTI[tipo];
-    this._particelle = new ParticleSystem(parent, { texture: textureEffetto(this._effetto.file), ...this._effetto.particelle });
+    parent.addChild(this._scorre);
+    this._particelle = new ParticleSystem(this._scorre, { texture: textureEffetto(this._effetto.file), ...this._effetto.particelle });
   }
 
   /** Ogni frame, anche a locomotiva ferma: gli sbuffi già partiti finiscono di svanire. */
@@ -84,17 +94,19 @@ class Fumo {
 
   /** px percorsi in questo frame; x, y: la base della locomotiva. */
   avanza(passo: number, x: number, y: number): void {
+    if (this._effetto.segueIlTerreno) this._scorre.x -= passo;
     this._distanza += passo;
     while (this._distanza >= this._effetto.ogniPx) {
       this._distanza -= this._effetto.ogniPx;
       if (Math.random() < this._effetto.probabilita) {
-        this._particelle.emit(x + this._effetto.origine.x, y + this._effetto.origine.y);
+        this._particelle.emit(x + this._effetto.origine.x - this._scorre.x, y + this._effetto.origine.y);
       }
     }
   }
 
   destroy(): void {
     this._particelle.destroy();
+    this._scorre.destroy();
   }
 }
 
