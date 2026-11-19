@@ -6,10 +6,10 @@ import { foglioLocomotiva } from "./locomotive.ts";
 import {
   FOTOGRAMMA_LOCOMOTIVA,
   disegnaBinario,
+  disegnaCavo,
   disegnaCielo,
   disegnaIconaStazione,
   disegnaOstacolo,
-  disegnaPiloni,
   disegnaStazione,
   disegnaStrato,
 } from "./segnaposto.ts";
@@ -50,7 +50,7 @@ export const texturesLocomotiva = (tipo: IdLocomotiva, colore: IdColore): Textur
 export const textureOstacolo = (tipo: TipoOstacolo, indice: number): Texture =>
   daCanvas(`ostacolo:${tipo}:${indice}`, () => disegnaOstacolo(tipo, OSTACOLI[tipo][indice]!, indice));
 
-export const texturePiloni = () => daCanvas("piloni", disegnaPiloni);
+export const textureCavo = () => daCanvas("cavo", disegnaCavo);
 export const textureCielo = (livello: IdLivello, l: number, a: number) =>
   daCanvas(`cielo:${livello}:${l}x${a}`, () => disegnaCielo(livello, l, a));
 export const textureStrato = (livello: IdLivello, quale: "lontano" | "vicino") =>

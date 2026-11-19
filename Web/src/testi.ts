@@ -37,8 +37,8 @@ export const TESTI = {
 
   scenari: {
     facile: "Campagna",
-    medio: "Stazione",
-    difficile: "Ferrovia industriale",
+    medio: "Cittadina",
+    difficile: "Porto",
   } satisfies Record<IdLivello, string>,
 
   livelli: {

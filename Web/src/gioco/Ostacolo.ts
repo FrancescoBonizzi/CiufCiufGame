@@ -1,7 +1,7 @@
 import { Container, Rectangle, Sprite } from "pixi.js";
 import { COMUNE } from "../config/livelli.ts";
 import { OSTACOLI, type TipoOstacolo, type VarianteOstacolo } from "../config/ostacoli.ts";
-import { textureOstacolo, texturePiloni } from "../grafica/textures.ts";
+import { textureCavo, textureOstacolo } from "../grafica/textures.ts";
 
 export type StatoOstacolo = "libero" | "in-corsa" | "sbalzato";
 
@@ -13,8 +13,6 @@ class Ostacolo {
   readonly variante: VarianteOstacolo;
 
   private readonly _figura: Sprite;
-  /** Quanto la scenografia (i piloni della trave) sporge ai lati della figura. */
-  private readonly _sporgenza: number;
   private _stato: StatoOstacolo = "libero";
   private _velocitaX = 0;
   private _velocitaY = 0;
@@ -25,14 +23,12 @@ class Ostacolo {
     indiceVariante: number,
   ) {
     this.variante = OSTACOLI[tipo][indiceVariante]!;
-    this._sporgenza = 0;
     if (tipo === "trave") {
-      // I piloni sono scenografia: reggono la trave ma non urtano.
-      const piloni = new Sprite(texturePiloni());
-      piloni.anchor.set(0, 1);
-      this._sporgenza = (piloni.width - this.variante.larghezza) / 2;
-      piloni.x = -this._sporgenza;
-      this.vista.addChild(piloni);
+      // Il cavo è scenografia: regge la trave ma non urta.
+      const cavo = new Sprite(textureCavo());
+      cavo.anchor.set(0, 1);
+      cavo.y = -this.variante.sollevamento - this.variante.altezza;
+      this.vista.addChild(cavo);
     }
     this._figura = new Sprite(textureOstacolo(tipo, indiceVariante));
     // Il perno al centro fa ruotare la figura su se stessa quando vola via.
@@ -49,13 +45,13 @@ class Ostacolo {
 
   /** Bordo destro di ciò che si vede, scenografia compresa, in coordinate del mondo. */
   get destra(): number {
-    return this.vista.x + this.variante.larghezza + this._sporgenza;
+    return this.vista.x + this.variante.larghezza;
   }
 
   /** @param x dove comincia ciò che si vede, scenografia compresa: lo schermo lo vede entrare dal bordo. */
   nasci(x: number): void {
     this._stato = "in-corsa";
-    this.vista.x = x + this._sporgenza;
+    this.vista.x = x;
     this.vista.y = 0;
     this.vista.visible = true;
     this._figura.rotation = 0;

@@ -11,7 +11,7 @@ export type TipoOstacolo =
   | "segnale"
   | "pallet"
   | "barili"
-  | "casse"
+  | "container"
   | "trave";
 
 export interface VarianteOstacolo {
@@ -42,7 +42,7 @@ export const OSTACOLI: Record<TipoOstacolo, VarianteOstacolo[]> = {
   segnale: [aTerra(20, 32, 10, 28)],
   pallet: [aTerra(36, 16, 32, 12)],
   barili: [aTerra(18, 26, 14, 22), aTerra(36, 26, 32, 22)],
-  casse: [aTerra(20, 20, 16, 16), aTerra(20, 40, 16, 36), aTerra(40, 40, 36, 36)],
-  // Da terra la locomotiva ci passa sotto, in salto la colpisce: si supera non premendo niente.
+  container: [aTerra(20, 20, 16, 16), aTerra(20, 40, 16, 36), aTerra(40, 40, 36, 36)],
+  // Appesa al cavo di una gru. Da terra la locomotiva ci passa sotto, in salto la colpisce: si supera non premendo niente.
   trave: [{ larghezza: 96, altezza: 12, hitbox: { larghezza: 92, altezza: 12 }, sollevamento: 48 }],
 };

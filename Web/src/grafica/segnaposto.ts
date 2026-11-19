@@ -176,13 +176,23 @@ const DISEGNI_OSTACOLI: Record<TipoOstacolo, DisegnoOstacolo> = {
       p.rett(x + 6, 11, 6, 5, "#f2c230");
     }
   },
-  casse: (p, _l, _a, indice) => {
-    const cassa = (x: number, y: number) => {
-      p.blocco(x + 1, y + 1, 18, 18, "#6b4423").rett(x + 1, y + 1, 18, 2, "#8a5a2b");
-      p.rett(x + 1, y + 1, 3, 3, "#8a8494").rett(x + 16, y + 16, 3, 3, "#8a8494");
+  container: (p, _l, _a, indice) => {
+    // Visti di testa: lamiera ondulata e le due sbarre di chiusura delle porte.
+    const container = (x: number, y: number, colore: string, ombra: string) => {
+      p.blocco(x + 1, y + 1, 18, 18, colore);
+      for (let i = x + 3; i < x + 18; i += 3) p.rett(i, y + 3, 1, 14, ombra);
+      p.rett(x + 7, y + 3, 1, 14, CONTORNO).rett(x + 12, y + 3, 1, 14, CONTORNO);
     };
-    const posizioni = [[[0, 0]], [[0, 0], [0, 20]], [[0, 20], [20, 20], [10, 0]]][indice] ?? [];
-    for (const [x, y] of posizioni) cassa(x!, y!);
+    const rosso = ["#e0483d", "#a93228"] as const;
+    const giallo = ["#f2b632", "#bf8a1c"] as const;
+    const verde = ["#2f9e5b", "#21744a"] as const;
+    const blu = ["#2f74c0", "#21558f"] as const;
+    const posizioni = [
+      [[0, 0, rosso]],
+      [[0, 0, giallo], [0, 20, verde]],
+      [[0, 20, rosso], [20, 20, blu], [10, 0, giallo]],
+    ] as const;
+    for (const [x, y, [colore, ombra]] of posizioni[indice] ?? []) container(x, y, colore, ombra);
   },
   trave: (p, l, a) => {
     p.blocco(1, 1, l - 2, a - 2, "#d4572a").rett(1, 1, l - 2, 2, "#f07a48");
@@ -200,13 +210,21 @@ export const disegnaOstacolo = (tipo: TipoOstacolo, variante: VarianteOstacolo, 
   return p.canvas;
 };
 
-/** I due piloni che reggono la trave: scenografia, non ostacolo (112×64). */
-export const disegnaPiloni = (): HTMLCanvasElement => {
-  const p = new Pennello(112, 64);
-  for (const x of [0, 104]) {
-    p.blocco(x + 1, 1, 6, 63, "#6f86a6");
-    for (let y = 4; y < 60; y += 8) p.rett(x + 1, y, 6, 1, "#4a5d78");
+/** Il cavo della gru che regge la trave, 96×200: scenografia, non ostacolo. Il bordo basso è la cima della trave. */
+export const disegnaCavo = (): HTMLCanvasElement => {
+  const p = new Pennello(96, 200);
+  // Acciaio grigio e niente contorno: il contorno scuro spetta a ciò che si urta.
+  const acciaio = "#5b5466";
+  const gancio = 48;
+  // Funi speculari, un pixel per colonna: dagli attacchi sulla trave (x 18 e 77) salgono al gancio.
+  for (let i = 0; i <= 30; i++) {
+    const y = 199 - Math.round((i * 20) / 30);
+    p.rett(18 + i, y, 1, 1, acciaio).rett(77 - i, y, 1, 1, acciaio);
   }
+  // WARNING: 200 px bastano perché il cavo esca dal bordo alto finché sollevamento + altezza della trave (60)
+  // + BINARIO_DAL_BASSO di Game.ts (36) + 200 superano i 270 px dello schermo con margine per lo scossone.
+  p.rett(gancio - 1, 0, 2, 176, acciaio);
+  p.rett(gancio - 3, 176, 6, 3, "#f2c230");
   return p.canvas;
 };
 
@@ -223,7 +241,7 @@ interface Scenario {
 const SCENARI: Record<IdLivello, Scenario> = {
   facile: { cielo: ["#7fd3ff", "#c8eeff"], nuvole: "#ffffff", lontano: ["#8cc7a0", "#6fae85"], vicino: ["#5cc85c", "#3fa64a"], dettaglio: "#ff7eb6" },
   medio: { cielo: ["#a9c6f0", "#f3dcc6"], nuvole: "#f7f2ea", lontano: ["#b08870", "#8e6a58"], vicino: ["#a7a29a", "#88837c"], dettaglio: "#f2c230" },
-  difficile: { cielo: ["#e8946a", "#a7a0a8"], nuvole: "#d9c2b8", lontano: ["#5e6b7a", "#47515e"], vicino: ["#7a6d63", "#5e534b"], dettaglio: "#b5562d" },
+  difficile: { cielo: ["#8cc6ec", "#e2f0f4"], nuvole: "#ffffff", lontano: ["#a3b4c4", "#8597aa"], vicino: ["#a9b0b6", "#8d959c"], dettaglio: "#d6e3ea" },
 };
 
 /** Onde ripetibili: periodi che dividono 480, così il bordo sinistro continua il destro. */
@@ -308,7 +326,7 @@ export const disegnaMiniatura = (livello: IdLivello): HTMLCanvasElement => {
   const icona: Record<IdLivello, () => void> = {
     facile: () => DISEGNI_OSTACOLI.fieno(sotto(p, 52, 28), 16, 16, 0),
     medio: () => DISEGNI_OSTACOLI.segnale(sotto(p, 60, 24), 12, 20, 0),
-    difficile: () => DISEGNI_OSTACOLI.barili(sotto(p, 54, 30), 18, 14, 0),
+    difficile: () => DISEGNI_OSTACOLI.container(sotto(p, 54, 24), 20, 20, 0),
   };
   icona[livello]();
   p.ctx.setTransform(1, 0, 0, 1, 0, 0);

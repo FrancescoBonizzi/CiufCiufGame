@@ -121,7 +121,7 @@ export const LIVELLI: Record<IdLivello, Livello> = {
     tipi: [
       { tipo: "pallet", peso: 1 },
       { tipo: "barili", peso: 1 },
-      { tipo: "casse", peso: 1 },
+      { tipo: "container", peso: 1 },
       { tipo: "trave", peso: 0.7 },
     ],
     nonRipetereTipo: true,
