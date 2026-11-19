@@ -22,6 +22,7 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 | HUD | **Barra del percorso**: una piccola locomotiva del colore scelto va dalla partenza alla stazione | Il traguardo si vede senza saper leggere; niente timer né punteggi. |
 | Menu | **Illustrato, usabile da chi non legge**: tre righe di figure (locomotive, colori, scenari) e un grande bottone ▶; parole solo come didascalia; anteprima dal vivo della locomotiva colorata | La bambina sceglie e parte da sola. |
 | Pausa | Esc o bottone in alto a destra; pausa automatica a scheda nascosta (già nello starter) | Il tocco sul bottone di pausa non fa saltare. |
+| Scenari | **Campagna**, **cittadina con stazione**, **porto** con gru, navi e container, ispirati alle ferrovie dei cartoni per bambini senza nomi né personaggi | Ambienti che un bambino riconosce, sempre più fitti mentre il gioco accelera. Il porto rende colorato il livello difficile, che l'industria faceva grigio. |
 | Grafica | **Segnaposto** finché le meccaniche non sono calibrate, poi **pixel art** generata con AI e ripulita (prompt in [`docs/prompt-pixel-art.md`](docs/prompt-pixel-art.md)) | Si calibra sul comportamento, non sull'aspetto. |
 | Audio | Effetti e una musica per scenario, in una fase a parte; bottone audio nel menu | Il fischio del treno è metà del divertimento. |
 | Testi | Italiano, tutti in un modulo `src/testi.ts` | Una traduzione futura tocca un file solo. |
@@ -69,7 +70,7 @@ L'altro vincolo è l'anticipo: con la locomotiva a x ≈ 80 restano circa 400 px
 
 ### Valori di partenza (ipotesi da calibrare in fase 5)
 
-| Parametro | Facile – Campagna | Medio – Stazione | Difficile – Ferrovia industriale |
+| Parametro | Facile – Campagna | Medio – Cittadina | Difficile – Porto |
 | --- | --- | --- | --- |
 | Durata partita | 60 s | 90 s | 120 s |
 | Velocità iniziale → massima | 110 → 140 px/s | 200 → 300 px/s | 260 → 380 px/s |

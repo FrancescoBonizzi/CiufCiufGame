@@ -18,6 +18,20 @@ Friendly, rounded, cartoon shapes. Single object centered on a fully transparent
 nothing else in the image, no ground shadow unless asked.
 ```
 
+## Leggibilità: ostacoli contro sfondo
+
+Le tre ambientazioni (campagna, cittadina con stazione, porto) si ispirano alle ferrovie dei cartoni per
+bambini, senza copiarle: nei prompt niente nomi di serie, personaggi o luoghi, niente facce sulle
+locomotive. Un generatore che legge un nome noto tende a riprodurne i personaggi.
+
+- Il contorno scuro `#2b2133` spetta solo a locomotiva e ostacoli. Gli strati di sfondo non ne hanno: ciò
+  che si tocca si stacca da ciò che si guarda.
+- Ogni strato di sfondo sfuma verso il colore dell'orizzonte, di più quanto è lontano; gli ostacoli restano
+  saturi.
+- Nello sfondo niente che somigli a un ostacolo dello stesso livello: niente staccionate o balle di fieno in
+  campagna, niente casse o segnali vicino al binario in cittadina, nessun container sulla banchina in primo
+  piano al porto.
+
 ## Locomotive
 
 Tutte guardano a **destra**, ruote appoggiate al bordo inferiore dell'immagine. La carrozzeria (il colore che
@@ -95,7 +109,7 @@ A short wooden countryside fence section, side view, 40x24 pixels, three white-p
 and two horizontal rails, slightly rustic. Transparent background.
 ```
 
-## Ostacoli – Medio, stazione
+## Ostacoli – Medio, cittadina con stazione
 
 ```
 A wooden railway freight crate with metal corners and a stencilled arrow, side view, 28x28 pixels,
@@ -118,9 +132,9 @@ A small ground railway signal, side view, 20x32 pixels: grey pole on a square ba
 round head with one red light on. Transparent background.
 ```
 
-## Ostacoli – Difficile, ferrovia industriale
+## Ostacoli – Difficile, porto
 
-Colori più freddi e saturi meno, ma sempre col contorno scuro: devono staccarsi dallo sfondo industriale.
+Saturi e col contorno scuro: dietro ci sono pile di container colorati, che sullo sfondo restano attenuate.
 
 ```
 A stack of two wooden industrial pallets, side view, 36x16 pixels, pale wood planks with dark gaps.
@@ -134,10 +148,13 @@ with metal rims and a small hazard label. Transparent background, 56x26 total.
 ```
 
 ```
-Stacked wooden cargo crates, side view: sprite sheet with three variants side by side —
-one crate (20x20), two crates stacked (20x40), three crates in a pyramid (40x40) —
-dark brown wood with lighter edges and metal corners. Transparent background, 80x40 total.
+Small shipping containers seen from the door end, side view: sprite sheet with three variants side by side —
+one container (20x20), two containers stacked (20x40), three containers in a pyramid (40x40) —
+corrugated steel in bright red, yellow, green and blue, two vertical dark locking bars on each door.
+Transparent background, 80x40 total.
 ```
+
+La trave pende dal cavo di una gru fuori campo: il cavo è scenografia e non urta.
 
 ```
 A horizontal steel I-beam girder, side view, 96x12 pixels, orange-red painted steel with rivets
@@ -145,15 +162,16 @@ and a yellow-black warning stripe at both ends. Transparent background.
 ```
 
 ```
-Two tall steel gantry pillars that hold an overhead girder, side view, each 8x64 pixels,
-grey-blue steel with rivets and cross bracing, placed as a pair 96 pixels apart (112x64 total).
-Transparent background.
+A crane cable holding a load, side view, 96x200 pixels: a single thin dark steel cable coming from the top
+edge down to a small yellow crane hook at about 175 pixels, then two straight slings from the hook down to
+the bottom corners at 18 and 78 pixels. Nothing else. Transparent background.
 ```
 
 ## Sfondi in parallasse
 
 Ogni scenario ha 3 strati larghi **480 px** e **ripetibili orizzontalmente senza giunture visibili**
 (il bordo sinistro deve continuare il destro), più il binario. Strati senza trasparenza tranne dove indicato.
+Negli strati niente contorno scuro, come dice la sezione sulla leggibilità.
 
 ### Campagna
 
@@ -163,47 +181,53 @@ with a few big fluffy white clouds, no ground. Cheerful, simple, for a children'
 ```
 
 ```
-Seamless horizontally tileable pixel art layer, 480x110 pixels, transparent top: soft rolling green hills
-far away with a few tiny trees and a small farmhouse with a red roof, muted colors for distance.
+Seamless horizontally tileable pixel art layer, 480x110 pixels, transparent top, no outlines: soft rolling
+green hills far away with a windmill, a patchwork of fields, round trees, a small farmhouse with a red roof
+and a red barn. Muted colors, slightly hazed toward the light-blue sky.
 ```
 
 ```
-Seamless horizontally tileable pixel art layer, 480x70 pixels, transparent top: close bright green meadow
-with flowers, bushes and a few wooden fence posts, saturated colors.
+Seamless horizontally tileable pixel art layer, 480x70 pixels, transparent top, no outlines: close bright
+green grassy bank with small pink, yellow and white flowers and a few bushes. No fences, no hay.
 ```
 
-### Stazione
+### Cittadina con stazione
 
 ```
-Seamless horizontally tileable pixel art background, 480x270 pixels, light afternoon sky
-with soft clouds and the silhouette of a city skyline far away. No ground.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x130 pixels, transparent top: a railway station
-building facade with arched windows, a big round clock, and a canopy roof on iron columns.
+Seamless horizontally tileable pixel art background, 480x270 pixels, light afternoon sky turning warm
+near the horizon, soft cream clouds, and far away the pale blue-grey silhouette of a small town:
+rooftops, a church spire and a clock tower. No ground.
 ```
 
 ```
-Seamless horizontally tileable pixel art layer, 480x50 pixels, transparent top: a stone station platform
-edge with a yellow safety line, benches and lamp posts.
-```
-
-### Ferrovia industriale
-
-```
-Seamless horizontally tileable pixel art background, 480x270 pixels, hazy orange-grey sky at dusk,
-distant factory chimneys with thin smoke. No ground.
+Seamless horizontally tileable pixel art layer, 480x130 pixels, transparent top, no outlines: a row of
+colorful terraced houses (brick red, ochre, cream, teal) with pitched slate roofs, chimneys and white
+windows, and a stone railway station with arched windows and a big round clock. Slightly hazed colors.
 ```
 
 ```
-Seamless horizontally tileable pixel art layer, 480x140 pixels, transparent top: freight warehouses
-with corrugated metal walls, stacked shipping containers and a tall crane silhouette.
+Seamless horizontally tileable pixel art layer, 480x50 pixels, transparent top, no outlines: a stone
+station platform with a yellow safety line along the edge, green lamp posts and wooden benches.
+No crates, no signals.
+```
+
+### Porto
+
+```
+Seamless horizontally tileable pixel art background, 480x270 pixels, clear light-blue sea sky with white
+clouds; in the lower part a calm blue sea, two cargo ships far away loaded with tiny colorful containers,
+and a red-and-white lighthouse on a stone breakwater. Pale, hazy colors for distance. No ground.
 ```
 
 ```
-Seamless horizontally tileable pixel art layer, 480x60 pixels, transparent top: gravel yard with
-rusty metal fences, spare rails and concrete blocks.
+Seamless horizontally tileable pixel art layer, 480x140 pixels, transparent top, no outlines: tall
+ship-to-shore gantry cranes (one orange, one blue) with long horizontal booms, and stacks of corrugated
+shipping containers in many colors. Colors noticeably hazed toward the sky color.
+```
+
+```
+Seamless horizontally tileable pixel art layer, 480x60 pixels, transparent top, no outlines: a concrete
+harbour quay with expansion joints and small dark mooring bollards. No containers, no barrels.
 ```
 
 ### Binario
@@ -228,7 +252,7 @@ Nel menu le figure si mostrano ingrandite con `image-rendering: pixelated`.
 ```
 Three pixel art thumbnails side by side, each 96x54 pixels (288x54 total), for a level select menu:
 1) green countryside with blue sky and a hay bale, 2) a railway station platform with a clock,
-3) an industrial rail yard with a crane and barrels. Bright, simple, no text.
+3) a harbour with a tall gantry crane, colorful containers and blue barrels. Bright, simple, no text.
 ```
 
 ```
