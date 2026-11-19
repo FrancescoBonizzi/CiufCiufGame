@@ -39,15 +39,21 @@ const daHsl = (h: number, s: number, l: number): Rgb => {
   return [canale(h + 1 / 3), canale(h), canale(h - 1 / 3)].map((c) => Math.round(c * 255)) as Rgb;
 };
 
-// Sotto questa luminosità il colore base scurisce tutta la rampa in proporzione: il nero con le luminosità
-// del magenta diventerebbe un grigio chiaro.
+// Sotto questa luminosità il colore base scurisce la rampa: il nero con le luminosità del magenta
+// diventerebbe un grigio chiaro. L'ombra però non scende sotto OMBRA_MINIMA, o si confonderebbe col
+// contorno (#2b2133, luminosità 0,16).
 const LUMINOSITA_SCURO = 0.3;
+const OMBRA_MINIMA = 0.22;
 
 /** Quattro tinte del colore scelto, con la luminosità dei quattro gradini magenta. */
 export const rampaDa = (coloreBase: string): Rgb[] => {
   const [h, s, l] = aHsl(daHex(coloreBase));
-  const fattore = Math.min(1, l / LUMINOSITA_SCURO);
-  return RAMPA_MAGENTA.map((m) => daHsl(h, s, aHsl(daHex(m))[2] * fattore));
+  const luminosita = RAMPA_MAGENTA.map((m) => aHsl(daHex(m))[2]);
+  if (l >= LUMINOSITA_SCURO) return luminosita.map((lm) => daHsl(h, s, lm));
+  // Colore scuro: la luce scende in proporzione, l'ombra si ferma a OMBRA_MINIMA, i gradini in mezzo seguono.
+  const [luce, ombra] = [Math.max(...luminosita), Math.min(...luminosita)];
+  const nuovaLuce = luce * (l / LUMINOSITA_SCURO);
+  return luminosita.map((lm) => daHsl(h, s, OMBRA_MINIMA + ((lm - ombra) * (nuovaLuce - OMBRA_MINIMA)) / (luce - ombra)));
 };
 
 /** Copia dell'immagine con la carrozzeria magenta ridipinta nel colore scelto. */

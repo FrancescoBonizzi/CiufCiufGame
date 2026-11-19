@@ -309,11 +309,12 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
         angolo = f * 2 * math.pi / FOTOGRAMMI
         for x0, x1, r in conf.get("carrelli", []):
             # Telaio del carrello all'altezza degli assi, dietro le ruote: davanti coprirebbe il raggio che
-            # mostra la rotazione. Largo quanto le ruote col loro contorno.
+            # mostra la rotazione. Sporge di 3 px oltre il contorno delle ruote, la parte che resta visibile.
             asse = piano - r
+            sporge = r + 4
             for y in range(asse - 2, asse + 1):
-                for x in range(x0 - r - 1, x1 + r + 2):
-                    bordo = y in (asse - 2, asse) or x in (x0 - r - 1, x1 + r + 1)
+                for x in range(x0 - sporge, x1 + sporge + 1):
+                    bordo = y in (asse - 2, asse) or x in (x0 - sporge, x1 + sporge)
                     pixel(p, l, a, x, y, CONTORNO if bordo else ACCIAIO_SCURO)
         for cx, r in conf["piccole"]:
             ruota(p, l, a, cx, piano - r, r, angolo * 7 / r)

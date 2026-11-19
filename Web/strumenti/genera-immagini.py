@@ -159,8 +159,8 @@ ASSET = {
               "both ends.", "1536x1024"),
 
     # --- Arrivo ---
-    # Al più 192 px a schermo: l'oggetto occupa circa il 95% della tela, quindi una griglia di 200 dà un
-    # pixel del generatore per pixel di gioco; con una griglia più fitta la riduzione fonde celle a caso.
+    # Al più 192×112 a schermo: si chiede una griglia vicina alla misura finale, perché una più fitta (260)
+    # faceva fondere celle a caso nella riduzione. Il generatore la rispetta solo in parte.
     "stazione": (STILE_BASE + OGGETTO + "Pixel art drawn exactly as if the whole image were only 200 pixels wide, "
                  "then scaled up: every pixel is a crisp square about 8 image pixels wide. A small friendly railway station building for the finish line, side view: a "
                  "grey stone platform along the bottom with a yellow safety line, a cozy cream building with a "
