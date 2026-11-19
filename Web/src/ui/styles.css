@@ -179,13 +179,19 @@ button {
   }
 }
 
-/* Ombra netta di un pixel d'interfaccia, senza sfocatura: ogni elemento sembra uno sprite appoggiato. */
-.menu .titolo-logo img,
-.menu .tasto-grande,
-.menu .tasto-medio,
-.menu .scelta,
-.menu .anteprima {
+/* Ombra netta di un pixel d'interfaccia, senza sfocatura: ogni elemento sembra uno sprite appoggiato. Vale in
+   menu, fine partita e pausa. Il bottone premuto scende sulla sua ombra, che resta ferma. */
+.titolo-logo img,
+.tasto-grande,
+.tasto-medio,
+.scelta,
+.anteprima {
   filter: drop-shadow(var(--pixel) var(--pixel) 0 var(--accent-ink));
+}
+
+.tasto-grande:active,
+.tasto-medio:active {
+  filter: drop-shadow(var(--pixel) 0 0 var(--accent-ink));
 }
 
 .menu__anteprima {

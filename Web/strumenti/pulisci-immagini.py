@@ -485,7 +485,8 @@ def foschia(im: Image.Image, cielo_im: Image.Image, quota: float) -> Image.Image
 
 
 # Strato vicino di cittadina e porto: muri e banchine pieni di dettaglio dietro ostacoli dello stesso tono.
-# Desaturato e schiarito verso un grigio caldo, lascia gli ostacoli come unici oggetti saturi.
+# Desaturato e schiarito verso un grigio caldo, fa staccare gli ostacoli dal muro subito dietro. Nel porto il
+# muro era già grigio: lì soprattutto schiarisce, e resta più chiaro dello strato lontano.
 ATTENUA_VICINO = {"medio": 0.35, "difficile": 0.35}
 GRIGIO_CALDO = (238, 234, 226)
 
