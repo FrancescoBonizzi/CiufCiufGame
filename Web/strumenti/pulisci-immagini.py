@@ -256,8 +256,9 @@ def ruota(p, l, a, cx, cy, r, angolo) -> None:
                 if r * 0.45 <= d <= r - 1 and abs(scarto) <= 0.75:
                     pixel(p, l, a, cx + x, cy + y, CONTRAPPESO)
     else:
-        # Un raggio solo, dal centro al cerchione: si ripete ogni 360°, così anche il passo di 90° a cui
-        # arriva l'elettrica a velocità massima si legge in avanti (un diametro si ripeterebbe ogni 180°).
+        # Un raggio solo, dal centro al cerchione: si ripete ogni 360°, così anche il passo di circa 120° per
+        # frame dell'elettrica (raggio 3, 380 px/s, 60 fps) si legge in avanti; un diametro si ripeterebbe ogni
+        # 180°. Sotto i 40 fps circa il passo supera i 180° e le ruote sembrano girare all'indietro.
         for d in range(0, r):
             pixel(p, l, a, cx + math.cos(angolo) * d, cy + math.sin(angolo) * d, GRIGIO_CHIARO)
 

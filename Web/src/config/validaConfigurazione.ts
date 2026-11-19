@@ -34,6 +34,8 @@ const validaVariante = (livello: Livello, nome: string, v: VarianteOstacolo): st
   if (v.sollevamento < altezzaLocomotiva) {
     errori.push(`${nome}: bordo a ${v.sollevamento} px, la locomotiva alta ${altezzaLocomotiva} px non ci passa sotto`);
   }
+  // WARNING: in gioco la hitbox non supera la sagoma disegnata (altezzaSagoma: l'elettrica è alta 20 px), quindi
+  // questo controllo è più permissivo della realtà per le locomotive basse.
   if (livello.salto.altezza + altezzaLocomotiva <= v.sollevamento) {
     errori.push(`${nome}: in salto la locomotiva non arriva al bordo a ${v.sollevamento} px, il salto non è punito`);
   }

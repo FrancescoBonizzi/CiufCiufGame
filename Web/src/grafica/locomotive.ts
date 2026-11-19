@@ -23,7 +23,8 @@ export const altezzaSagoma = (tipo: IdLocomotiva): number => {
   for (let y = 0; y < altezza; y++) {
     for (let x = 0; x < larghezza; x++) if (alfa[(y * larghezza + x) * 4 + 3]! > 0) return altezza - y;
   }
-  return 0;
+  // Una sagoma vuota darebbe una hitbox alta zero: la locomotiva non urterebbe più niente, senza errori.
+  throw new Error(`Sagoma vuota: locomotive/${tipo}`);
 };
 
 // Unico punto da cui partita, menu e fine partita prendono il foglio della locomotiva colorata.
