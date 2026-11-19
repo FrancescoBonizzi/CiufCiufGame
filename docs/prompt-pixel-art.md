@@ -24,6 +24,17 @@ Dalla cartella `Web/`, con Pillow installato e la chiave in `~/.config/ciufciuf/
 Modello: `gpt-image-2.6-sunburst`, qualità alta. Delle due varianti 2.6 è quella pensata per il dettaglio e
 per gli asset finali (Flare è quella veloce).
 
+## Una grana sola
+
+Ogni pixel dello schermo deve avere la stessa misura: sprite, sfondi e interfaccia.
+
+- Di suo il generatore disegna «pixel» di circa 16 px. Ridotti a 480 di larghezza diventerebbero 5 pixel di
+  gioco, cinque volte quelli degli sprite. Gli sfondi si chiedono quindi con `GRANA_FINE`, come se l'immagine
+  fosse larga 480 pixel, e si usano a scala 1.
+- Il fondo di menu e pagine si ingrandisce del fattore intero più piccolo che copre la finestra, mai con
+  `cover`.
+- La miniatura della barra del percorso è disegnata a 32×20, non rimpicciolita dallo sprite.
+
 ## Cosa fa la pulizia
 
 - Riduce la palette a piena risoluzione raggruppando le tinte per distanza, poi riduce la misura dando a ogni

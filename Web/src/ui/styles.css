@@ -72,9 +72,13 @@ button {
 }
 
 /* Menu e fine partita stanno nello stesso paesaggio pixel art, 480×270 come il canvas della partita. */
+/* Ingrandito di un fattore intero (--scala-sfondo, da main.ts), il più piccolo che copre la finestra: un
+   "cover" lo stirerebbe di un fattore qualunque, con pixel di misure diverse. */
 .page,
-.menu {
-  background: var(--background) var(--img-menu-sfondo) center bottom / cover no-repeat;
+.menu,
+#orientation-overlay {
+  background: var(--background) var(--img-menu-sfondo) center bottom no-repeat;
+  background-size: calc(480px * var(--scala-sfondo, 3)) calc(270px * var(--scala-sfondo, 3));
   image-rendering: pixelated;
 }
 
@@ -330,9 +334,7 @@ canvas.pixel-art {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  /* Lo stesso paesaggio del menu, col messaggio in una cornice come i pannelli delle scelte. */
-  background: var(--background) var(--img-menu-sfondo) center bottom / cover no-repeat;
-  image-rendering: pixelated;
+  /* Lo stesso paesaggio del menu (regola sopra), col messaggio in una cornice come i pannelli delle scelte. */
   color: var(--ink);
   flex-direction: column;
   align-items: center;

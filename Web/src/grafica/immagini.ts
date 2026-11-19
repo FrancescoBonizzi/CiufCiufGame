@@ -10,8 +10,8 @@ export type Effetto = "fumo" | "scarico" | "scintilla";
 const EFFETTI: Effetto[] = ["fumo", "scarico", "scintilla"];
 type StratoScenario = "cielo" | "lontano" | "vicino" | "binario" | "miniatura";
 const STRATI: StratoScenario[] = ["cielo", "lontano", "vicino", "binario", "miniatura"];
-export type Pezzo = "legna" | "paglia" | "asse" | "stella";
-const PEZZI: Pezzo[] = ["legna", "paglia", "asse", "stella"];
+export type Pezzo = "legna" | "paglia" | "asse" | "stella" | "polvere";
+const PEZZI: Pezzo[] = ["legna", "paglia", "asse", "stella", "polvere"];
 // Usate dal DOM (icone.ts, styles.css): precaricate anche loro, così il menu non compare a pezzi.
 const INTERFACCIA = [
   "tasti/gioca", "tasti/pausa", "tasti/casa", "tasti/ancora", "tasti/audio", "tasti/muto", "icone/ruota",
@@ -20,6 +20,7 @@ const INTERFACCIA = [
 
 export type NomeImmagine =
   | `locomotive/${IdLocomotiva}`
+  | `locomotive/${IdLocomotiva}-mini`
   | `ostacoli/${TipoOstacolo}-${number}`
   | `effetti/${Effetto}`
   | `scenari/${IdLivello}-${StratoScenario}`
@@ -31,6 +32,7 @@ export type NomeImmagine =
 // Un file per variante di ostacolo: ostacoli/<tipo>-<indice>, come le varianti di OSTACOLI.
 const NOMI: NomeImmagine[] = [
   ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}` as const),
+  ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}-mini` as const),
   ...(Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) =>
     OSTACOLI[tipo].map((_, i) => `ostacoli/${tipo}-${i}` as const),
   ),

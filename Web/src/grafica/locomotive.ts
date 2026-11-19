@@ -19,6 +19,17 @@ export const pxPerFotogramma = (tipo: IdLocomotiva): number =>
 // Unico punto da cui partita, menu e fine partita prendono il foglio della locomotiva colorata.
 const colorati = new Map<string, HTMLCanvasElement>();
 
+/** La locomotiva 32×20 della barra del percorso, col colore scelto: disegnata a quella misura, non rimpicciolita. */
+export const miniaturaLocomotiva = (tipo: IdLocomotiva, colore: IdColore): HTMLCanvasElement => {
+  const chiave = `mini:${tipo}:${colore}`;
+  let mini = colorati.get(chiave);
+  if (!mini) {
+    mini = ricolora(canvasDa(`locomotive/${tipo}-mini`), COLORI[colore]);
+    colorati.set(chiave, mini);
+  }
+  return mini;
+};
+
 /** Foglio di 8 fotogrammi (FOTOGRAMMA_LOCOMOTIVA) con la carrozzeria nel colore scelto. Non va modificato. */
 export const foglioLocomotiva = (tipo: IdLocomotiva, colore: IdColore): HTMLCanvasElement => {
   const chiave = `${tipo}:${colore}`;

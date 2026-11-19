@@ -3,7 +3,8 @@ import { textureIconaStazione } from "../grafica/textures.ts";
 import Numbers from "../services/Numbers.ts";
 
 const MARGINE = 40;
-const Y = 14;
+// La miniatura (32×20) poggia sulla barra: a 22 px dal bordo alto ci sta intera, ciminiera e pantografo compresi.
+const Y = 22;
 
 // Il traguardo si vede senza saper leggere: una piccola locomotiva del colore scelto va dalla partenza
 // alla stazione. Niente timer né punteggi.
@@ -29,8 +30,6 @@ class BarraPercorso {
     barra.addChild(stazione);
 
     this._miniatura = new Sprite(locomotiva);
-    // Mezza misura: 32×20, in scala intera per restare pixel art.
-    this._miniatura.scale.set(0.5);
     this._miniatura.anchor.set(0.5, 1);
     this._miniatura.position.set(this._inizio, Y + 2);
     barra.addChild(this._miniatura);

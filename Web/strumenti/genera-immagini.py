@@ -36,11 +36,24 @@ STILE = (
     "Friendly, rounded, cartoon shapes. Big chunky pixels on a coarse, perfectly regular pixel grid. "
 )
 OGGETTO = "A single object, centered, on a fully transparent background, nothing else in the image, no ground shadow. "
+# Grana degli sfondi: il generatore di suo disegna "pixel" di circa 16 px, che ridotti a 480 di larghezza
+# diventano 5 pixel di gioco, cinque volte quelli degli sprite. Gli si chiede la griglia di 480.
+GRANA_FINE = (
+    "VERY FINE pixel art: draw it exactly as if the whole image were only 480 pixels wide and 320 pixels tall, "
+    "then scaled up: every single pixel is a tiny square about 3 image pixels wide, with lots of small detail. "
+    "Small clouds, small trees, small houses: nothing drawn with big chunky blocks. "
+)
+# I cieli coprono lo schermo a scala 1 e non si possono ridurre: griglia ancora più fine.
+GRANA_FINISSIMA = (
+    "EXTREMELY FINE pixel art: draw it exactly as if the whole image were 960 pixels wide and 640 pixels tall, "
+    "then scaled up: every pixel is a tiny square under 2 image pixels wide. Clouds are small and detailed, "
+    "made of many tiny pixels. "
+)
 STRATO = (
     "Pixel art game background layer, 16-bit era style, for a cheerful children's side-scrolling train game. "
     "Side view, orthographic. NO dark outlines anywhere: soft flat color shapes only. "
     "Flat shading, limited palette, no gradients, no dithering, no anti-aliasing, no text, no people, no vehicles. "
-    "Big chunky pixels on a coarse, perfectly regular pixel grid. The image is a wide horizontal strip. "
+    "The image is a wide horizontal strip. " + GRANA_FINE
 )
 
 MAGENTA = (
@@ -151,6 +164,9 @@ ASSET = {
     "pezzo-paglia": (PEZZO + "a small tuft of golden straw, three or four straws crossing.", "1024x1024"),
     "pezzo-asse": (PEZZO + "a small broken piece of a white-painted wooden fence plank with a jagged end.",
                    "1024x1024"),
+    "pezzo-polvere": (STILE + SOLO_EFFETTO + "A single small soft puff of light beige dust, like a tiny cartoon "
+                      "cloud made of three round blobs, drawn as if on an 8x8 pixel grid scaled up. No rock, no "
+                      "stone, no debris. Outline in a darker beige-brown instead of dark purple.", "1024x1024"),
     "pezzo-stella": (PEZZO + "a small bright yellow cartoon impact star with five points.", "1024x1024"),
 
     # --- Interfaccia: icone, bottoni, titolo, fondo del menu ---
@@ -170,35 +186,37 @@ ASSET = {
                "bottom shading and thick dark outline, slightly bouncy baseline, a small white steam puff "
                "rising from the dot of the letter i. Wide and short, about 3.5 times wider than tall. "
                "Correct spelling is essential.", "1536x1024"),
-    "menu-sfondo": (STRATO + "A cozy wide countryside railway landscape for a title screen, golden late "
+    "menu-sfondo": (STRATO + GRANA_FINISSIMA + "A cozy wide countryside railway landscape for a title screen, golden late "
                     "afternoon light: soft blue sky with a few fluffy clouds, rolling green hills, a small "
                     "red-roofed station far on the right, a railway track running horizontally along the "
                     "bottom, flowers in the grass. The left two thirds of the sky stay calm and simple. No "
                     "train, no people, no text.", "1536x1024"),
 
     # --- Sfondi (strisce larghe: le rende ripetibili pulisci-immagini.py) ---
-    "facile-cielo": (STRATO + "A bright clear blue sky with a few big fluffy white clouds spread across the width, "
+    "facile-cielo": (STRATO + GRANA_FINISSIMA + "A bright clear blue sky with a few big fluffy white clouds spread across the width, "
                      "lighter near the bottom. Only sky, no ground, no hills.", "1536x1024"),
     "facile-lontano": (STRATO + "Soft rolling green hills far away under a light-blue sky: a windmill, a patchwork of "
                        "fields, round trees, a small farmhouse with a red roof and a red barn. Muted colors, slightly "
                        "hazed toward light blue. The scenery fills the bottom 40% of the image; above it "
                        "the image is fully transparent (no sky).", "1536x1024"),
-    "facile-vicino": (STRATO + "A low, close bright green grassy bank seen from the side, with small pink, yellow "
+    "facile-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
+                      "A low, close bright green grassy bank seen from the side, with small pink, yellow "
                       "and white flowers and tiny tufts of grass; only a few very low, small round bushes. No "
                       "fences, no hay, no rocks, no tall plants. The grass is a thin strip filling only the bottom "
                       "12% of the image; above it the image is fully transparent (no sky).", "1536x1024"),
-    "medio-cielo": (STRATO + "A light afternoon sky turning warm cream near the horizon, soft cream clouds, and far "
+    "medio-cielo": (STRATO + GRANA_FINISSIMA + "A light afternoon sky turning warm cream near the horizon, soft cream clouds, and far "
                     "away along the bottom the pale blue-grey silhouette of a small town: rooftops, a church spire "
                     "and a clock tower. No ground.", "1536x1024"),
     "medio-lontano": (STRATO + "A row of colorful terraced houses (brick red, ochre, cream, teal) with pitched slate "
                       "roofs, chimneys and white windows, and a stone railway station with arched windows and a big "
                       "round clock. Slightly hazed colors. The buildings fill the bottom 45% of the image; above them "
                       "the image is fully transparent (no sky).", "1536x1024"),
-    "medio-vicino": (STRATO + "A stone railway station platform seen from the side, with a yellow safety line along "
+    "medio-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
+                      "A stone railway station platform seen from the side, with a yellow safety line along "
                      "its top edge, green lamp posts and wooden benches. No crates, no signals, no people. The "
                      "platform fills the bottom 20% of the image, lamp posts rise above it; behind and "
                      "above them the image is fully transparent (no sky).", "1536x1024"),
-    "difficile-cielo": (STRATO + "A clear light-blue sky with white clouds over a calm blue sea; on the sea far away "
+    "difficile-cielo": (STRATO + GRANA_FINISSIMA + "A clear light-blue sky with white clouds over a calm blue sea; on the sea far away "
                         "two small cargo ships loaded with tiny colorful containers, and a red-and-white lighthouse "
                         "on a stone breakwater. The sea fills the bottom third. Pale hazy colors for distance.",
                         "1536x1024"),
@@ -206,15 +224,16 @@ ASSET = {
                           "horizontal booms, and stacks of corrugated shipping containers in many colors. Colors "
                           "noticeably hazed toward light blue. The scenery fills the bottom 50% of the image; above "
                           "it the image is fully transparent (no sky).", "1536x1024"),
-    "difficile-vicino": (STRATO + "A concrete harbour quay seen from the side, light grey concrete with vertical "
+    "difficile-vicino": (STRATO + "ONLY this foreground strip: nothing behind it, no houses, no trees, no hills, no buildings, no sea, no horizon; everything above it is fully transparent (no sky). "
+                      "A concrete harbour quay seen from the side, light grey concrete with vertical "
                          "expansion joints and a few small dark mooring bollards on top. No containers, no barrels. "
                          "The quay fills the bottom 20% of the image; above it the image is fully transparent (no sky).",
                          "1536x1024"),
-    "binario-campagna": (STILE + "A straight railway track seen exactly from the side, filling the whole width: "
+    "binario-campagna": (STILE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: "
                          "one shiny steel rail on top, the ends of wooden sleepers just below it, and brown-grey "
                          "gravel ballast underneath filling the bottom. Transparent above the rail. Uniform along "
                          "the width.", "1536x1024"),
-    "binario-porto": (STILE + "A straight railway track seen exactly from the side, filling the whole width: one "
+    "binario-porto": (STILE + GRANA_FINE + "A straight railway track seen exactly from the side, filling the whole width: one "
                       "shiny steel rail on top, the ends of dark wooden sleepers just below it, and grey gravel "
                       "ballast underneath filling the bottom. Transparent above the rail. Uniform along the width.",
                       "1536x1024"),

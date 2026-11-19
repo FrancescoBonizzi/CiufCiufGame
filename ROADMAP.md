@@ -186,7 +186,9 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
       quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
 - [x] Interfaccia nello stesso stile: titolo, bottoni con icona, cornici dei pannelli, campioni di colore,
       fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
-- [ ] Niente atlas: 52 PNG singoli per 228 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, miniatura della
+      barra disegnata a 32×20, polvere all'atterraggio in pixel art
+- [ ] Niente atlas: 56 PNG singoli per 348 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio

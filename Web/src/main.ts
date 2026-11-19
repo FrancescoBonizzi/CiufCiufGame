@@ -28,6 +28,11 @@ if (errori.length > 0) {
   for (const nome of ["menu-sfondo", "interfaccia/cornice", "interfaccia/cornice-scelta"]) {
     radice.setProperty(`--img-${nome.replace("interfaccia/", "")}`, `url("${ASSETS_ROOT}images/${nome}.png")`);
   }
+  // Il fondo di menu e pagine (480×270) si ingrandisce del fattore intero più piccolo che copre la finestra.
+  const scalaSfondo = () =>
+    radice.setProperty("--scala-sfondo", String(Math.ceil(Math.max(innerWidth / 480, innerHeight / 270))));
+  scalaSfondo();
+  addEventListener("resize", scalaSfondo);
   const font = new FontFace("Pixelify Sans", `url("${ASSETS_ROOT}fonts/pixelify-sans-latin.woff2")`, { weight: "400 700" });
   document.fonts.add(font);
 

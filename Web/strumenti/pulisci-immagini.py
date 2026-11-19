@@ -330,8 +330,26 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
     return foglio
 
 
+def miniatura_locomotiva(tipo: str) -> Image.Image:
+    """32×20 per la barra del percorso: la carrozzeria ridotta a quella misura e ruote piccole disegnate qui.
+    Rimpicciolire lo sprite 64×40 a metà salterebbe righe e colonne a caso."""
+    l, a = 32, 20
+    corpo = ritaglia(carica(tipo))
+    lc, ac = adatta(corpo, l - 2, a - 4)
+    corpo = riduci(corpo, lc, ac, magenta=True)
+    out = Image.new("RGBA", (l, a), (0, 0, 0, 0))
+    out.alpha_composite(corpo, ((l - lc) // 2, a - 3 - ac))
+    p = out.load()
+    for cx, r, _ in LOCOMOTIVE[tipo]["ruote"]:
+        x = round(cx / 2)
+        disco(p, l, a, x, a - 3, 2, CONTORNO)
+        disco(p, l, a, x, a - 3, 1, GRIGIO_RUOTA)
+    return out
+
+
 def locomotiva(tipo: str) -> None:
     salva(foglio_locomotiva(tipo), f"locomotive/{tipo}.png")
+    salva(miniatura_locomotiva(tipo), f"locomotive/{tipo}-mini.png")
 
 
 # --- Ostacoli: misura esatta di src/config/ostacoli.ts, appoggiati al bordo basso ----------------------------
@@ -393,10 +411,11 @@ LIVELLI = ("facile", "medio", "difficile")
 BINARI = {"facile": "binario-campagna", "medio": "binario-porto", "difficile": "binario-porto"}
 LARGHEZZA = 480
 SCHERMO = 270
-# Quanta larghezza dello schermo copre una grezza (1536 px). A 1 un pixel del generatore diventa circa 5 px di
-# gioco, troppo grosso accanto agli sprite, e lo strato vicino copre quello lontano: a metà si ripete due
-# volte per schermo, e scorrendo non si nota. Il vicino è più basso, così le colline restano in vista.
-SCALA = {"lontano": 0.5, "vicino": 0.4, "binario": 0.5}
+# Quanta larghezza dello schermo copre una grezza (1536 px). Gli sfondi si generano con GRANA_FINE: ridotti a
+# qualunque scala fino a 1, ogni pixel resta un pixel di gioco, come negli sprite (senza, il generatore disegna
+# pixel di circa 16 px, che a scala 1 diventano 5 pixel di gioco). La scala la decide quindi la misura degli
+# oggetti accanto alla locomotiva: a 1 una panchina è lunga quanto lei.
+SCALA = {"lontano": 0.6, "vicino": 0.5, "binario": 0.7}
 # Il binario scende fino al bordo basso: almeno BINARIO_DAL_BASSO di src/Game.ts.
 BINARIO_ALTEZZA = 36
 
@@ -430,20 +449,21 @@ def binario(id_asset: str) -> Image.Image:
     piccolo = riduci(im, larghezza, round(im.height * larghezza / im.width), contorno=False)
     if piccolo.height >= BINARIO_ALTEZZA:
         return piccolo
-    # Massicciata ripetuta verso il basso finché il binario arriva al bordo dello schermo.
-    pezzo = piccolo.crop((0, piccolo.height * 2 // 3, larghezza, piccolo.height))
+    # Massicciata allungata verso il basso fino al bordo dello schermo, specchiata a ogni ripetizione: una
+    # fascia ripetuta uguale disegna righe regolari, come un muro di mattoni.
+    pezzo = piccolo.crop((0, piccolo.height // 2, larghezza, piccolo.height))
     out = Image.new("RGBA", (larghezza, BINARIO_ALTEZZA), (0, 0, 0, 0))
     out.alpha_composite(piccolo, (0, 0))
-    y = piccolo.height
+    y, specchio = piccolo.height, True
     while y < BINARIO_ALTEZZA:
-        out.alpha_composite(pezzo, (0, y))
-        y += pezzo.height
+        out.alpha_composite(pezzo.transpose(Image.FLIP_TOP_BOTTOM) if specchio else pezzo, (0, y))
+        y, specchio = y + pezzo.height, not specchio
     return out
 
 
 # Quanto lo strato lontano sfuma verso il cielo dietro di lui: ciò che si urta resta saturo, ciò che si guarda
 # si attenua. Il porto di più, perché le sue pile di container somigliano agli ostacoli.
-FOSCHIA = {"facile": 0.15, "medio": 0.2, "difficile": 0.4}
+FOSCHIA = {"facile": 0.15, "medio": 0.2, "difficile": 0.25}
 
 
 def foschia(im: Image.Image, cielo_im: Image.Image, quota: float) -> Image.Image:
@@ -502,7 +522,7 @@ def effetto(id_asset: str) -> None:
 
 # Tutta l'interfaccia si mostra a ×3 (styles.css, --pixel): bottoni e icone sono composti qui alla misura
 # nativa, così ogni pixel dello schermo ha la stessa grana. Bottone: (colore, lato, icona, lato dell'icona).
-PEZZI = ("pezzo-legna", "pezzo-paglia", "pezzo-asse", "pezzo-stella")
+PEZZI = ("pezzo-legna", "pezzo-paglia", "pezzo-asse", "pezzo-stella", "pezzo-polvere")
 TASTI = {
     "gioca": ("giallo", 32, "icona-gioca", 16),
     "ancora": ("giallo", 32, "icona-ancora", 16),

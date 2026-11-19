@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Texture, Ticker } from "pixi.js";
+import { Application, Container, Sprite, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
 import BarraPercorso from "./gioco/BarraPercorso.ts";
@@ -8,7 +8,7 @@ import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
 import { pxPerFotogramma } from "./grafica/locomotive.ts";
-import { texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
+import { textureMiniaturaLocomotiva, texturePezzo, texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
 import Controller from "./interaction/Controller.ts";
 import ParticleSystem from "./particles/ParticleSystem.ts";
 import type { Preferenze } from "./preferenze.ts";
@@ -85,21 +85,20 @@ class Game {
     const particelle = new Container();
     mondo.addChild(particelle);
     this._polvere = new ParticleSystem(particelle, {
-      texture: Texture.WHITE,
+      texture: texturePezzo("polvere"),
       density: 2,
-      numParticles: { min: 6, max: 10 },
+      numParticles: { min: 4, max: 6 },
       speed: { min: 20, max: 60 },
       acceleration: { min: -40, max: -10 },
       rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.25, max: 0.45 },
-      scale: { min: 2, max: 3 }, // Texture.WHITE è un pixel solo: la scala è il lato in px
+      scale: { min: 1, max: 1 },
       spawnAngleDegrees: { min: 100, max: 170 },
-      colors: [0xd8cbb0, 0xb8a888, 0xf4f1ea],
     });
 
     this._pezzi = new Pezzi(particelle);
 
-    this._barra = new BarraPercorso(app.stage, width, fotogrammi[0]!);
+    this._barra = new BarraPercorso(app.stage, width, textureMiniaturaLocomotiva(preferenze.locomotiva, preferenze.colore));
 
     // Solo in sviluppo (Vite lo toglie dal build): lo stato che legge il bot della prova automatica.
     if (import.meta.env.DEV) {
