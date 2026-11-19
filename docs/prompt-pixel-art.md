@@ -68,3 +68,18 @@ locomotive. Un generatore che legge un nome noto tende a riprodurne i personaggi
   sulla banchina al porto. Negli strati lontani ciò che gli somiglia (le pile di container dietro le gru) è
   ammesso solo attenuato verso il cielo.
 - Il cavo che regge la trave è scenografia, disegnato a codice: acciaio grigio, senza contorno scuro.
+
+## Interfaccia
+
+Anche menu, bottoni e scritte sono pixel art, mai stili misti accanto agli sprite.
+
+- Tutta l'interfaccia si mostra a un ingrandimento intero, `--scala` in `styles.css`: ×3, ×2 su telefono.
+  Bottoni, cornici e campioni hanno la stessa grana.
+- Bottone e icona sono un'immagine sola, composta da `pulisci-immagini.py` (tabella `TASTI`) alla misura
+  nativa: 32, 24 o 16 px.
+- Sotto i 15 px un'icona ridotta dalla grezza diventa una macchia. Altoparlante, onde e X dell'audio sono
+  quindi disegnati a codice, pixel per pixel, coi colori delle icone generate. Lo stesso vale per le cornici
+  dei pannelli (12×12, usate come `border-image`).
+- I campioni di colore del menu si disegnano nel browser con i toni della stessa rampa che ricolora la
+  locomotiva.
+- Font: Pixelify Sans (OFL), registrato da `main.ts`.

@@ -57,6 +57,21 @@ SENZA_RUOTE = (
     "absolutely nothing below it. Every part is solidly attached to the body: one compact connected silhouette. "
 )
 
+ICONA = (
+    "Pixel art user-interface icon for a children's game, drawn as if on a 16x16 pixel grid scaled up: very few, "
+    "very big, bold shapes. Pure white fill with one light grey shading tone, thick dark outline (#2b2133). "
+    "Centered, filling most of the image, on a fully transparent background. No text, no background, no button "
+    "around it. The icon shows: "
+)
+PEZZO = (STILE + "One single tiny debris piece flying off a hit obstacle, drawn as if on an 8x8 pixel grid scaled "
+         "up: one simple bold shape filling the image, centered, fully transparent background, nothing else. ")
+BOTTONE = (
+    "Pixel art round push button for a children's game menu, seen from the front, drawn as if on a 32x32 pixel "
+    "grid scaled up: a perfect circle face with a lighter highlight at the top-left, a darker thicker rim at the "
+    "bottom giving thickness, thick dark outline (#2b2133). Completely EMPTY face: no symbol, no icon, no text. "
+    "Centered, filling the image, fully transparent background. Color: "
+)
+
 # id: (prompt, formato di generazione)
 ASSET = {
     # --- Locomotive: solo carrozzeria, le ruote e le bielle le aggiunge pulisci-immagini.py ---
@@ -130,6 +145,37 @@ ASSET = {
                        "red triangular roof, and a green flag on a pole on top. No details, no windows, no text.",
                        "1024x1024"),
 
+    # --- Pezzi che volano via all'urto nel facile ---
+    "pezzo-legna": (PEZZO + "a small broken piece of a firewood log, brown bark with a light round ring on its end.",
+                    "1024x1024"),
+    "pezzo-paglia": (PEZZO + "a small tuft of golden straw, three or four straws crossing.", "1024x1024"),
+    "pezzo-asse": (PEZZO + "a small broken piece of a white-painted wooden fence plank with a jagged end.",
+                   "1024x1024"),
+    "pezzo-stella": (PEZZO + "a small bright yellow cartoon impact star with five points.", "1024x1024"),
+
+    # --- Interfaccia: icone, bottoni, titolo, fondo del menu ---
+    "icona-gioca": (ICONA + "a play symbol, a big right-pointing triangle with rounded corners.", "1024x1024"),
+    "icona-pausa": (ICONA + "a pause symbol, two thick vertical bars with rounded corners.", "1024x1024"),
+    "icona-casa": (ICONA + "a simple house: a triangular roof and a square body with a door.", "1024x1024"),
+    "icona-ancora": (ICONA + "a 'play again' symbol: a thick circular arrow going clockwise.", "1024x1024"),
+    "icona-audio": (ICONA + "a loudspeaker with two curved sound waves coming out to the right.", "1024x1024"),
+    "icona-muto": (ICONA + "a loudspeaker with a small bold X to its right instead of sound waves.", "1024x1024"),
+    "icona-ruota": (ICONA + "a smartphone lying horizontally with a curved arrow around it, meaning 'rotate "
+                    "your device'.", "1024x1024"),
+    "bottone-giallo": (BOTTONE + "warm golden yellow (#f2c230), rim darker ochre.", "1024x1024"),
+    "bottone-crema": (BOTTONE + "warm cream white (#f4f1ea), rim light warm grey.", "1024x1024"),
+    "bottone-prugna": (BOTTONE + "muted plum purple (#4d3d66), rim darker plum.", "1024x1024"),
+    "titolo": (STILE + OGGETTO + "The game title logo reading exactly \"Ciuf Ciuf\" (two words, capital C, nothing "
+               "else written), big chunky rounded pixel letters in warm golden yellow with a darker orange "
+               "bottom shading and thick dark outline, slightly bouncy baseline, a small white steam puff "
+               "rising from the dot of the letter i. Wide and short, about 3.5 times wider than tall. "
+               "Correct spelling is essential.", "1536x1024"),
+    "menu-sfondo": (STRATO + "A cozy wide countryside railway landscape for a title screen, golden late "
+                    "afternoon light: soft blue sky with a few fluffy clouds, rolling green hills, a small "
+                    "red-roofed station far on the right, a railway track running horizontally along the "
+                    "bottom, flowers in the grass. The left two thirds of the sky stay calm and simple. No "
+                    "train, no people, no text.", "1536x1024"),
+
     # --- Sfondi (strisce larghe: le rende ripetibili pulisci-immagini.py) ---
     "facile-cielo": (STRATO + "A bright clear blue sky with a few big fluffy white clouds spread across the width, "
                      "lighter near the bottom. Only sky, no ground, no hills.", "1536x1024"),
@@ -137,9 +183,10 @@ ASSET = {
                        "fields, round trees, a small farmhouse with a red roof and a red barn. Muted colors, slightly "
                        "hazed toward light blue. The scenery fills the bottom 40% of the image; above it "
                        "the image is fully transparent (no sky).", "1536x1024"),
-    "facile-vicino": (STRATO + "A close bright green grassy bank seen from the side, with small pink, yellow and "
-                      "white flowers and a few round bushes. No fences, no hay, no rocks. The grass fills the bottom "
-                      "25% of the image; above it the image is fully transparent (no sky).", "1536x1024"),
+    "facile-vicino": (STRATO + "A low, close bright green grassy bank seen from the side, with small pink, yellow "
+                      "and white flowers and tiny tufts of grass; only a few very low, small round bushes. No "
+                      "fences, no hay, no rocks, no tall plants. The grass is a thin strip filling only the bottom "
+                      "12% of the image; above it the image is fully transparent (no sky).", "1536x1024"),
     "medio-cielo": (STRATO + "A light afternoon sky turning warm cream near the horizon, soft cream clouds, and far "
                     "away along the bottom the pale blue-grey silhouette of a small town: rooftops, a church spire "
                     "and a clock tower. No ground.", "1536x1024"),
@@ -207,8 +254,8 @@ def registra(id_asset: str, file: Path, risposta: dict) -> None:
 
 
 def trasparente(id_asset: str) -> bool:
-    # I cieli coprono tutto lo schermo: senza trasparenza. Il resto la chiede.
-    return not id_asset.endswith("-cielo")
+    # Cieli e fondo del menu coprono tutto lo schermo: senza trasparenza. Il resto la chiede.
+    return not (id_asset.endswith("-cielo") or id_asset == "menu-sfondo")
 
 
 def chiama(id_asset: str) -> Path:

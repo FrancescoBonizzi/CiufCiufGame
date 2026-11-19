@@ -2,7 +2,7 @@ import { Rectangle, Texture } from "pixi.js";
 import type { IdLivello } from "../config/livelli.ts";
 import type { TipoOstacolo } from "../config/ostacoli.ts";
 import type { IdColore, IdLocomotiva } from "../preferenze.ts";
-import { canvasDa, type Effetto } from "./immagini.ts";
+import { canvasDa, type Effetto, type Pezzo } from "./immagini.ts";
 import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "./locomotive.ts";
 import { disegnaCavo } from "./cavo.ts";
 
@@ -53,4 +53,5 @@ export const textureBinario = (livello: IdLivello) =>
 export const textureStazione = () => daCanvas("stazione", () => canvasDa("stazione"));
 export const textureEffetto = (nome: Effetto) =>
   daCanvas(`effetto:${nome}`, () => canvasDa(`effetti/${nome}`));
+export const texturePezzo = (nome: Pezzo) => daCanvas(`pezzo:${nome}`, () => canvasDa(`pezzi/${nome}`));
 export const textureIconaStazione = () => daCanvas("icona-stazione", () => canvasDa("icona-stazione"));

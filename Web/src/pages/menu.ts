@@ -1,5 +1,6 @@
 import type { IdLivello } from "../config/livelli.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "../grafica/locomotive.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva, pxPerFotogramma } from "../grafica/locomotive.ts";
+import { rampaDa } from "../grafica/palette.ts";
 import { canvasDa } from "../grafica/immagini.ts";
 import {
   COLORI,
@@ -17,8 +18,42 @@ import { TESTI } from "../testi.ts";
 import { ICONE } from "../ui/icone.ts";
 import router from "./router.ts";
 
-/** Fotogrammi al secondo dell'anteprima: le ruote girano come a velocità moderata. */
-const FOTOGRAMMI_AL_SECONDO = 20;
+/** px/s dell'anteprima: le ruote girano come a velocità moderata, ognuna secondo il suo raggio. */
+const VELOCITA_ANTEPRIMA = 120;
+
+/** Campione di colore 12×12 disegnato a pixel, coi toni della stessa rampa che ricolora la locomotiva. */
+const campione = (colore: string): HTMLCanvasElement => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 12;
+  canvas.height = 12;
+  canvas.className = "pixel campione";
+  const ctx = canvas.getContext("2d")!;
+  const [luce, pieno, ombra] = rampaDa(colore).map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
+  // Righe del disco: c contorno, l luce, p pieno, o ombra.
+  const disco = [
+    "....cccc....",
+    "..ccllllcc..",
+    ".clllpppppc.",
+    ".cllppppppc.",
+    "cllppppppppc",
+    "clpppppppppc",
+    "cppppppppooc",
+    "cppppppppooc",
+    ".cppppppoooc",
+    ".cppppooooc.",
+    "..ccooooocc.",
+    "....cccc....",
+  ];
+  const tinte: Record<string, string> = { c: "#2b2133", l: luce!, p: pieno!, o: ombra! };
+  disco.forEach((riga, y) =>
+    [...riga].forEach((k, x) => {
+      if (k === ".") return;
+      ctx.fillStyle = tinte[k]!;
+      ctx.fillRect(x, y, 1, 1);
+    }),
+  );
+  return canvas;
+};
 
 // Menu illustrato, usabile da chi non legge: tre righe di figure e un grande bottone ▶. Le parole sono
 // didascalie. Ogni scelta si salva subito, così la prossima visita riparte da lì.
@@ -35,10 +70,12 @@ export function renderMenuPage(container: HTMLElement): void {
   container.innerHTML = `
     <main class="menu">
       <section class="menu__anteprima">
-        <h1 class="titolo">${TESTI.titolo}</h1>
+        <h1 class="titolo-logo" aria-label="${TESTI.titolo}">${ICONE.titolo}</h1>
         <canvas id="anteprima" class="pixel anteprima" width="${larghezza}" height="${altezza}"></canvas>
-        <button id="btn-gioca" class="tasto-grande" aria-label="${TESTI.menu.gioca}">${ICONE.gioca}</button>
-        <button id="btn-audio" class="tasto-piccolo" aria-pressed="${preferenze.audio}"></button>
+        <div class="azioni">
+          <button id="btn-gioca" class="tasto-grande" aria-label="${TESTI.menu.gioca}">${ICONE.gioca}</button>
+          <button id="btn-audio" class="tasto-medio" aria-pressed="${preferenze.audio}"></button>
+        </div>
       </section>
       <section class="menu__scelte">
         <div class="riga" role="group" aria-label="${TESTI.menu.locomotive}">
@@ -48,7 +85,7 @@ export function renderMenuPage(container: HTMLElement): void {
         </div>
         <div class="riga riga--colori" role="group" aria-label="${TESTI.menu.colori}">
           ${(Object.keys(COLORI) as IdColore[]).map((id) =>
-            scelta("colore", id, TESTI.colori[id], `<span class="campione" style="background:${COLORI[id]}"></span>`, id === preferenze.colore),
+            scelta("colore", id, TESTI.colori[id], `<span class="segnaposto-campione" data-colore="${id}"></span>`, id === preferenze.colore),
           ).join("")}
         </div>
         <div class="riga" role="group" aria-label="${TESTI.menu.scenari}">
@@ -59,6 +96,10 @@ export function renderMenuPage(container: HTMLElement): void {
       </section>
     </main>
   `;
+
+  for (const segnaposto of container.querySelectorAll<HTMLElement>(".segnaposto-campione")) {
+    segnaposto.replaceWith(campione(COLORI[segnaposto.dataset["colore"] as IdColore]));
+  }
 
   for (const segnaposto of container.querySelectorAll<HTMLElement>(".figura-scenario")) {
     const miniatura = canvasDa(`scenari/${segnaposto.dataset["scenario"] as IdLivello}-miniatura`);
@@ -83,7 +124,8 @@ export function renderMenuPage(container: HTMLElement): void {
   const anima = (ora: number) => {
     // Si ferma da solo quando il menu lascia il posto a un'altra pagina.
     if (!anteprima.isConnected) return;
-    const fotogramma = Math.floor((ora / 1000) * FOTOGRAMMI_AL_SECONDO) % FOTOGRAMMA_LOCOMOTIVA.numero;
+    const fotogrammiAlSecondo = VELOCITA_ANTEPRIMA / pxPerFotogramma(preferenze.locomotiva);
+    const fotogramma = Math.floor((ora / 1000) * fotogrammiAlSecondo) % FOTOGRAMMA_LOCOMOTIVA.numero;
     ctxAnteprima.clearRect(0, 0, larghezza, altezza);
     ctxAnteprima.drawImage(foglioLocomotiva(preferenze.locomotiva, preferenze.colore), fotogramma * larghezza, 0, larghezza, altezza, 0, 0, larghezza, altezza);
     requestAnimationFrame(anima);

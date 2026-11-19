@@ -1,5 +1,6 @@
 import { LIVELLI } from "./config/livelli.ts";
 import { validaConfigurazione } from "./config/validaConfigurazione.ts";
+import { ASSETS_ROOT } from "./assets/paths.ts";
 import { caricaImmagini } from "./grafica/immagini.ts";
 import { initializeRouter } from "./pages/router.ts";
 import { leggiPreferenze } from "./preferenze.ts";
@@ -21,8 +22,17 @@ if (errori.length > 0) {
   SoundManagerInstance.impostaAudio(leggiPreferenze().audio);
   // Prima lo sblocco audio: il router disegna subito il menu.
   wireAudioUnlockOnce();
-  // Le immagini prima del router: menu e partita le disegnano senza attese.
-  caricaImmagini()
+  // Font e immagini del CSS passano da ASSETS_ROOT come il resto: un url assoluto in styles.css ignorerebbe la
+  // sottocartella in cui il gioco è pubblicato.
+  const radice = document.documentElement.style;
+  for (const nome of ["menu-sfondo", "interfaccia/cornice", "interfaccia/cornice-scelta"]) {
+    radice.setProperty(`--img-${nome.replace("interfaccia/", "")}`, `url("${ASSETS_ROOT}images/${nome}.png")`);
+  }
+  const font = new FontFace("Pixelify Sans", `url("${ASSETS_ROOT}fonts/pixelify-sans-latin.woff2")`, { weight: "400 700" });
+  document.fonts.add(font);
+
+  // Font e immagini prima del router: menu e partita le disegnano senza attese.
+  Promise.all([font.load(), caricaImmagini()])
     .then(initializeRouter)
     .catch((e: unknown) => {
       console.error(e);

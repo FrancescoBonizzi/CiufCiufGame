@@ -10,12 +10,21 @@ export type Effetto = "fumo" | "scarico" | "scintilla";
 const EFFETTI: Effetto[] = ["fumo", "scarico", "scintilla"];
 type StratoScenario = "cielo" | "lontano" | "vicino" | "binario" | "miniatura";
 const STRATI: StratoScenario[] = ["cielo", "lontano", "vicino", "binario", "miniatura"];
+export type Pezzo = "legna" | "paglia" | "asse" | "stella";
+const PEZZI: Pezzo[] = ["legna", "paglia", "asse", "stella"];
+// Usate dal DOM (icone.ts, styles.css): precaricate anche loro, così il menu non compare a pezzi.
+const INTERFACCIA = [
+  "tasti/gioca", "tasti/pausa", "tasti/casa", "tasti/ancora", "tasti/audio", "tasti/muto", "icone/ruota",
+  "titolo", "menu-sfondo", "interfaccia/cornice", "interfaccia/cornice-scelta",
+] as const;
 
 export type NomeImmagine =
   | `locomotive/${IdLocomotiva}`
   | `ostacoli/${TipoOstacolo}-${number}`
   | `effetti/${Effetto}`
   | `scenari/${IdLivello}-${StratoScenario}`
+  | `pezzi/${Pezzo}`
+  | (typeof INTERFACCIA)[number]
   | "stazione"
   | "icona-stazione";
 
@@ -28,6 +37,8 @@ const NOMI: NomeImmagine[] = [
   "stazione",
   "icona-stazione",
   ...EFFETTI.map((nome) => `effetti/${nome}` as const),
+  ...PEZZI.map((nome) => `pezzi/${nome}` as const),
+  ...INTERFACCIA,
   ...LIVELLI_IN_ORDINE.flatMap((livello) => STRATI.map((quale) => `scenari/${livello}-${quale}` as const)),
 ];
 

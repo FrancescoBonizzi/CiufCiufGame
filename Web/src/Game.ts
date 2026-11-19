@@ -4,8 +4,10 @@ import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
 import BarraPercorso from "./gioco/BarraPercorso.ts";
 import Fumo from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
+import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
+import { pxPerFotogramma } from "./grafica/locomotive.ts";
 import { texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
 import Controller from "./interaction/Controller.ts";
 import ParticleSystem from "./particles/ParticleSystem.ts";
@@ -37,6 +39,7 @@ class Game {
   private readonly _barra: BarraPercorso;
   private readonly _polvere: ParticleSystem;
   private readonly _fumo: Fumo;
+  private readonly _pezzi: Pezzi;
 
   private _stato: Stato = "viaggio";
   private _tempo = 0;
@@ -76,7 +79,7 @@ class Game {
     const fumo = new Container();
     mondo.addChild(fumo);
     this._fumo = new Fumo(fumo, preferenze.locomotiva);
-    this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello);
+    this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello, pxPerFotogramma(preferenze.locomotiva));
 
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
     const particelle = new Container();
@@ -93,6 +96,8 @@ class Game {
       spawnAngleDegrees: { min: 100, max: 170 },
       colors: [0xd8cbb0, 0xb8a888, 0xf4f1ea],
     });
+
+    this._pezzi = new Pezzi(particelle);
 
     this._barra = new BarraPercorso(app.stage, width, fotogrammi[0]!);
 
@@ -123,6 +128,7 @@ class Game {
     this._camera.update(dt);
     this._polvere.update(dt);
     this._fumo.update(dt);
+    this._pezzi.update(dt);
     if (this._stato === "finita") return;
     this._tempo += dt;
 
@@ -213,6 +219,7 @@ class Game {
       if (ostacolo.stato !== "in-corsa" || !this._locomotiva.hitbox.intersects(ostacolo.hitbox)) continue;
       if (urto.effetto === "sbalzo") {
         ostacolo.sbalza();
+        this._pezzi.emit(ostacolo.tipo, ostacolo.hitbox.x + ostacolo.hitbox.width / 2, ostacolo.hitbox.y + ostacolo.hitbox.height / 2);
         this._fattoreUrto = urto.fattoreVelocita;
         this._sounds.play("urto");
         this._camera.shake(3);
@@ -240,6 +247,7 @@ class Game {
     this._controller.dispose();
     this._polvere.destroy();
     this._fumo.destroy();
+    this._pezzi.destroy();
   }
 }
 

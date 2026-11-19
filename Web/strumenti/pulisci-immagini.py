@@ -85,7 +85,7 @@ def raggruppa(im: Image.Image, alfa: Image.Image, distanza: float) -> tuple[list
 
 
 def riduci(im: Image.Image, larghezza: int, altezza: int, distanza: float = 40, magenta: bool = False,
-           contorno: bool = True) -> Image.Image:
+           contorno: bool = True, buchi: bool = False) -> Image.Image:
     """Ridimensiona a (larghezza, altezza): ogni pixel prende il colore prevalente del suo blocco.
 
     La palette si riduce prima, a piena risoluzione: una media fra pixel (ridimensionamento BOX) trasforma
@@ -123,9 +123,44 @@ def riduci(im: Image.Image, larghezza: int, altezza: int, distanza: float = 40, 
             if pieni * 2 < (x1 - x0) * (y1 - y0):
                 continue
             po[x, y] = (*finali[max(conti, key=conti.get)], 255)
+    if buchi:
+        chiudi_buchi(out, im.getchannel("A").resize((larghezza, altezza), Image.BOX))
     if contorno:
         rifai_contorno(out)
     return out
+
+
+def chiudi_buchi(im: Image.Image, velo: Image.Image) -> Image.Image:
+    """Riempie i vuoti chiusi dentro la figura: il generatore a volte lascia il centro semitrasparente.
+
+    Buco è un pixel vuoto che dal bordo non si raggiunge passando per pixel vuoti e che nella grezza aveva un
+    velo di colore (alfa media in velo > 10): l'interno di una freccia circolare, davvero vuoto, resta vuoto.
+    Ogni buco prende il colore pieno più frequente fra i vicini, dall'esterno verso l'interno.
+    """
+    l, a = im.size
+    p, pv = im.load(), velo.load()
+    fuori = [[False] * l for _ in range(a)]
+    coda = [(x, y) for x in range(l) for y in (0, a - 1)] + [(x, y) for y in range(a) for x in (0, l - 1)]
+    while coda:
+        x, y = coda.pop()
+        if not (0 <= x < l and 0 <= y < a) or fuori[y][x] or p[x, y][3]:
+            continue
+        fuori[y][x] = True
+        coda += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    buchi = {(x, y) for y in range(a) for x in range(l) if not p[x, y][3] and not fuori[y][x] and pv[x, y] > 10}
+    while buchi:
+        riempiti = {}
+        for x, y in buchi:
+            vicini = [p[x + dx, y + dy] for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
+                      if 0 <= x + dx < l and 0 <= y + dy < a and p[x + dx, y + dy][3]]
+            if vicini:
+                riempiti[(x, y)] = max(set(vicini), key=vicini.count)
+        if not riempiti:
+            break
+        for xy, c in riempiti.items():
+            p[xy] = c
+        buchi -= riempiti.keys()
+    return im
 
 
 def rifai_contorno(im: Image.Image) -> None:
@@ -165,12 +200,15 @@ GRIGIO_RUOTA = (0x5B, 0x54, 0x66)
 GRIGIO_CHIARO = (0x9A, 0x93, 0xA6)
 ACCIAIO = (0xC9, 0xC3, 0xD1)
 ACCIAIO_SCURO = (0x8A, 0x84, 0x94)
+RAGGIO_FONDO = (0x47, 0x40, 0x52)
+RAGGIO = (0x6A, 0x62, 0x78)
+CONTRAPPESO = (0xA9, 0xA2, 0xB6)
 
 # Per tipo: altezza della carrozzeria, ruote (centro x, raggio, colore del mozzo), se ha la biella
 # d'accoppiamento e, per il vapore, il cilindro (x del bordo sinistro) da cui parte la biella motrice.
 LOCOMOTIVE = {
     "vapore": {"altezza": 31, "ruote": [(17, 7, (0xD6, 0x3C, 0x3C)), (35, 7, (0xD6, 0x3C, 0x3C))],
-               "piccole": [], "biella": True, "cilindro": 47},
+               "piccole": [], "biella": True, "cilindro": 51},
     "diesel": {"altezza": 31, "ruote": [(15, 5, GRIGIO_RUOTA), (27, 5, GRIGIO_RUOTA), (39, 5, GRIGIO_RUOTA),
                                          (51, 5, GRIGIO_RUOTA)], "piccole": [], "biella": True},
     "elettrica": {"altezza": 32, "ruote": [(12, 4, GRIGIO_RUOTA), (22, 4, GRIGIO_RUOTA), (40, 4, GRIGIO_RUOTA),
@@ -191,20 +229,30 @@ def disco(p, l, a, cx, cy, r, c) -> None:
                 pixel(p, l, a, cx + x, cy + y, c)
 
 
-def ruota(p, l, a, cx, cy, r, angolo, mozzo) -> None:
+def ruota(p, l, a, cx, cy, r, angolo) -> None:
+    """Ruota senza mozzo: il mozzo si disegna dopo le bielle, che altrimenti lo coprirebbero."""
     disco(p, l, a, cx, cy, r + 1, CONTORNO)
     disco(p, l, a, cx, cy, r, GRIGIO_RUOTA)
     if r >= 5:
-        # Cerchione chiaro e raggi: sono i raggi a far vedere che gira.
-        disco(p, l, a, cx, cy, r - 1, (0x47, 0x40, 0x52))
+        # WARNING: otto raggi a 45° che girano di 45° a fotogramma sembrano fermi. I raggi restano tenui e il
+        # giro lo mostra il contrappeso a mezzaluna, opposto al perno di manovella come sulle ruote vere.
+        disco(p, l, a, cx, cy, r - 1, RAGGIO_FONDO)
         for k in range(4):
             t = angolo + k * math.pi / 4
-            for d in range(1, r):
-                pixel(p, l, a, cx + math.cos(t) * d, cy + math.sin(t) * d, GRIGIO_CHIARO)
+            for d in range(-r + 1, r):
+                pixel(p, l, a, cx + math.cos(t) * d, cy + math.sin(t) * d, RAGGIO)
+        opposto = angolo + math.pi
+        for y in range(-r, r + 1):
+            for x in range(-r, r + 1):
+                d = math.hypot(x, y)
+                scarto = (math.atan2(y, x) - opposto + math.pi) % (2 * math.pi) - math.pi
+                if r * 0.45 <= d <= r - 1 and abs(scarto) <= 0.75:
+                    pixel(p, l, a, cx + x, cy + y, CONTRAPPESO)
     else:
-        for d in range(-r + 1, r):
+        # Un raggio solo, dal centro al cerchione: si ripete ogni 360°, così anche il passo di 90° a cui
+        # arriva l'elettrica a velocità massima si legge in avanti (un diametro si ripeterebbe ogni 180°).
+        for d in range(0, r):
             pixel(p, l, a, cx + math.cos(angolo) * d, cy + math.sin(angolo) * d, GRIGIO_CHIARO)
-    disco(p, l, a, cx, cy, 1 if r >= 5 else 0, mozzo)
 
 
 def linea(p, l, a, x0, y0, x1, y1, c) -> None:
@@ -220,7 +268,9 @@ def motrice(p, l, a, px: float, py: float, asse: int, cilindro: int) -> None:
     La testa a croce scorre in orizzontale sulla linea dell'asse; la biella, di lunghezza fissa, la unisce
     al perno: quando il perno sale o scende la biella si inclina e la testa a croce va avanti e indietro.
     """
-    lunghezza = 11
+    # Al punto morto anteriore la testa a croce arriva a perno + raggio del perno + lunghezza: il cilindro
+    # (LOCOMOTIVE["vapore"]["cilindro"]) comincia oltre, così la biella non ci entra mai.
+    lunghezza = 10
     croce = px + math.sqrt(lunghezza ** 2 - (py - asse) ** 2)
     # Stelo del pistone, dalla testa a croce dentro il cilindro.
     linea(p, l, a, croce, asse, cilindro + 2, asse, ACCIAIO_SCURO)
@@ -253,9 +303,9 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
         # Senso orario: guardando a destra, la locomotiva avanza e le ruote girano in avanti.
         angolo = f * 2 * math.pi / FOTOGRAMMI
         for cx, r in conf["piccole"]:
-            ruota(p, l, a, cx, piano - r, r, angolo * 7 / r, GRIGIO_RUOTA)
-        for cx, r, mozzo in conf["ruote"]:
-            ruota(p, l, a, cx, piano - r, r, angolo, mozzo)
+            ruota(p, l, a, cx, piano - r, r, angolo * 7 / r)
+        for cx, r, _ in conf["ruote"]:
+            ruota(p, l, a, cx, piano - r, r, angolo)
         if conf["biella"]:
             # Biella: unisce i perni di manovella, tutti alla stessa fase, quindi resta orizzontale e
             # descrive un cerchio. Ruote motrici piccole o grandi, il perno sta a metà raggio.
@@ -272,6 +322,8 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
                 pixel(p, l, a, cx + dx, y, ACCIAIO_SCURO)
             if "cilindro" in conf:
                 motrice(p, l, a, ruote[-1][0] + dx, y, piano - rm, conf["cilindro"])
+        for cx, r, mozzo in conf["ruote"]:
+            disco(p, l, a, cx, piano - r, 1 if r >= 5 else 0, mozzo)
         foglio.alpha_composite(fot, (f * l, 0))
     return foglio
 
@@ -387,9 +439,29 @@ def binario(id_asset: str) -> Image.Image:
     return out
 
 
+# Quanto lo strato lontano sfuma verso il cielo dietro di lui: ciò che si urta resta saturo, ciò che si guarda
+# si attenua. Il porto di più, perché le sue pile di container somigliano agli ostacoli.
+FOSCHIA = {"facile": 0.15, "medio": 0.2, "difficile": 0.4}
+
+
+def foschia(im: Image.Image, cielo_im: Image.Image, quota: float) -> Image.Image:
+    """Mescola ogni pixel col colore del cielo all'altezza in cui lo strato si vede."""
+    binario_y = SCHERMO - BINARIO_ALTEZZA
+    out = im.copy()
+    p, pc = out.load(), cielo_im.load()
+    for y in range(im.height):
+        cr, cg, cb, _ = pc[LARGHEZZA // 2, min(SCHERMO - 1, binario_y - im.height + y)]
+        for x in range(im.width):
+            r, g, b, a = p[x, y]
+            if a:
+                p[x, y] = (round(r + (cr - r) * quota), round(g + (cg - g) * quota), round(b + (cb - b) * quota), a)
+    return out
+
+
 def scenario(livello: str) -> None:
     livelli = {"cielo": cielo(f"{livello}-cielo"), "lontano": strato(f"{livello}-lontano", "lontano"),
                "vicino": strato(f"{livello}-vicino", "vicino"), "binario": binario(BINARI[livello])}
+    livelli["lontano"] = foschia(livelli["lontano"], livelli["cielo"], FOSCHIA[livello])
     for nome, im in livelli.items():
         salva(im, f"scenari/{livello}-{nome}.png")
     miniatura(livello, livelli)
@@ -424,10 +496,150 @@ def effetto(id_asset: str) -> None:
     salva(riduci(im, *adatta(im, EFFETTI[id_asset], EFFETTI[id_asset]), contorno=False), f"effetti/{id_asset}.png")
 
 
+# --- Interfaccia e pezzi dell'urto -----------------------------------------------------------------------
+
+# Tutta l'interfaccia si mostra a ×3 (styles.css, --pixel): bottoni e icone sono composti qui alla misura
+# nativa, così ogni pixel dello schermo ha la stessa grana. Bottone: (colore, lato, icona, lato dell'icona).
+PEZZI = ("pezzo-legna", "pezzo-paglia", "pezzo-asse", "pezzo-stella")
+TASTI = {
+    "gioca": ("giallo", 32, "icona-gioca", 16),
+    "ancora": ("giallo", 32, "icona-ancora", 16),
+    "casa": ("crema", 24, "icona-casa", 13),
+    "pausa": ("prugna", 16, "icona-pausa", 9),
+    # Altoparlante e onde non si leggono sotto i 14 px: il tasto dell'audio è medio, non piccolo.
+    "audio": ("prugna", 24, "disegno-audio", 15),
+    "muto": ("prugna", 24, "disegno-muto", 15),
+}
+
+
+def figura_quadrata(id_asset: str, lato: int, contorno: bool = True) -> Image.Image:
+    im = ritaglia(carica(id_asset))
+    l, a = adatta(im, lato, lato)
+    out = Image.new("RGBA", (lato, lato), (0, 0, 0, 0))
+    out.alpha_composite(riduci(im, l, a, contorno=contorno, buchi=True), ((lato - l) // 2, (lato - a) // 2))
+    return out
+
+
+def pezzo(id_asset: str) -> None:
+    salva(figura_quadrata(id_asset, 8), f"pezzi/{id_asset.split('-', 1)[1]}.png")
+
+
+BIANCO, GRIGIO_ICONA = (0xFF, 0xFF, 0xFF), (0xC9, 0xC6, 0xD1)
+
+
+def altoparlante(lato: int, muto: bool) -> Image.Image:
+    """Altoparlante con onde, o con la X, disegnato pixel per pixel: ridotte dalla grezza, a 15 px onde e X
+    diventano macchie. Stessi bianco, grigio e contorno delle icone generate."""
+    im = Image.new("RGBA", (lato, lato), (0, 0, 0, 0))
+    p = im.load()
+    centro = lato // 2
+    for y in range(centro - 2, centro + 3):  # corpo
+        for x in range(1, 4):
+            pixel(p, lato, lato, x, y, BIANCO)
+    for x in range(4, 8):  # cono, che si allarga verso destra
+        for y in range(centro - 2 - (x - 3), centro + 3 + (x - 3)):
+            pixel(p, lato, lato, x, y, BIANCO)
+    for y in range(centro + 1, lato):  # ombra sotto
+        for x in range(lato):
+            if p[x, y][3]:
+                p[x, y] = (*GRIGIO_ICONA, 255)
+    if muto:
+        for d in range(-2, 3):
+            pixel(p, lato, lato, 11 + d, centro + d, BIANCO)
+            pixel(p, lato, lato, 11 + d, centro - d, BIANCO)
+    else:
+        for raggio in (3, 6):
+            for gradi in range(-50, 51, 5):
+                t = math.radians(gradi)
+                pixel(p, lato, lato, 7 + raggio * math.cos(t), centro + raggio * math.sin(t), BIANCO)
+    # Contorno attorno a ogni pixel pieno, verso l'esterno.
+    pieni = {(x, y) for y in range(lato) for x in range(lato) if p[x, y][3]}
+    for x, y in pieni:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (x + dx, y + dy) not in pieni and 0 <= x + dx < lato and 0 <= y + dy < lato:
+                p[x + dx, y + dy] = (*CONTORNO, 255)
+    return im
+
+
+def tasto(nome: str) -> None:
+    colore, lato, icona, lato_icona = TASTI[nome]
+    fondo = figura_quadrata(f"bottone-{colore}", lato)
+    segno = (altoparlante(lato_icona, icona == "disegno-muto") if icona.startswith("disegno-")
+             else figura_quadrata(icona, lato_icona))
+    # L'icona sta sulla faccia del bottone, un poco sopra il centro: sotto c'è lo spessore del bordo.
+    fondo.alpha_composite(segno, ((lato - lato_icona) // 2, (lato - lato_icona) // 2 - max(1, lato // 16)))
+    salva(fondo, f"tasti/{nome}.png")
+
+
+def icona_ruota() -> None:
+    salva(figura_quadrata("icona-ruota", 24), "icone/ruota.png")
+
+
+def titolo() -> None:
+    im = ritaglia(carica("titolo"))
+    salva(riduci(im, *adatta(im, 104, 40), buchi=True), "titolo.png")
+
+
+def menu_sfondo() -> None:
+    """Fondo di menu e fine partita: 480×270 come il canvas, quindi a schermo ha la grana della partita."""
+    im = carica("menu-sfondo")
+    altezza = round(im.height * LARGHEZZA / im.width)
+    salva(riduci(im, LARGHEZZA, altezza, distanza=16, contorno=False).crop(
+        (0, altezza - SCHERMO, LARGHEZZA, altezza)), "menu-sfondo.png")
+
+
+# Cornici dei pannelli del menu, 12×12 per il border-image di styles.css (4 px di bordo, angoli smussati).
+CORNICI = {"cornice": ((0x3D, 0x31, 0x50), (0x5A, 0x4A, 0x72)), "cornice-scelta": ((0x4D, 0x3D, 0x66), (0xF2, 0xC2, 0x30))}
+
+
+def cornici() -> None:
+    for nome, (fondo, luce) in CORNICI.items():
+        im = Image.new("RGBA", (12, 12), (0, 0, 0, 0))
+        p = im.load()
+        for y in range(12):
+            for x in range(12):
+                angolo = (x in (0, 11) and y in (0, 1, 10, 11)) or (y in (0, 11) and x in (0, 1, 10, 11))
+                if angolo:
+                    continue
+                bordo = x in (0, 11) or y in (0, 11) or (x in (1, 10) and y in (1, 10))
+                if bordo:
+                    p[x, y] = (*CONTORNO, 255)
+                elif x in (1, 10) or y in (1, 10) or (nome == "cornice-scelta" and (x in (2, 9) or y in (2, 9))):
+                    p[x, y] = (*luce, 255)
+                else:
+                    p[x, y] = (*fondo, 255)
+        salva(im, f"interfaccia/{nome}.png")
+
+
+def favicon() -> None:
+    """La locomotiva a vapore rossa, primo fotogramma, su 64×64: la scheda del browser la riconosce."""
+    import colorsys
+
+    loco = Image.open(IMMAGINI / "locomotive" / "vapore.png").convert("RGBA").crop((0, 0, *FOTOGRAMMA))
+    # Stessa sostituzione di palette di src/grafica/palette.ts: tinta del rosso, luminosità della rampa.
+    h, _, s_ = colorsys.rgb_to_hls(0xE8 / 255, 0x3B / 255, 0x3B / 255)
+    rossa = {m: tuple(round(c * 255) for c in colorsys.hls_to_rgb(h, colorsys.rgb_to_hls(*(v / 255 for v in m))[1], s_))
+             for m in RAMPA}
+    p = loco.load()
+    for y in range(loco.height):
+        for x in range(loco.width):
+            r, g, b, a = p[x, y]
+            if a and (r, g, b) in rossa:
+                p[x, y] = (*rossa[(r, g, b)], a)
+    out = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    out.alpha_composite(loco, (0, 12))
+    out.save(QUI.parent / "public" / "favicon.png")
+    print("favicon.png: 64×64")
+
+
 PULITORI = {**{t: (lambda t=t: locomotiva(t)) for t in LOCOMOTIVE},
             **{t: (lambda t=t: ostacolo(t)) for t in OSTACOLI},
             **{f"scenario-{l}": (lambda l=l: scenario(l)) for l in LIVELLI},
             **{e: (lambda e=e: effetto(e)) for e in EFFETTI},
+            **{t: (lambda t=t: pezzo(t)) for t in PEZZI},
+            **{f"tasto-{t}": (lambda t=t: tasto(t)) for t in TASTI},
+            "icona-ruota": icona_ruota, "titolo": titolo, "menu-sfondo": menu_sfondo, "cornici": cornici,
+            "favicon": favicon,
             "barili": barili, "container": container, "stazione": stazione, "icona-stazione": icona_stazione}
 
 

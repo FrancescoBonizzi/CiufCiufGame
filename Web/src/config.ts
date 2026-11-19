@@ -14,5 +14,5 @@ export const GAME = {
   // Lo stesso font serve il DOM (styles.css) e i Text di Pixi: va dichiarato in @font-face o caricato da index.html.
   // Sintassi di font-family CSS: i nomi vanno tra virgolette ('"Press Start 2P", monospace'). Con una parola
   // che comincia con una cifra, senza virgolette document.fonts.load lancia e la partita non parte.
-  fontFamily: "system-ui, sans-serif",
+  fontFamily: '"Pixelify Sans", system-ui, sans-serif',
 };

@@ -181,10 +181,12 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
 - [x] Locomotive in 8 fotogrammi con ruote e bielle disegnate a codice (vapore: cilindro e biella motrice),
       sfondi in parallasse per i tre scenari, miniature del menu ricavate dagli strati veri
 - [x] Fumo del vapore, scarico del diesel, scintille del pantografo, col ritmo della strada percorsa
-- [ ] Particelle: pezzi dell'ostacolo sbalzato
+- [x] Pezzi dell'ostacolo sbalzato nel facile (legna, paglia, assi) con una stellina d'urto
 - [x] Hitbox: gli ostacoli escono alla misura esatta di `ostacoli.ts`, quindi le hitbox restano valide;
       quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
-- [ ] Niente atlas: 38 PNG singoli per 156 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [x] Interfaccia nello stesso stile: titolo, bottoni con icona, cornici dei pannelli, campioni di colore,
+      fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
+- [ ] Niente atlas: 52 PNG singoli per 228 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio
