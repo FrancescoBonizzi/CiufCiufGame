@@ -10,7 +10,7 @@ export const FOTOGRAMMA_LOCOMOTIVA = { larghezza: 64, altezza: 40, numero: 8 };
 
 /** Raggio delle ruote motrici in px. WARNING: copia di LOCOMOTIVE in strumenti/pulisci-immagini.py, che lo
  * disegna nello sprite: chi ne cambia uno cambia l'altro, o le ruote slittano sul terreno. */
-const RAGGIO_RUOTE: Record<IdLocomotiva, number> = { vapore: 7, diesel: 5, elettrica: 4 };
+const RAGGIO_RUOTE: Record<IdLocomotiva, number> = { vapore: 7, diesel: 4, elettrica: 4 };
 
 /** px percorsi per fotogramma: le ruote rotolano senza strisciare, un giro per circonferenza. */
 export const pxPerFotogramma = (tipo: IdLocomotiva): number =>

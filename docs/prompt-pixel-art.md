@@ -57,9 +57,10 @@ Ogni pixel dello schermo deve avere la stessa misura: sprite, sfondi e interfacc
 ## Locomotive
 
 Il generatore disegna **solo la carrozzeria, senza ruote né bielle**: non tiene ferma una biella fra un
-fotogramma e l'altro. Ruote, biella d'accoppiamento e, nel vapore, cilindro e biella motrice le disegna
-`pulisci-immagini.py`, in un foglio di **8 fotogrammi da 64×40**. Tutte guardano a **destra**, con le ruote
-sull'ultima riga.
+fotogramma e l'altro. Le parti in movimento le disegna `pulisci-immagini.py`: nel vapore ruote motrici,
+biella d'accoppiamento, cilindro e biella motrice; nella diesel due carrelli a due assi senza biella, come le
+diesel vere (con la biella sembrava una vapore); nell'elettrica quattro ruote piccole. Il
+tutto in un foglio di **8 fotogrammi da 64×40**. Tutte guardano a **destra**, con le ruote sull'ultima riga.
 
 La carrozzeria (il colore che il giocatore sceglie) usa **solo** la rampa magenta, che nient'altro può usare:
 il gioco la sostituisce col colore scelto. La pulizia porta su questa rampa ogni tinta magenta della

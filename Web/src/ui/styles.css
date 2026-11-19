@@ -6,8 +6,7 @@
   --background: #2b2133;
   /* Lo stesso di GAME.fontFamily; il FontFace lo registra main.ts. */
   --font: "Pixelify Sans", system-ui, sans-serif;
-  /* Ingrandimento di tutta l'interfaccia pixel art: bottoni, cornici e icone hanno la stessa grana. Le figure
-     dei pannelli usano un passo in meno (--scala - 1), così tre locomotive stanno in una riga. */
+  /* Ingrandimento di tutta l'interfaccia pixel art: bottoni, cornici, icone e figure hanno la stessa grana. */
   --scala: 3;
   --pixel: calc(var(--scala) * 1px);
   /* --img-menu-sfondo, --img-cornice, --img-cornice-scelta: li imposta main.ts da ASSETS_ROOT. */
@@ -213,14 +212,11 @@ button {
   border-image-source: var(--img-cornice-scelta);
 }
 
+/* Locomotive (64×40) e miniature degli scenari (64×36) allo stesso ingrandimento dei bottoni. */
 .scelta canvas {
   display: block;
-  width: calc(64px * (var(--scala) - 1));
+  width: calc(64 * var(--pixel));
   height: auto;
-}
-
-.scelta canvas[width="96"] {
-  width: calc(96px * (var(--scala) - 1));
 }
 
 /* Più specifico di ".scelta canvas", che darebbe al campione la misura delle locomotive. */

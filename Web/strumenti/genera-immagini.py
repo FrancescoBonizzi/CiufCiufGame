@@ -101,11 +101,16 @@ ASSET = {
                "roof; long round boiler in front, with a black smokestack near the front and a small golden bell "
                "sitting directly on top of the boiler; a small cowcatcher at the front bottom. Boiler, cab and "
                "cowcatcher " + MAGENTA + "Smokestack black and dark grey. No smoke.", "1536x1024"),
+    # Una diesel vera, non una vapore squadrata: niente comignolo né caldaia, ruote su due carrelli senza bielle.
     "diesel": (STILE + OGGETTO + SENZA_RUOTE +
-               "A cute small diesel shunting locomotive, side view facing right, boxy body with a rounded front "
-               "hood, a cab on the left with two square light-blue windows, horizontal vent grilles on the hood, "
-               "a small round headlight on the front, a yellow-and-black warning-striped buffer plate at the front "
-               "bottom, a short grey exhaust pipe on the roof. The body " + MAGENTA + "No smoke.", "1536x1024"),
+               "A cute small modern diesel-electric locomotive, side view facing right, like a classic European "
+               "mainline diesel: one long rectangular box body with a flat roof and slightly rounded corners, a "
+               "driver's cab at the front (right) end with a big sloped light-blue windshield and a side window, a "
+               "smaller cab window at the rear end too, rows of vertical ventilation grilles and louvres along "
+               "the side, a small horn and a low flat exhaust grille on the roof, round headlights on the front, "
+               "a yellow-and-black warning-striped buffer beam at the front bottom. Absolutely NO chimney, NO "
+               "smokestack, NO boiler, NO round steam-engine shapes. The body " + MAGENTA + "No smoke.",
+               "1536x1024"),
     "elettrica": (STILE + OGGETTO + SENZA_RUOTE +
                   "A cute small modern electric locomotive, side view facing right, sleek streamlined body with a "
                   "sloped rounded nose and a wide light-blue windshield, two small side windows and a door, a white "
@@ -154,12 +159,14 @@ ASSET = {
               "both ends.", "1536x1024"),
 
     # --- Arrivo ---
-    "stazione": (STILE + OGGETTO + "A small friendly railway station building for the finish line, side view: a "
+    # 192 px a schermo: anche lei a griglia fine, o ridotta da 1536 avrebbe pixel doppi accanto al treno.
+    "stazione": (STILE_BASE + OGGETTO + "Pixel art drawn exactly as if the whole image were only 260 pixels wide, "
+                 "then scaled up: every pixel is a small square about 6 image pixels wide, with a thin 1-pixel dark "
+                 "outline (#2b2133). A small friendly railway station building for the finish line, side view: a "
                  "grey stone platform along the bottom with a yellow safety line, a cozy cream building with a "
                  "pitched red roof, a big round clock in the gable, two windows, a wooden door, and a green flag on "
                  "a pole on the roof. A blank sign board with no text. About 1.7 times wider than tall.",
                  "1536x1024"),
-
     "icona-stazione": (STILE + OGGETTO + "A tiny icon of a small railway station, designed to stay readable at 16x16 "
                        "pixels: very few, very big shapes. A cream square building with one dark door, a big bright "
                        "red triangular roof, and a green flag on a pole on top. No details, no windows, no text.",

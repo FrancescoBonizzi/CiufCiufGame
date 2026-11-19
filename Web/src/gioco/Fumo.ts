@@ -39,7 +39,7 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
   },
   diesel: {
     file: "scarico",
-    origine: { x: 10, y: -34 },
+    origine: { x: -8, y: -32 },
     ogniPx: 28,
     probabilita: 1,
     segueIlTerreno: true,

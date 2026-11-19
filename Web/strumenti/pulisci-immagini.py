@@ -211,8 +211,10 @@ CONTRAPPESO = (0xA9, 0xA2, 0xB6)
 LOCOMOTIVE = {
     "vapore": {"altezza": 31, "ruote": [(17, 7, (0xD6, 0x3C, 0x3C)), (35, 7, (0xD6, 0x3C, 0x3C))],
                "piccole": [], "biella": True, "cilindro": 51},
-    "diesel": {"altezza": 31, "ruote": [(15, 5, GRIGIO_RUOTA), (27, 5, GRIGIO_RUOTA), (39, 5, GRIGIO_RUOTA),
-                                         (51, 5, GRIGIO_RUOTA)], "piccole": [], "biella": True},
+    # Diesel: due carrelli a due assi, come le diesel vere; niente biella, che la farebbe sembrare una vapore.
+    "diesel": {"altezza": 31, "ruote": [(12, 4, GRIGIO_RUOTA), (21, 4, GRIGIO_RUOTA), (42, 4, GRIGIO_RUOTA),
+                                         (51, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False,
+               "carrelli": [(12, 21), (42, 51)]},
     "elettrica": {"altezza": 32, "ruote": [(12, 4, GRIGIO_RUOTA), (22, 4, GRIGIO_RUOTA), (40, 4, GRIGIO_RUOTA),
                                             (50, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False},
 }
@@ -324,6 +326,13 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
                 pixel(p, l, a, cx + dx, y, ACCIAIO_SCURO)
             if "cilindro" in conf:
                 motrice(p, l, a, ruote[-1][0] + dx, y, piano - rm, conf["cilindro"])
+        for x0, x1 in conf.get("carrelli", []):
+            # Telaio laterale del carrello, davanti alle ruote all'altezza degli assi: le ruote si vedono sotto.
+            asse = piano - conf["ruote"][0][1]
+            for y in range(asse - 2, asse + 1):
+                for x in range(x0 - 5, x1 + 6):
+                    bordo = y in (asse - 2, asse) or x in (x0 - 5, x1 + 5)
+                    pixel(p, l, a, x, y, CONTORNO if bordo else ACCIAIO_SCURO)
         for cx, r, mozzo in conf["ruote"]:
             disco(p, l, a, cx, piano - r, 1 if r >= 5 else 0, mozzo)
         foglio.alpha_composite(fot, (f * l, 0))
@@ -476,11 +485,13 @@ def scenario(livello: str) -> None:
     miniatura(livello, livelli)
 
 
-ICONE_MINIATURA = {"facile": ("fieno", 14, 14), "medio": ("segnale", 9, 14), "difficile": ("container-rosso", 12, 12)}
+# 64×36: nel menu si mostra allo stesso ingrandimento dei bottoni, e tre stanno in una riga.
+MINIATURA = (64, 36)
+ICONE_MINIATURA = {"facile": ("fieno", 10, 10), "medio": ("segnale", 6, 10), "difficile": ("container-rosso", 8, 8)}
 
 
 def miniatura(livello: str, livelli: dict[str, Image.Image]) -> None:
-    """La scena intera ridotta a 96×54 per il menu, con un ostacolo tipico: lo scenario si riconosce senza leggere."""
+    """La scena intera ridotta a 64×36 per il menu, con un ostacolo tipico: lo scenario si riconosce senza leggere."""
     binario_y = SCHERMO - BINARIO_ALTEZZA
     scena = livelli["cielo"].copy()
     for nome in ("lontano", "vicino", "binario"):
@@ -488,10 +499,11 @@ def miniatura(livello: str, livelli: dict[str, Image.Image]) -> None:
         y = binario_y if nome == "binario" else binario_y - im.height
         for x in range(0, LARGHEZZA, im.width):
             scena.alpha_composite(im.crop((0, 0, im.width, min(im.height, SCHERMO - y))), (x, y))
-    piccola = riduci(scena, 96, 54, distanza=20, contorno=False)
+    piccola = riduci(scena, *MINIATURA, distanza=20, contorno=False)
     id_icona, l, a = ICONE_MINIATURA[livello]
     icona = figura(id_icona, l, a)
-    piccola.alpha_composite(icona, (56, binario_y // 5 - a + 1))
+    scala = MINIATURA[1] / SCHERMO
+    piccola.alpha_composite(icona, (round(MINIATURA[0] * 0.58), round(binario_y * scala) - a + 1))
     salva(piccola, f"scenari/{livello}-miniatura.png")
 
 
