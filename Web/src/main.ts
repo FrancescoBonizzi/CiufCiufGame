@@ -31,8 +31,10 @@ if (errori.length > 0) {
   const font = new FontFace("Pixelify Sans", `url("${ASSETS_ROOT}fonts/pixelify-sans-latin.woff2")`, { weight: "400 700" });
   document.fonts.add(font);
 
-  // Font e immagini prima del router: menu e partita le disegnano senza attese.
-  Promise.all([font.load(), caricaImmagini()])
+  // Font e immagini prima del router: menu e partita le disegnano senza attese. Il font è un di più: se non
+  // arriva, il CSS ricade su system-ui e il gioco parte lo stesso.
+  const caricaFont = font.load().catch((e: unknown) => console.warn("Font non caricato, uso system-ui", e));
+  Promise.all([caricaFont, caricaImmagini()])
     .then(initializeRouter)
     .catch((e: unknown) => {
       console.error(e);

@@ -204,6 +204,8 @@ RAGGIO_FONDO = (0x47, 0x40, 0x52)
 RAGGIO = (0x6A, 0x62, 0x78)
 CONTRAPPESO = (0xA9, 0xA2, 0xB6)
 
+# WARNING: il raggio delle ruote motrici è copiato in RAGGIO_RUOTE di src/grafica/locomotive.ts, che ne ricava
+# la velocità di rotolamento: chi lo cambia qui lo cambia anche lì.
 # Per tipo: altezza della carrozzeria, ruote (centro x, raggio, colore del mozzo), se ha la biella
 # d'accoppiamento e, per il vapore, il cilindro (x del bordo sinistro) da cui parte la biella motrice.
 LOCOMOTIVE = {
@@ -615,7 +617,8 @@ def favicon() -> None:
     """La locomotiva a vapore rossa, primo fotogramma, su 64×64: la scheda del browser la riconosce."""
     import colorsys
 
-    loco = Image.open(IMMAGINI / "locomotive" / "vapore.png").convert("RGBA").crop((0, 0, *FOTOGRAMMA))
+    # Dal foglio ricostruito, non dal PNG già scritto: lanciata da sola resterebbe allo sprite di prima.
+    loco = foglio_locomotiva("vapore").crop((0, 0, *FOTOGRAMMA))
     # Stessa sostituzione di palette di src/grafica/palette.ts: tinta del rosso, luminosità della rampa.
     h, _, s_ = colorsys.rgb_to_hls(0xE8 / 255, 0x3B / 255, 0x3B / 255)
     rossa = {m: tuple(round(c * 255) for c in colorsys.hls_to_rgb(h, colorsys.rgb_to_hls(*(v / 255 for v in m))[1], s_))

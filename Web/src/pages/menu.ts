@@ -121,11 +121,16 @@ export function renderMenuPage(container: HTMLElement): void {
   ridipingi();
 
   const ctxAnteprima = anteprima.getContext("2d")!;
+  // La strada si accumula come in Locomotiva: cambiando locomotiva il giro continua da dov'era.
+  let strada = 0;
+  let prima: number | null = null;
   const anima = (ora: number) => {
     // Si ferma da solo quando il menu lascia il posto a un'altra pagina.
     if (!anteprima.isConnected) return;
-    const fotogrammiAlSecondo = VELOCITA_ANTEPRIMA / pxPerFotogramma(preferenze.locomotiva);
-    const fotogramma = Math.floor((ora / 1000) * fotogrammiAlSecondo) % FOTOGRAMMA_LOCOMOTIVA.numero;
+    strada += prima === null ? 0 : (VELOCITA_ANTEPRIMA * Math.min(ora - prima, 100)) / 1000;
+    prima = ora;
+    const passi = Math.floor(strada / pxPerFotogramma(preferenze.locomotiva));
+    const fotogramma = passi % FOTOGRAMMA_LOCOMOTIVA.numero;
     ctxAnteprima.clearRect(0, 0, larghezza, altezza);
     ctxAnteprima.drawImage(foglioLocomotiva(preferenze.locomotiva, preferenze.colore), fotogramma * larghezza, 0, larghezza, altezza, 0, 0, larghezza, altezza);
     requestAnimationFrame(anima);

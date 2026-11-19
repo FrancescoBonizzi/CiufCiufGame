@@ -206,6 +206,7 @@ class Game {
   private muoviLocomotiva(dt: number, velocita: number, premuto: boolean): void {
     const evento = this._locomotiva.update(dt, velocita, premuto, this._tempo);
     this._fumo.avanza(velocita * dt, this._locomotiva.sprite.x, this._locomotiva.sprite.y);
+    this._pezzi.scorri(velocita * dt);
     if (evento === "salto") this._sounds.play("salto");
     if (evento === "atterraggio") {
       this._sounds.play("atterraggio");

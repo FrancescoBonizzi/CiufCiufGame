@@ -65,7 +65,7 @@ button {
 }
 
 /* Telefono in orizzontale e finestre basse: tutto a ×2, ancora a pixel interi. */
-@media (max-height: 560px), (max-width: 720px) {
+@media (max-height: 680px), (max-width: 720px) {
   :root {
     --scala: 2;
   }
@@ -106,7 +106,7 @@ button {
 .titolo-logo img {
   display: block;
   width: calc(104 * var(--pixel));
-  height: calc(33 * var(--pixel));
+  height: auto;
 }
 
 /* Bottone e icona sono un'immagine sola (tasti/*.png): le misure sono quelle native × --pixel. */
@@ -147,11 +147,14 @@ button {
 }
 
 /* Menu: anteprima e ▶ da una parte, le tre righe di figure dall'altra. In verticale si impilano. */
+/* Misure fisse a pixel interi: in una finestra troppo bassa il menu scorre invece di uscire dallo schermo
+   ("safe" tiene visibile l'inizio quando il contenuto è più alto della finestra). */
 .menu {
-  min-height: 100svh;
+  height: 100svh;
+  overflow-y: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: safe center;
+  justify-content: safe center;
   gap: calc(12 * var(--pixel));
   padding: 16px;
 }
@@ -296,13 +299,15 @@ canvas.pixel-art {
 }
 
 /* Pausa: il bottone sta sopra la partita, in alto a destra; il suo tocco non fa saltare. */
+/* Sempre ×3 (48 px), anche dove il resto è ×2: sotto i 44 px un dito di bambino lo manca e il tocco
+   arriva al canvas, che fa saltare. */
 .tasto-pausa {
   position: absolute;
   top: max(10px, env(safe-area-inset-top));
   right: max(10px, env(safe-area-inset-right));
   z-index: 10;
-  width: calc(16 * var(--pixel));
-  height: calc(16 * var(--pixel));
+  width: 48px;
+  height: 48px;
 }
 
 .overlay-pausa {
