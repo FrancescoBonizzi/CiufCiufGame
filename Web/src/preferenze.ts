@@ -2,7 +2,7 @@ import { GAME } from "./config.ts";
 import type { IdLivello } from "./config/livelli.ts";
 
 export type IdLocomotiva = "vapore" | "diesel" | "elettrica";
-export type IdColore = "rosso" | "arancione" | "giallo" | "verde" | "azzurro" | "blu" | "viola" | "rosa";
+export type IdColore = "rosso" | "arancione" | "giallo" | "verde" | "azzurro" | "blu" | "viola" | "rosa" | "nero";
 
 export const LOCOMOTIVE: IdLocomotiva[] = ["vapore", "diesel", "elettrica"];
 export const LIVELLI_IN_ORDINE: IdLivello[] = ["facile", "medio", "difficile"];
@@ -17,6 +17,7 @@ export const COLORI: Record<IdColore, string> = {
   blu: "#3557d6",
   viola: "#8e44c9",
   rosa: "#ff6fb5",
+  nero: "#2a2834",
 };
 
 export interface Preferenze {

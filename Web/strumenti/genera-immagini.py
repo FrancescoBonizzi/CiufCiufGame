@@ -159,10 +159,10 @@ ASSET = {
               "both ends.", "1536x1024"),
 
     # --- Arrivo ---
-    # 192 px a schermo: anche lei a griglia fine, o ridotta da 1536 avrebbe pixel doppi accanto al treno.
-    "stazione": (STILE_BASE + OGGETTO + "Pixel art drawn exactly as if the whole image were only 260 pixels wide, "
-                 "then scaled up: every pixel is a small square about 6 image pixels wide, with a thin 1-pixel dark "
-                 "outline (#2b2133). A small friendly railway station building for the finish line, side view: a "
+    # Al più 192 px a schermo: l'oggetto occupa circa il 95% della tela, quindi una griglia di 200 dà un
+    # pixel del generatore per pixel di gioco; con una griglia più fitta la riduzione fonde celle a caso.
+    "stazione": (STILE_BASE + OGGETTO + "Pixel art drawn exactly as if the whole image were only 200 pixels wide, "
+                 "then scaled up: every pixel is a crisp square about 8 image pixels wide. A small friendly railway station building for the finish line, side view: a "
                  "grey stone platform along the bottom with a yellow safety line, a cozy cream building with a "
                  "pitched red roof, a big round clock in the gable, two windows, a wooden door, and a green flag on "
                  "a pole on the roof. A blank sign board with no text. About 1.7 times wider than tall.",

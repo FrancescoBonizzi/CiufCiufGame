@@ -33,6 +33,7 @@ export const TESTI = {
     blu: "Blu",
     viola: "Viola",
     rosa: "Rosa",
+    nero: "Nero",
   } satisfies Record<IdColore, string>,
 
   scenari: {

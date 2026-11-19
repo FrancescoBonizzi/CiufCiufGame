@@ -207,14 +207,15 @@ CONTRAPPESO = (0xA9, 0xA2, 0xB6)
 # WARNING: il raggio delle ruote motrici è copiato in RAGGIO_RUOTE di src/grafica/locomotive.ts, che ne ricava
 # la velocità di rotolamento: chi lo cambia qui lo cambia anche lì.
 # Per tipo: altezza della carrozzeria, ruote (centro x, raggio, colore del mozzo), se ha la biella
-# d'accoppiamento e, per il vapore, il cilindro (x del bordo sinistro) da cui parte la biella motrice.
+# d'accoppiamento, per il vapore il cilindro (x del bordo sinistro) da cui parte la biella motrice e, per la
+# diesel, i carrelli (x della prima e dell'ultima ruota, raggio) di cui disegnare il telaio.
 LOCOMOTIVE = {
     "vapore": {"altezza": 31, "ruote": [(17, 7, (0xD6, 0x3C, 0x3C)), (35, 7, (0xD6, 0x3C, 0x3C))],
                "piccole": [], "biella": True, "cilindro": 51},
     # Diesel: due carrelli a due assi, come le diesel vere; niente biella, che la farebbe sembrare una vapore.
     "diesel": {"altezza": 31, "ruote": [(12, 4, GRIGIO_RUOTA), (21, 4, GRIGIO_RUOTA), (42, 4, GRIGIO_RUOTA),
                                          (51, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False,
-               "carrelli": [(12, 21), (42, 51)]},
+               "carrelli": [(12, 21, 4), (42, 51, 4)]},
     "elettrica": {"altezza": 32, "ruote": [(12, 4, GRIGIO_RUOTA), (22, 4, GRIGIO_RUOTA), (40, 4, GRIGIO_RUOTA),
                                             (50, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False},
 }
@@ -306,6 +307,14 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
         p = fot.load()
         # Senso orario: guardando a destra, la locomotiva avanza e le ruote girano in avanti.
         angolo = f * 2 * math.pi / FOTOGRAMMI
+        for x0, x1, r in conf.get("carrelli", []):
+            # Telaio del carrello all'altezza degli assi, dietro le ruote: davanti coprirebbe il raggio che
+            # mostra la rotazione. Largo quanto le ruote col loro contorno.
+            asse = piano - r
+            for y in range(asse - 2, asse + 1):
+                for x in range(x0 - r - 1, x1 + r + 2):
+                    bordo = y in (asse - 2, asse) or x in (x0 - r - 1, x1 + r + 1)
+                    pixel(p, l, a, x, y, CONTORNO if bordo else ACCIAIO_SCURO)
         for cx, r in conf["piccole"]:
             ruota(p, l, a, cx, piano - r, r, angolo * 7 / r)
         for cx, r, _ in conf["ruote"]:
@@ -326,13 +335,6 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
                 pixel(p, l, a, cx + dx, y, ACCIAIO_SCURO)
             if "cilindro" in conf:
                 motrice(p, l, a, ruote[-1][0] + dx, y, piano - rm, conf["cilindro"])
-        for x0, x1 in conf.get("carrelli", []):
-            # Telaio laterale del carrello, davanti alle ruote all'altezza degli assi: le ruote si vedono sotto.
-            asse = piano - conf["ruote"][0][1]
-            for y in range(asse - 2, asse + 1):
-                for x in range(x0 - 5, x1 + 6):
-                    bordo = y in (asse - 2, asse) or x in (x0 - 5, x1 + 5)
-                    pixel(p, l, a, x, y, CONTORNO if bordo else ACCIAIO_SCURO)
         for cx, r, mozzo in conf["ruote"]:
             disco(p, l, a, cx, piano - r, 1 if r >= 5 else 0, mozzo)
         foglio.alpha_composite(fot, (f * l, 0))
@@ -389,7 +391,9 @@ def container() -> None:
 
 
 def stazione() -> None:
-    salva(figura("stazione", 192, 112), "stazione.png")
+    # Niente hitbox: le proporzioni restano quelle disegnate (l'orologio resta tondo), dentro 192×112.
+    im = ritaglia(carica("stazione"))
+    salva(riduci(im, *adatta(im, 192, 112)), "stazione.png")
 
 
 def icona_stazione() -> None:
@@ -485,7 +489,7 @@ def scenario(livello: str) -> None:
     miniatura(livello, livelli)
 
 
-# 64×36: nel menu si mostra allo stesso ingrandimento dei bottoni, e tre stanno in una riga.
+# 64×36: nel menu si mostra allo stesso ingrandimento dei bottoni (a ×3, tre per riga da 1040 px in su).
 MINIATURA = (64, 36)
 ICONE_MINIATURA = {"facile": ("fieno", 10, 10), "medio": ("segnale", 6, 10), "difficile": ("container-rosso", 8, 8)}
 

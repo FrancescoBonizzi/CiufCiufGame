@@ -63,8 +63,9 @@ button {
   image-rendering: pixelated;
 }
 
-/* Telefono in orizzontale e finestre basse: tutto a ×2, ancora a pixel interi. */
-@media (max-height: 680px), (max-width: 720px) {
+/* Telefono in orizzontale, finestre basse o strette: tutto a ×2, ancora a pixel interi. Sotto i 1040 px di
+   larghezza le tre figure di una riga del menu a ×3 non starebbero accanto al titolo. */
+@media (max-height: 680px), (max-width: 1040px) {
   :root {
     --scala: 2;
   }
