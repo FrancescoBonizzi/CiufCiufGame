@@ -6,7 +6,7 @@ Gioco web 2D per tutti, pensato perché il livello facile sia giocabile anche da
 un solo comando (spazio, o un tocco sullo schermo), partite brevi con un traguardo, nessun punteggio.
 
 In sviluppo: decisioni e fasi di lavoro in [ROADMAP.md](ROADMAP.md). Le meccaniche sono giocabili con
-grafica ed effetti segnaposto; pixel art, musiche e calibrazione arrivano nelle fasi successive.
+pixel art generata e ripulita a codice, effetti sonori segnaposto; musiche e calibrazione arrivano nelle fasi successive.
 
 ## Sviluppo
 

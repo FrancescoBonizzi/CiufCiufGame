@@ -1,5 +1,5 @@
-import { foglioLocomotiva } from "../grafica/locomotive.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, disegnaIconaStazione } from "../grafica/segnaposto.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "../grafica/locomotive.ts";
+import { canvasDa } from "../grafica/immagini.ts";
 import { leggiPreferenze } from "../preferenze.ts";
 import { TESTI } from "../testi.ts";
 import { ICONE } from "../ui/icone.ts";
@@ -36,7 +36,7 @@ export function renderEsitoPage(container: HTMLElement, esito: Esito): void {
     .drawImage(foglioLocomotiva(preferenze.locomotiva, preferenze.colore), 0, 0, larghezza, altezza, 0, 0, larghezza, altezza);
   figura.appendChild(locomotiva);
   if (esito === "vittoria") {
-    const stazione = disegnaIconaStazione();
+    const stazione = canvasDa("icona-stazione");
     stazione.className = "pixel esito__stazione";
     figura.appendChild(stazione);
   }

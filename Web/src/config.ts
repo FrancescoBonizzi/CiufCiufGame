@@ -4,7 +4,7 @@ export const GAME = {
   // Prefisso delle chiavi di localStorage: due giochi sullo stesso dominio non devono pestarsi le preferenze.
   storagePrefix: "ciufciuf",
   // Risoluzione logica: il mondo di gioco non cambia mai, a schermo si scala solo il canvas.
-  // 480×270 inchioda la misura di tutti gli asset di docs/prompt-pixel-art.md.
+  // 480×270 inchioda la misura di tutti gli asset prodotti da strumenti/pulisci-immagini.py.
   width: 480,
   height: 270,
   orientation: "landscape" as "landscape" | "portrait",
@@ -14,5 +14,5 @@ export const GAME = {
   // Lo stesso font serve il DOM (styles.css) e i Text di Pixi: va dichiarato in @font-face o caricato da index.html.
   // Sintassi di font-family CSS: i nomi vanno tra virgolette ('"Press Start 2P", monospace'). Con una parola
   // che comincia con una cifra, senza virgolette document.fonts.load lancia e la partita non parte.
-  fontFamily: "system-ui, sans-serif",
+  fontFamily: '"Pixelify Sans", system-ui, sans-serif',
 };

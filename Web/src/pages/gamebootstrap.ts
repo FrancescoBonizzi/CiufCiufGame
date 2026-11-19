@@ -41,13 +41,10 @@ export async function initGame(container: HTMLElement) {
         <button id="btn-pausa-menu" class="tasto-medio" aria-label="${TESTI.partita.menu}">${ICONE.casa}</button>
       </div>
       <div id="orientation-overlay">
-        <!-- Lucide rotate-cw, licenza ISC. Un SVG e non un carattere Unicode: il glifo ha un riquadro
-             asimmetrico e la rotazione animata viene storta. -->
-        <svg class="rotate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-          <path d="M21 3v5h-5" />
-        </svg>
-        <p>${TESTI.ruotaDispositivo}</p>
+        <div class="cornice-messaggio">
+          <span class="rotate-icon">${ICONE.ruota}</span>
+          <p>${TESTI.ruotaDispositivo}</p>
+        </div>
       </div>
     </div>
   `;
@@ -86,6 +83,9 @@ export async function initGame(container: HTMLElement) {
       height: GAME.height,
       background: GAME.background,
       antialias: !GAME.pixelArt,
+      // Sprite e particelle a coordinate intere: a risoluzione 2 una posizione frazionaria li metterebbe a
+      // mezzo pixel di gioco, fuori dalla griglia degli altri.
+      roundPixels: GAME.pixelArt,
       autoDensity: true,
       // Oltre 2x la memoria del canvas cresce col quadrato senza differenza visibile.
       resolution: Math.min(window.devicePixelRatio || 1, 2),

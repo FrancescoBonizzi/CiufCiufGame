@@ -1,5 +1,5 @@
-// Misure degli ostacoli, le stesse di docs/prompt-pixel-art.md: quando arriveranno gli sprite veri le hitbox
-// si rileggono su di loro (fase 6) e validaConfigurazione deve restare verde.
+// Misure degli ostacoli: strumenti/pulisci-immagini.py riporta ogni sprite a queste misure esatte (tabella
+// OSTACOLI), quindi chi ne cambia una rigenera lo sprite. validaConfigurazione deve restare verde.
 
 export type TipoOstacolo =
   | "legna"

@@ -2,11 +2,14 @@
   --ink: #f4f1ea;
   --accent: #f2c230;
   --accent-ink: #2b2133;
-  --scelto: #ff6fb5;
-  --superficie: #3d3150;
   /* Lo stesso colore del canvas: le bande del letterbox non si distinguono dal gioco. */
   --background: #2b2133;
-  --font: system-ui, sans-serif;
+  /* Lo stesso di GAME.fontFamily; il FontFace lo registra main.ts. */
+  --font: "Pixelify Sans", system-ui, sans-serif;
+  /* Ingrandimento di tutta l'interfaccia pixel art: bottoni, cornici, icone e figure hanno la stessa grana. */
+  --scala: 3;
+  --pixel: calc(var(--scala) * 1px);
+  /* --img-menu-sfondo, --img-cornice, --img-cornice-scelta: li imposta main.ts da ASSETS_ROOT. */
 }
 
 *,
@@ -60,6 +63,28 @@ button {
   image-rendering: pixelated;
 }
 
+/* Telefono in orizzontale, finestre basse o strette: tutto a ×2, ancora a pixel interi. Sotto i 1040 px di
+   larghezza le tre figure di una riga del menu a ×3 non starebbero accanto al titolo: 2×16 di margine,
+   312 di titolo, 36 di spazio, 3×216 di pannelli e 2×6 fra i pannelli fanno 1040. */
+@media (max-height: 680px), (max-width: 1040px) {
+  :root {
+    --scala: 2;
+  }
+}
+
+/* Menu e fine partita stanno nello stesso paesaggio pixel art, 480×270 come il canvas della partita. */
+/* Ingrandito di un fattore intero (--scala-sfondo, da main.ts), il più piccolo che copre la finestra: un
+   "cover" lo stirerebbe di un fattore qualunque, con pixel di misure diverse. */
+.page,
+.menu,
+#orientation-overlay {
+  background: var(--background) var(--img-menu-sfondo) center bottom no-repeat;
+  background-size: calc(480px * var(--scala-sfondo, 3)) calc(270px * var(--scala-sfondo, 3));
+  /* Fermo sulla finestra, su cui è calcolato: una pagina più alta scorre sopra il paesaggio, che la copre. */
+  background-attachment: fixed;
+  image-rendering: pixelated;
+}
+
 .page {
   min-height: 100svh;
   display: flex;
@@ -71,130 +96,134 @@ button {
   text-align: center;
 }
 
+/* Scritte in pixel art: contorno scuro a gradini di un pixel d'interfaccia, come gli sprite. */
 .titolo {
-  font-size: clamp(1.8rem, 6vw, 3.2rem);
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  font-weight: 700;
   color: var(--accent);
   line-height: 1.1;
+  text-shadow:
+    var(--pixel) 0 0 var(--accent-ink),
+    calc(-1 * var(--pixel)) 0 0 var(--accent-ink),
+    0 var(--pixel) 0 var(--accent-ink),
+    0 calc(-1 * var(--pixel)) 0 var(--accent-ink),
+    0 calc(2 * var(--pixel)) 0 var(--accent-ink);
 }
 
-.icona {
-  width: 55%;
-  height: 55%;
+.titolo-logo img {
+  display: block;
+  width: calc(104 * var(--pixel));
+  height: auto;
 }
 
+/* Bottone e icona sono un'immagine sola (tasti/*.png): le misure sono quelle native × --pixel. */
 .tasto-grande,
-.tasto-medio,
-.tasto-piccolo {
+.tasto-medio {
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-ink);
-  box-shadow: 0 6px 0 #b8901a;
-  transition: transform 80ms;
+}
+
+.tasto-grande img,
+.tasto-medio img,
+.tasto-pausa img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .tasto-grande:active,
 .tasto-medio:active,
-.tasto-piccolo:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 #b8901a;
+.tasto-pausa:active {
+  transform: translateY(var(--pixel));
 }
 
 .tasto-grande {
-  width: clamp(72px, 18vmin, 112px);
-  height: clamp(72px, 18vmin, 112px);
+  width: calc(32 * var(--pixel));
+  height: calc(32 * var(--pixel));
 }
 
 .tasto-medio {
-  width: clamp(52px, 12vmin, 72px);
-  height: clamp(52px, 12vmin, 72px);
-  background: var(--ink);
-  box-shadow: 0 5px 0 #b8b2a8;
-}
-
-.tasto-piccolo {
-  width: 48px;
-  height: 48px;
-  background: var(--superficie);
-  color: var(--ink);
-  box-shadow: none;
-}
-
-.tasto-piccolo[aria-pressed="false"] {
-  opacity: 0.6;
+  width: calc(24 * var(--pixel));
+  height: calc(24 * var(--pixel));
 }
 
 .azioni {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: calc(6 * var(--pixel));
 }
 
 /* Menu: anteprima e ▶ da una parte, le tre righe di figure dall'altra. In verticale si impilano. */
+/* Misure fisse a pixel interi: in una finestra troppo bassa il menu scorre invece di uscire dallo schermo
+   ("safe" tiene visibile l'inizio quando il contenuto è più alto della finestra). */
 .menu {
-  min-height: 100svh;
+  height: 100svh;
+  overflow-y: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(16px, 4vw, 48px);
+  align-items: safe center;
+  justify-content: safe center;
+  gap: calc(12 * var(--pixel));
   padding: 16px;
-  flex-wrap: wrap;
+}
+
+@media (orientation: portrait) {
+  .menu {
+    flex-direction: column;
+  }
 }
 
 .menu__anteprima {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: calc(4 * var(--pixel));
 }
 
 .anteprima {
-  width: clamp(128px, 22vmin, 192px);
+  width: calc(64 * var(--pixel));
   aspect-ratio: 64 / 40;
 }
 
 .menu__scelte {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: calc(3 * var(--pixel));
   max-width: 100%;
 }
 
 .riga {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: calc(2 * var(--pixel));
   justify-content: center;
 }
 
+/* Pannelli con la cornice pixel art (interfaccia/cornice*.png, 12×12 con 4 px di bordo). */
 .scelta {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px;
-  border-radius: 12px;
-  background: var(--superficie);
-  border: 3px solid transparent;
+  border-style: solid;
+  border-width: calc(4 * var(--pixel));
+  border-image: var(--img-cornice) 4 fill / calc(4 * var(--pixel)) round;
+  image-rendering: pixelated;
 }
 
 .scelta[aria-pressed="true"] {
-  border-color: var(--scelto);
-  background: #4d3d66;
+  border-image-source: var(--img-cornice-scelta);
 }
 
+/* Locomotive (64×40) e miniature degli scenari (64×36) allo stesso ingrandimento dei bottoni. */
 .scelta canvas {
   display: block;
-  width: clamp(80px, 13vmin, 112px);
+  width: calc(64 * var(--pixel));
   height: auto;
 }
 
-.riga--colori .scelta {
-  padding: 4px;
-  border-radius: 50%;
+/* Più specifico di ".scelta canvas", che darebbe al campione la misura delle locomotive. */
+.riga--colori .scelta canvas.campione {
+  width: calc(12 * var(--pixel));
 }
 
 .riga--colori .didascalia {
@@ -208,15 +237,13 @@ button {
 
 .campione {
   display: block;
-  width: clamp(32px, 7vmin, 44px);
-  height: clamp(32px, 7vmin, 44px);
-  border-radius: 50%;
-  border: 2px solid var(--accent-ink);
+  width: calc(12 * var(--pixel));
+  height: calc(12 * var(--pixel));
 }
 
 .didascalia {
-  font-size: 0.75rem;
-  opacity: 0.85;
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .esito__figura {
@@ -226,8 +253,8 @@ button {
 }
 
 .esito__stazione {
-  width: 64px;
-  height: 64px;
+  width: calc(16 * var(--pixel));
+  height: calc(16 * var(--pixel));
 }
 
 .errori {
@@ -276,18 +303,15 @@ canvas.pixel-art {
 }
 
 /* Pausa: il bottone sta sopra la partita, in alto a destra; il suo tocco non fa saltare. */
+/* Sempre ×3 (48 px), anche dove il resto è ×2: sotto i 44 px un dito di bambino lo manca e il tocco
+   arriva al canvas, che fa saltare. */
 .tasto-pausa {
   position: absolute;
   top: max(10px, env(safe-area-inset-top));
   right: max(10px, env(safe-area-inset-right));
   z-index: 10;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: rgb(43 33 51 / 60%);
-  color: var(--ink);
+  width: 48px;
+  height: 48px;
 }
 
 .overlay-pausa {
@@ -310,23 +334,45 @@ canvas.pixel-art {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: var(--background);
+  /* Lo stesso paesaggio del menu (regola sopra), col messaggio in una cornice come i pannelli delle scelte. */
   color: var(--ink);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  font-size: 20px;
+  font-size: 1.4rem;
+}
+
+#orientation-overlay > * {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(3 * var(--pixel));
+}
+
+.cornice-messaggio {
+  padding: calc(2 * var(--pixel)) calc(4 * var(--pixel));
+  border-style: solid;
+  border-width: calc(4 * var(--pixel));
+  border-image: var(--img-cornice) 4 fill / calc(4 * var(--pixel)) round;
 }
 
 #orientation-overlay.visible {
   display: flex;
 }
 
+/* A scatti di 90°: una rotazione continua storcerebbe i pixel dell'icona. */
 .rotate-icon {
-  width: 4rem;
-  height: 4rem;
-  animation: rotate-hint 1.5s linear infinite;
+  display: block;
+  /* Un passo più grande del resto, sempre a multipli interi dei 24 px dell'icona. */
+  width: calc(24px * (var(--scala) + 1));
+  height: calc(24px * (var(--scala) + 1));
+  animation: rotate-hint 2s steps(4) infinite;
+}
+
+.rotate-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 @keyframes rotate-hint {

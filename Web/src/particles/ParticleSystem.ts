@@ -21,6 +21,8 @@ export interface ParticleSystemOptions {
   blendMode?: BLEND_MODES;
   randomizedSpawnAngle?: boolean;
   colors?: ColorSource[];
+  /** false per gli sprite pixel art: ingranditi di una frazione salterebbero righe e colonne. */
+  crescita?: boolean;
   /** towardsCamera null: metà delle particelle verso la camera, metà lontano. */
   perspective?: { z0: number; vz: number; focalLength: number; towardsCamera: boolean | null };
 }
@@ -32,7 +34,7 @@ class ParticleSystem {
   private readonly _free: Particle[];
   private readonly _launch: ParticleLaunch = {
     x: 0, y: 0, speedX: 0, speedY: 0, accelerationX: 0, accelerationY: 0, rotationSpeed: 0,
-    color: 0xffffff, scale: 1, lifetimeSeconds: 0, randomizedSpawnAngle: false, focalLength: 0, z0: 0, vz: 0,
+    color: 0xffffff, scale: 1, lifetimeSeconds: 0, randomizedSpawnAngle: false, crescita: true, focalLength: 0, z0: 0, vz: 0,
   };
 
   constructor(
@@ -98,6 +100,7 @@ class ParticleSystem {
     l.scale = Numbers.randomBetweenInterval(o.scale);
     l.lifetimeSeconds = Numbers.randomBetweenInterval(o.lifetimeSeconds);
     l.randomizedSpawnAngle = o.randomizedSpawnAngle ?? false;
+    l.crescita = o.crescita ?? true;
 
     if (o.perspective) {
       const towardsCamera = o.perspective.towardsCamera ?? Numbers.headOrTail();

@@ -19,11 +19,11 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 | Salto | **Durata e altezza fisse** per livello: più velocità, più terreno coperto | Il ritmo della pressione non cambia mai e ogni ostacolo resta saltabile a ogni velocità (come Chrome Dino). |
 | Treno | **Solo la locomotiva**, nessun vagone | Una hitbox corta e leggibile; i vagoni allungherebbero salti e distanze contro l'obiettivo del facile. |
 | Urto nel facile | L'ostacolo **viene sbalzato via** (parabola, rotazione, suono buffo); il treno frena e riprende velocità in circa 2 s | L'urto si capisce e non spaventa; la partita non si interrompe. |
-| HUD | **Barra del percorso**: una piccola locomotiva del colore scelto va dalla partenza alla stazione | Il traguardo si vede senza saper leggere; niente timer né punteggi. |
+| HUD | **Nessuno**: solo il bottone di pausa; la stazione si scopre all'arrivo | La barra del percorso, con la locomotiva in miniatura sospesa sopra il cielo, sembrava un treno che vola (tolta in fase 6). Niente timer né punteggi. |
 | Menu | **Illustrato, usabile da chi non legge**: tre righe di figure (locomotive, colori, scenari) e un grande bottone ▶; parole solo come didascalia; anteprima dal vivo della locomotiva colorata | La bambina sceglie e parte da sola. |
 | Pausa | Esc o bottone in alto a destra; pausa automatica a scheda nascosta (già nello starter) | Il tocco sul bottone di pausa non fa saltare. |
 | Scenari | **Campagna**, **cittadina con stazione**, **porto** con gru, navi e container, ispirati alle ferrovie dei cartoni per bambini senza nomi né personaggi | Ambienti che un bambino riconosce, sempre più fitti mentre il gioco accelera. Il porto rende colorato il livello difficile, che l'industria faceva grigio. |
-| Grafica | **Segnaposto** finché le meccaniche non sono calibrate, poi **pixel art** generata con AI e ripulita (prompt in [`docs/prompt-pixel-art.md`](docs/prompt-pixel-art.md)) | Si calibra sul comportamento, non sull'aspetto. |
+| Grafica | **Pixel art** generata con AI e ripulita a codice ([`docs/prompt-pixel-art.md`](docs/prompt-pixel-art.md)); ruote e bielle disegnate a codice | Un generatore non tiene ferma una biella fra un fotogramma e l'altro. |
 | Audio | Effetti e una musica per scenario, in una fase a parte; bottone audio nel menu | Il fischio del treno è metà del divertimento. |
 | Testi | Italiano, tutti in un modulo `src/testi.ts` | Una traduzione futura tocca un file solo. |
 
@@ -151,7 +151,7 @@ in `try/catch`; un valore illeggibile torna ai default senza errori.
 - [x] Menu illustrato con anteprima dal vivo della locomotiva colorata (segnaposto fino alla fase 6)
 - [x] Sostituzione di palette sulla carrozzeria
 - [x] Preferenze salvate e ripristinate
-- [x] Barra del percorso
+- [x] Barra del percorso (tolta in fase 6: sembrava un treno che vola)
 - [x] Pausa (Esc, bottone, scheda nascosta)
 - [ ] Prova su tablet e telefono: tocco, overlay di rotazione, letterbox (fatta su iPhone 13 emulato in
       Chrome; resta la prova su un dispositivo vero)
@@ -164,9 +164,8 @@ sbalzando gli ostacoli. Non prova che siano *divertenti*: quello è la fase 5.
 Fatti in anticipo, perché costavano poco: polvere all'atterraggio (fase 6) e i meta SEO dello starter in
 `index.html` (fase 8; canonical e immagine puntano a pagine del sito che ancora non esistono).
 
-Grafica ed effetti segnaposto sono prodotti nel repository: le figure disegnate a codice in
-`src/grafica/segnaposto.ts`, con le misure e la rampa magenta degli sprite veri, e gli effetti sintetizzati da
-`strumenti/genera-suoni.py`. Le fasi 6 e 7 cambiano da dove vengono le immagini e i suoni, non chi li usa.
+Gli effetti sonori segnaposto sono sintetizzati da `strumenti/genera-suoni.py`: la fase 7 cambia da dove
+vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è stata sostituita dalla fase 6.
 
 ### 5. Calibrazione
 
@@ -176,12 +175,21 @@ Grafica ed effetti segnaposto sono prodotti nel repository: le figure disegnate 
 
 ### 6. Pixel art
 
-- [ ] Generazione con i prompt di [`docs/prompt-pixel-art.md`](docs/prompt-pixel-art.md)
-- [ ] Pulizia: riportare ogni immagine alla griglia vera (ridimensionamento nearest), ridurre alla palette,
-      controllare che la rampa magenta compaia solo sulla carrozzeria
-- [ ] Atlas, animazioni (ruote, fumo, scintille), sfondi in parallasse per i tre scenari
-- [ ] Particelle: polvere all'atterraggio, pezzi dell'ostacolo sbalzato, fumo per tipo di locomotiva
-- [ ] Hitbox rilette sugli sprite veri e `validaConfigurazione` ancora verde
+- [x] Generazione con `gpt-image-2.6-sunburst` (`strumenti/genera-immagini.py`), sfondi resi ripetibili
+- [x] Pulizia (`strumenti/pulisci-immagini.py`): palette per distanza, colore prevalente per blocco, contorno
+      rifatto, rampa magenta riservata alla carrozzeria
+- [x] Locomotive in 8 fotogrammi con ruote e bielle disegnate a codice (vapore: cilindro e biella motrice),
+      sfondi in parallasse per i tre scenari, miniature del menu ricavate dagli strati veri
+- [x] Fumo del vapore, scarico del diesel, scintille del pantografo, col ritmo della strada percorsa
+- [x] Pezzi dell'ostacolo sbalzato nel facile (legna, paglia, assi) con una stellina d'urto
+- [x] Hitbox: gli ostacoli escono alla misura esatta di `ostacoli.ts`, quindi le hitbox restano valide;
+      quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
+- [x] Interfaccia nello stesso stile: titolo, bottoni con icona, cornici dei pannelli, campioni di colore,
+      fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
+- [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, polvere
+      all'atterraggio in pixel art
+- [ ] Niente atlas: 53 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+      Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio
 

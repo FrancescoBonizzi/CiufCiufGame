@@ -1,11 +1,13 @@
-import { Application, Container, Sprite, Texture, Ticker } from "pixi.js";
+import { Application, Container, Sprite, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
-import BarraPercorso from "./gioco/BarraPercorso.ts";
+import Fumo from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
+import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
-import { texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
+import { altezzaSagoma, pxPerFotogramma } from "./grafica/locomotive.ts";
+import { texturePezzo, texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
 import Controller from "./interaction/Controller.ts";
 import ParticleSystem from "./particles/ParticleSystem.ts";
 import type { Preferenze } from "./preferenze.ts";
@@ -33,8 +35,9 @@ class Game {
   private readonly _generatore: Generatore;
   private readonly _locomotiva: Locomotiva;
   private readonly _stazione: Sprite;
-  private readonly _barra: BarraPercorso;
   private readonly _polvere: ParticleSystem;
+  private readonly _fumo: Fumo;
+  private readonly _pezzi: Pezzi;
 
   private _stato: Stato = "viaggio";
   private _tempo = 0;
@@ -70,25 +73,36 @@ class Game {
     this._generatore = new Generatore(strato, this._livello, width, COMUNE.attesaInizialeSecondi);
 
     const fotogrammi = texturesLocomotiva(preferenze.locomotiva, preferenze.colore);
-    this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello);
+    // Prima della locomotiva, quindi dietro: ricadendo dopo un salto passa attraverso il fumo, non sotto.
+    const fumo = new Container();
+    mondo.addChild(fumo);
+    this._fumo = new Fumo(fumo, preferenze.locomotiva);
+    this._locomotiva = new Locomotiva(
+      mondo,
+      fotogrammi,
+      this._livello,
+      pxPerFotogramma(preferenze.locomotiva),
+      altezzaSagoma(preferenze.locomotiva),
+    );
 
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
     const particelle = new Container();
     mondo.addChild(particelle);
     this._polvere = new ParticleSystem(particelle, {
-      texture: Texture.WHITE,
+      texture: texturePezzo("polvere"),
       density: 2,
-      numParticles: { min: 6, max: 10 },
+      numParticles: { min: 4, max: 6 },
       speed: { min: 20, max: 60 },
       acceleration: { min: -40, max: -10 },
       rotationSpeed: { min: 0, max: 0 },
       lifetimeSeconds: { min: 0.25, max: 0.45 },
-      scale: { min: 2, max: 3 }, // Texture.WHITE è un pixel solo: la scala è il lato in px
+      scale: { min: 1, max: 1 },
+      crescita: false,
       spawnAngleDegrees: { min: 100, max: 170 },
-      colors: [0xd8cbb0, 0xb8a888, 0xf4f1ea],
     });
 
-    this._barra = new BarraPercorso(app.stage, width, fotogrammi[0]!);
+    this._pezzi = new Pezzi(particelle);
+
 
     // Solo in sviluppo (Vite lo toglie dal build): lo stato che legge il bot della prova automatica.
     if (import.meta.env.DEV) {
@@ -97,7 +111,11 @@ class Game {
         tempo: this._tempo,
         velocita: this.velocitaCurva * this._fattoreUrto,
         aTerra: this._locomotiva.aTerra,
-        locomotiva: { x: this._locomotiva.hitbox.x, larghezza: this._locomotiva.hitbox.width },
+        locomotiva: {
+          x: this._locomotiva.hitbox.x,
+          larghezza: this._locomotiva.hitbox.width,
+          altezza: this._locomotiva.hitbox.height,
+        },
         salto: this._livello.salto,
         ostacoli: this._generatore.ostacoli
           .filter((o) => o.stato === "in-corsa")
@@ -116,6 +134,8 @@ class Game {
     const dt = ticker.deltaMS / 1000;
     this._camera.update(dt);
     this._polvere.update(dt);
+    this._fumo.update(dt);
+    this._pezzi.update(dt);
     if (this._stato === "finita") return;
     this._tempo += dt;
 
@@ -157,7 +177,6 @@ class Game {
     const generazioneAttiva = this._tempo < durataSecondi - chiusuraSecondi;
     this._generatore.update(dt, this._tempo, velocita, this.velocitaCurva, this.progressoCurva, generazioneAttiva);
     this._scenario.update(dt, velocita);
-    this._barra.progresso = this._tempo / durataSecondi;
     this.controllaUrti();
 
     if (this._stato === "viaggio" && this._tempo >= durataSecondi) {
@@ -181,7 +200,6 @@ class Game {
     this.muoviLocomotiva(dt, velocita, false);
     this._generatore.update(dt, this._tempo, velocita, velocita, 1, false);
     this._scenario.update(dt, velocita);
-    this._barra.progresso = 1;
 
     if (distanza - passo <= COMUNE.tolleranzaArrivoPx && this._locomotiva.aTerra) {
       this._stato = "fermo";
@@ -192,10 +210,13 @@ class Game {
 
   private muoviLocomotiva(dt: number, velocita: number, premuto: boolean): void {
     const evento = this._locomotiva.update(dt, velocita, premuto, this._tempo);
+    this._fumo.avanza(velocita * dt, this._locomotiva.sprite.x, this._locomotiva.sprite.y);
+    this._pezzi.scorri(velocita * dt);
     if (evento === "salto") this._sounds.play("salto");
     if (evento === "atterraggio") {
       this._sounds.play("atterraggio");
-      this._polvere.emit(this._locomotiva.sprite.x - 8, 0);
+      // Mezzo sbuffo (8×8) sopra la rotaia, che altrimenti coprirebbe per un attimo.
+      this._polvere.emit(this._locomotiva.sprite.x - 8, -4);
     }
   }
 
@@ -205,6 +226,7 @@ class Game {
       if (ostacolo.stato !== "in-corsa" || !this._locomotiva.hitbox.intersects(ostacolo.hitbox)) continue;
       if (urto.effetto === "sbalzo") {
         ostacolo.sbalza();
+        this._pezzi.emit(ostacolo.tipo, ostacolo.hitbox.x + ostacolo.hitbox.width / 2, ostacolo.hitbox.y + ostacolo.hitbox.height / 2);
         this._fattoreUrto = urto.fattoreVelocita;
         this._sounds.play("urto");
         this._camera.shake(3);
@@ -231,6 +253,8 @@ class Game {
     if (import.meta.env.DEV) delete (window as unknown as Record<string, unknown>)["__ciufciuf"];
     this._controller.dispose();
     this._polvere.destroy();
+    this._fumo.destroy();
+    this._pezzi.destroy();
   }
 }
 

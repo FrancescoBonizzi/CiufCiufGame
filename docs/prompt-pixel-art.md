@@ -1,276 +1,105 @@
-# Prompt per la pixel art
+# Pixel art: come si produce
 
-Un prompt per ogni immagine del gioco, da dare a un generatore di pixel art. I prompt sono in inglese
-perché i generatori rendono meglio così; ognuno va incollato **dopo** il blocco di stile comune.
+Le immagini del gioco si generano con l'API di OpenAI e si ripuliscono a codice. I prompt stanno in
+[`Web/strumenti/genera-immagini.py`](../Web/strumenti/genera-immagini.py), la pulizia in
+[`Web/strumenti/pulisci-immagini.py`](../Web/strumenti/pulisci-immagini.py): questo file tiene le regole che
+entrambi seguono.
 
-Risoluzione logica del gioco: **480×270**. Le misure qui sotto sono quelle **finali** in pixel di gioco: se il
-generatore produce immagini più grandi, si riportano alla misura con un ridimensionamento *nearest* e si
-riduce la palette (fase 6 della roadmap). Nessun generatore produce pixel perfetti: la pulizia è prevista.
+Risoluzione logica del gioco: **480×270**. Nessun generatore produce pixel perfetti: produce immagini grandi
+(1536×1024) disegnate su una griglia grossa ma irregolare, con decine di migliaia di colori. La pulizia è
+sempre prevista.
 
-## Blocco di stile comune
+## Il giro
 
-```
-Pixel art game asset, 16-bit era style, clean and readable for a 4-year-old child.
-Side view, orthographic, no perspective. Thick 1-pixel dark outline (#2b2133) around every object.
-Flat shading with at most 3 tones per material, light coming from the top-left.
-Limited palette, no gradients, no dithering, no anti-aliasing, no blur, no text, no watermark.
-Friendly, rounded, cartoon shapes. Single object centered on a fully transparent background,
-nothing else in the image, no ground shadow unless asked.
-```
+Dalla cartella `Web/`, con Pillow installato e la chiave in `~/.config/ciufciuf/openai.key`:
 
-## Leggibilità: ostacoli contro sfondo
+1. `python3 strumenti/genera-immagini.py <id> [quante]`: le grezze vanno in `strumenti/.grezze/<id>/`,
+   esclusa da git, e i token consumati in `strumenti/.grezze/consumi.jsonl`.
+2. Per gli sfondi: `python3 strumenti/genera-immagini.py ripetibile <id> <file>` per renderli ripetibili in
+   orizzontale.
+3. Si sceglie la grezza migliore in `strumenti/scelte-immagini.json`.
+4. `python3 strumenti/pulisci-immagini.py [id ...]` scrive i PNG in `public/assets/images/`, poi
+   `python3 strumenti/pulisci-immagini.py anteprima` dà un foglio ingrandito di tutto per controllarli.
+
+Modello: `gpt-image-2.6-sunburst`, qualità alta. Delle due varianti 2.6 è quella pensata per il dettaglio e
+per gli asset finali (Flare è quella veloce).
+
+## Una grana sola
+
+Ogni pixel dello schermo deve avere la stessa misura: sprite, sfondi e interfaccia.
+
+- Di suo il generatore disegna «pixel» di circa 16 px. Ridotti a 480 di larghezza diventerebbero 5 pixel di
+  gioco, cinque volte quelli degli sprite. Gli sfondi si chiedono quindi con `GRANA_FINE`, come se l'immagine
+  fosse larga 480 pixel, e i cieli con `GRANA_FINISSIMA`, perché coprono lo schermo a scala 1. Così ridotti a
+  qualunque scala fino a 1 ogni pixel resta un pixel di gioco; la scala degli strati (`SCALA` in
+  `pulisci-immagini.py`) la decide la misura dei loro oggetti accanto alla locomotiva.
+- Una sola istruzione di grana per prompt: `STILE` per gli sprite, `GRANA_FINE` o `GRANA_FINISSIMA` per gli
+  sfondi.
+- Le particelle pixel art non crescono né ruotano (`crescita: false`), e Pixi arrotonda le posizioni ai pixel
+  (`roundPixels`). Limite: su schermi con densità non intera (1,5×, 2,625×) nessun ingrandimento dà pixel tutti
+  uguali, partita compresa.
+- Il fondo di menu e pagine si ingrandisce del fattore intero più piccolo che copre la finestra, mai con
+  `cover`.
+- Uno sprite non si rimpicciolisce a metà per una seconda misura: salterebbe righe e colonne. Si disegna alla
+  misura in cui serve.
+
+## Cosa fa la pulizia
+
+- Riduce la palette a piena risoluzione raggruppando le tinte per distanza, poi riduce la misura dando a ogni
+  pixel il colore **prevalente** del suo blocco. Una media (ridimensionamento BOX) trasforma una campana dorata
+  piccola in una macchia beige.
+- Rifà il contorno scuro `#2b2133` di 1 px su locomotive e ostacoli. Gli sfondi restano senza contorno.
+- Riporta ogni ostacolo alla misura esatta di `src/config/ostacoli.ts`, da cui dipendono le hitbox. Lo script
+  ne tiene una copia (tabella `OSTACOLI`, più barili e container): chi cambia una misura aggiorna anche
+  quella e rigenera lo sprite. All'avvio il gioco confronta ogni PNG con `ostacoli.ts` e si ferma se non
+  coincidono.
+
+## Locomotive
+
+Il generatore disegna **solo la carrozzeria, senza ruote né bielle**: non tiene ferma una biella fra un
+fotogramma e l'altro. Le parti in movimento le disegna `pulisci-immagini.py`: nel vapore ruote motrici,
+biella d'accoppiamento, cilindro e biella motrice; nella diesel due carrelli a due assi senza biella, come le
+diesel vere (con la biella sembrava una vapore); nell'elettrica, un treno ad alta velocità basso e affusolato, quattro ruote piccole sotto le gonne. Il
+tutto in un foglio di **8 fotogrammi da 64×40**. Tutte guardano a **destra**, con le ruote sull'ultima riga.
+
+La carrozzeria (il colore che il giocatore sceglie) usa **solo** la rampa magenta, che nient'altro può usare:
+il gioco la sostituisce col colore scelto. La pulizia porta su questa rampa ogni tinta magenta della
+carrozzeria e sposta di un'unità ogni altro pixel che ci cadesse sopra per caso.
+
+Rampa magenta (dalla luce all'ombra): `#ff9cff`, `#ff3dff`, `#c400c4`, `#7a007a`.
+
+## Stile comune
+
+16-bit, leggibile da una bambina di 4 anni: vista laterale ortogonale, forme tonde da cartone, al massimo 3
+toni per materiale, luce dall'alto a sinistra, niente sfumature, retini o testo.
 
 Le tre ambientazioni (campagna, cittadina con stazione, porto) si ispirano alle ferrovie dei cartoni per
 bambini, senza copiarle: nei prompt niente nomi di serie, personaggi o luoghi, niente facce sulle
 locomotive. Un generatore che legge un nome noto tende a riprodurne i personaggi.
 
-- Il contorno scuro `#2b2133` spetta solo a locomotiva e ostacoli. Gli strati di sfondo non ne hanno: ciò
-  che si tocca si stacca da ciò che si guarda.
+## Leggibilità: ostacoli contro sfondo
+
+- Il contorno scuro spetta solo a locomotiva e ostacoli. Gli strati di sfondo non ne hanno: ciò che si tocca
+  si stacca da ciò che si guarda.
 - Ogni strato di sfondo sfuma verso il colore dell'orizzonte, di più quanto è lontano; gli ostacoli restano
   saturi.
 - Nello strato vicino al binario niente che somigli a un ostacolo dello stesso livello: niente staccionate o
   balle di fieno in campagna, niente casse o segnali sul marciapiede in cittadina, nessun container né barile
   sulla banchina al porto. Negli strati lontani ciò che gli somiglia (le pile di container dietro le gru) è
   ammesso solo attenuato verso il cielo.
-- Il cavo che regge la trave è scenografia: acciaio grigio, senza contorno scuro.
-
-## Locomotive
-
-Tutte guardano a **destra**, ruote appoggiate al bordo inferiore dell'immagine. La carrozzeria (il colore che
-il giocatore sceglie) va disegnata **solo** con la rampa magenta qui sotto, che nessun'altra parte deve
-usare: il gioco la sostituisce col colore scelto.
-
-Rampa magenta (dalla luce all'ombra): `#ff9cff`, `#ff3dff`, `#c400c4`, `#7a007a`.
-
-Ogni locomotiva: foglio orizzontale di **4 fotogrammi da 64×40**, cioè 256×40, in cui cambia solo la
-posizione delle ruote e delle bielle (ciclo di rotazione).
-
-### Locomotiva a vapore
-
-```
-A cute small steam locomotive, side view facing right, 64x40 pixels per frame,
-horizontal sprite sheet of 4 frames (256x40 total) showing a wheel rotation cycle.
-Boiler, cab and cowcatcher painted ONLY in these magenta shades: #ff9cff, #ff3dff, #c400c4, #7a007a.
-Black smokestack, dark grey wheels with red hubs, golden bell, small round window with light-blue glass.
-No magenta anywhere else. No smoke (smoke is a separate sprite).
-```
-
-### Locomotiva diesel
-
-```
-A cute small diesel locomotive, side view facing right, 64x40 pixels per frame,
-horizontal sprite sheet of 4 frames (256x40 total) showing a wheel rotation cycle.
-Boxy body with rounded front, cab with two light-blue windows, painted ONLY in these magenta shades:
-#ff9cff, #ff3dff, #c400c4, #7a007a. Yellow-black warning stripes on the front, dark grey bogies,
-a small grey exhaust on the roof. No magenta anywhere else. No smoke.
-```
-
-### Locomotiva elettrica
-
-```
-A cute small electric locomotive, side view facing right, 64x40 pixels per frame,
-horizontal sprite sheet of 4 frames (256x40 total) showing a wheel rotation cycle.
-Sleek streamlined body with a sloped nose and wide light-blue windshield, painted ONLY in these
-magenta shades: #ff9cff, #ff3dff, #c400c4, #7a007a. Grey pantograph folded on the roof,
-dark grey bogies, white headlight. No magenta anywhere else.
-```
-
-### Effetti delle locomotive
-
-```
-Pixel art puff of white-grey steam smoke, 4 frames of 16x16 pixels in a horizontal strip (64x16),
-growing and fading from a small dense puff to a large soft cloud. Transparent background.
-```
-
-```
-Pixel art small dark-grey diesel exhaust puff, 4 frames of 12x12 pixels in a horizontal strip (48x12),
-growing and fading. Transparent background.
-```
-
-```
-Pixel art electric spark from a train pantograph, 3 frames of 12x12 pixels in a horizontal strip (36x12),
-bright white-yellow and light-blue zigzag sparks. Transparent background.
-```
-
-## Ostacoli – Facile, campagna
-
-Grandi, colori caldi, riconoscibili al primo sguardo. Appoggiati al bordo inferiore dell'immagine.
-
-```
-A big bundle of firewood logs tied with a red rope, side view, 36x28 pixels, warm browns,
-log ends showing light rings. Transparent background.
-```
-
-```
-A round golden hay bale seen from the side, 32x32 pixels, warm yellow straw texture with a few
-loose straws sticking out, two thin brown bands around it. Transparent background.
-```
-
-```
-A short wooden countryside fence section, side view, 40x24 pixels, three white-painted vertical posts
-and two horizontal rails, slightly rustic. Transparent background.
-```
-
-## Ostacoli – Medio, cittadina con stazione
-
-```
-A wooden railway freight crate with metal corners and a stencilled arrow, side view, 28x28 pixels,
-brown wood and grey metal. Transparent background.
-```
-
-```
-A vintage railway station luggage trolley with two big spoked wheels and a long handle,
-loaded with two suitcases (one blue, one red), side view, 40x28 pixels. Transparent background.
-```
-
-```
-A lowered railway level crossing barrier, side view, 44x24 pixels: a short dark post on the left
-and a horizontal red-and-white striped arm extending to the right at about 18 pixels height,
-a small red lamp on the arm. Transparent background.
-```
-
-```
-A small ground railway signal, side view, 20x32 pixels: grey pole on a square base,
-round head with one red light on. Transparent background.
-```
-
-## Ostacoli – Difficile, porto
-
-Saturi e col contorno scuro: dietro ci sono pile di container colorati, che sullo sfondo restano attenuate.
-
-```
-A stack of two wooden pallets, side view, 36x16 pixels, pale wood planks with dark gaps.
-Transparent background.
-```
-
-```
-Blue steel oil barrels, side view: sprite sheet with two variants side by side —
-a single blue steel barrel 18x26 pixels and two barrels side by side 36x26 pixels —
-with metal rims and a small hazard label. Transparent background, 56x26 total.
-```
-
-```
-Small shipping containers seen from the door end, side view: sprite sheet with three variants side by side —
-one container (20x20), two containers stacked (20x40), three containers in a pyramid (40x40) —
-corrugated steel in bright red, yellow, green and blue, two vertical dark locking bars on each door.
-Transparent background, 80x40 total.
-```
-
-La trave pende dal cavo di una gru fuori campo: il cavo è scenografia e non urta.
-
-```
-A horizontal steel I-beam girder, side view, 96x12 pixels, orange-red painted steel with rivets
-and a yellow-black warning stripe at both ends. Transparent background.
-```
-
-```
-A crane cable holding a load, side view, 96x200 pixels, no dark outline: a single thin grey steel cable
-coming from the top edge down to a small yellow crane hook at about 176 pixels, then two straight slings
-from the hook down to the bottom edge at x = 18 and x = 77. Nothing else. Transparent background.
-```
-
-## Sfondi in parallasse
-
-Ogni scenario ha 3 strati larghi **480 px** e **ripetibili orizzontalmente senza giunture visibili**
-(il bordo sinistro deve continuare il destro), più il binario. Strati senza trasparenza tranne dove indicato.
-Negli strati niente contorno scuro, come dice la sezione sulla leggibilità.
-
-### Campagna
-
-```
-Seamless horizontally tileable pixel art background, 480x270 pixels, bright clear blue sky
-with a few big fluffy white clouds, no ground. Cheerful, simple, for a children's game.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x110 pixels, transparent top, no outlines: soft rolling
-green hills far away with a windmill, a patchwork of fields, round trees, a small farmhouse with a red roof
-and a red barn. Muted colors, slightly hazed toward the light-blue sky.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x70 pixels, transparent top, no outlines: close bright
-green grassy bank with small pink, yellow and white flowers and a few bushes. No fences, no hay.
-```
-
-### Cittadina con stazione
-
-```
-Seamless horizontally tileable pixel art background, 480x270 pixels, light afternoon sky turning warm
-near the horizon, soft cream clouds, and far away the pale blue-grey silhouette of a small town:
-rooftops, a church spire and a clock tower. No ground.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x130 pixels, transparent top, no outlines: a row of
-colorful terraced houses (brick red, ochre, cream, teal) with pitched slate roofs, chimneys and white
-windows, and a stone railway station with arched windows and a big round clock. Slightly hazed colors.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x50 pixels, transparent top, no outlines: a stone
-station platform with a yellow safety line along the edge, green lamp posts and wooden benches.
-No crates, no signals.
-```
-
-### Porto
-
-```
-Seamless horizontally tileable pixel art background, 480x270 pixels, clear light-blue sea sky with white
-clouds; in the lower part a calm blue sea, two cargo ships far away loaded with tiny colorful containers,
-and a red-and-white lighthouse on a stone breakwater. Pale, hazy colors for distance. No ground.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x140 pixels, transparent top, no outlines: tall
-ship-to-shore gantry cranes (one orange, one blue) with long horizontal booms, and stacks of corrugated
-shipping containers in many colors. Colors noticeably hazed toward the sky color.
-```
-
-```
-Seamless horizontally tileable pixel art layer, 480x60 pixels, transparent top, no outlines: a concrete
-harbour quay with expansion joints and small dark mooring bollards. No containers, no barrels.
-```
-
-### Binario
-
-```
-Seamless horizontally tileable pixel art railway track, side view, 64x24 pixels:
-two steel rails seen from the side on wooden sleepers over grey gravel ballast. Transparent above the rails.
-```
-
-## Arrivo
-
-```
-A small friendly railway station building for the finish line, side view, 192x112 pixels:
-platform at the bottom, a cozy building with a pitched red roof, a clock, a flag on top,
-and a sign board with no text. Transparent background.
-```
+- Il cavo che regge la trave è scenografia, disegnato a codice: acciaio grigio, senza contorno scuro.
 
 ## Interfaccia
 
-Nel menu le figure si mostrano ingrandite con `image-rendering: pixelated`.
+Anche menu, bottoni e scritte sono pixel art, mai stili misti accanto agli sprite.
 
-```
-Three pixel art thumbnails side by side, each 96x54 pixels (288x54 total), for a level select menu:
-1) green countryside with blue sky and a hay bale, 2) a small town with colorful terraced houses
-and a railway signal,
-3) a harbour with a tall gantry crane, colorful containers and blue barrels. Bright, simple, no text.
-```
-
-```
-Small pixel art icons on transparent background, each 16x16 pixels, in a horizontal strip (64x16):
-a pause icon, a play triangle, a speaker with sound waves, a speaker crossed out. Dark outline, white fill.
-```
-
-```
-A tiny pixel art railway station icon, 16x16 pixels, red roof and a flag, for a progress bar destination.
-Transparent background.
-```
-
-## Particelle
-
-```
-Pixel art particle sprites on transparent background, horizontal strip of 8x8 pixel cells (48x8 total):
-a dust puff, a wood chip, a straw piece, a small splinter, a metal bolt, a star sparkle.
-```
+- Tutta l'interfaccia si mostra a un ingrandimento intero, `--scala` in `styles.css`: ×3, ×2 su telefono.
+  Bottoni, cornici e campioni hanno la stessa grana.
+- Bottone e icona sono un'immagine sola, composta da `pulisci-immagini.py` (tabella `TASTI`) alla misura
+  nativa: 32, 24 o 16 px.
+- Sotto i 15 px un'icona ridotta dalla grezza diventa una macchia. Altoparlante, onde e X dell'audio sono
+  quindi disegnati a codice, pixel per pixel, coi colori delle icone generate. Lo stesso vale per le cornici
+  dei pannelli (12×12, usate come `border-image`).
+- I campioni di colore del menu si disegnano nel browser con i toni della stessa rampa che ricolora la
+  locomotiva.
+- Font: Pixelify Sans (OFL), registrato da `main.ts`.

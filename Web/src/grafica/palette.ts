@@ -2,7 +2,7 @@
 // rampa di magenta, che nient'altro usa. Al caricamento quei pixel prendono la rampa del colore scelto,
 // con la stessa luminosità gradino per gradino. Un'immagine per locomotiva, nessuno strato separato.
 
-/** Dalla luce all'ombra. Le stesse tinte dei prompt in docs/prompt-pixel-art.md. */
+/** Dalla luce all'ombra. Le stesse tinte di RAMPA in strumenti/pulisci-immagini.py e dei suoi prompt. */
 export const RAMPA_MAGENTA = ["#ff9cff", "#ff3dff", "#c400c4", "#7a007a"] as const;
 
 type Rgb = [number, number, number];
@@ -39,10 +39,21 @@ const daHsl = (h: number, s: number, l: number): Rgb => {
   return [canale(h + 1 / 3), canale(h), canale(h - 1 / 3)].map((c) => Math.round(c * 255)) as Rgb;
 };
 
+// Sotto questa luminosità il colore base scurisce la rampa: il nero con le luminosità del magenta
+// diventerebbe un grigio chiaro. L'ombra però non scende sotto OMBRA_MINIMA, o si confonderebbe col
+// contorno (#2b2133, luminosità 0,16).
+const LUMINOSITA_SCURO = 0.3;
+const OMBRA_MINIMA = 0.22;
+
 /** Quattro tinte del colore scelto, con la luminosità dei quattro gradini magenta. */
 export const rampaDa = (coloreBase: string): Rgb[] => {
-  const [h, s] = aHsl(daHex(coloreBase));
-  return RAMPA_MAGENTA.map((m) => daHsl(h, s, aHsl(daHex(m))[2]));
+  const [h, s, l] = aHsl(daHex(coloreBase));
+  const luminosita = RAMPA_MAGENTA.map((m) => aHsl(daHex(m))[2]);
+  if (l >= LUMINOSITA_SCURO) return luminosita.map((lm) => daHsl(h, s, lm));
+  // Colore scuro: la luce scende in proporzione, l'ombra si ferma a OMBRA_MINIMA, i gradini in mezzo seguono.
+  const [luce, ombra] = [Math.max(...luminosita), Math.min(...luminosita)];
+  const nuovaLuce = luce * (l / LUMINOSITA_SCURO);
+  return luminosita.map((lm) => daHsl(h, s, OMBRA_MINIMA + ((lm - ombra) * (nuovaLuce - OMBRA_MINIMA)) / (luce - ombra)));
 };
 
 /** Copia dell'immagine con la carrozzeria magenta ridipinta nel colore scelto. */

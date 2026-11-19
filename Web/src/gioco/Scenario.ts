@@ -13,7 +13,10 @@ class Scenario {
   private readonly _binario: TilingSprite;
 
   constructor(stage: Container, mondo: Container, livello: IdLivello, larghezza: number, altezza: number) {
-    stage.addChildAt(new Sprite(textureCielo(livello, larghezza, altezza)), 0);
+    // Il cielo è largo quanto la risoluzione logica (480×270): resta fermo e la copre tutta.
+    const cielo = new Sprite(textureCielo(livello));
+    cielo.y = altezza - cielo.height;
+    stage.addChildAt(cielo, 0);
 
     const strato = (texture: ReturnType<typeof textureStrato>, y: number) => {
       const t = new TilingSprite({ texture, width: larghezza, height: texture.height });
