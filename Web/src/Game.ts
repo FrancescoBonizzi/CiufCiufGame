@@ -6,7 +6,7 @@ import Generatore from "./gioco/Generatore.ts";
 import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
-import { pxPerFotogramma } from "./grafica/locomotive.ts";
+import { altezzaSagoma, pxPerFotogramma } from "./grafica/locomotive.ts";
 import { texturePezzo, texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
 import Controller from "./interaction/Controller.ts";
 import ParticleSystem from "./particles/ParticleSystem.ts";
@@ -77,7 +77,13 @@ class Game {
     const fumo = new Container();
     mondo.addChild(fumo);
     this._fumo = new Fumo(fumo, preferenze.locomotiva);
-    this._locomotiva = new Locomotiva(mondo, fotogrammi, this._livello, pxPerFotogramma(preferenze.locomotiva));
+    this._locomotiva = new Locomotiva(
+      mondo,
+      fotogrammi,
+      this._livello,
+      pxPerFotogramma(preferenze.locomotiva),
+      altezzaSagoma(preferenze.locomotiva),
+    );
 
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
     const particelle = new Container();
@@ -105,7 +111,11 @@ class Game {
         tempo: this._tempo,
         velocita: this.velocitaCurva * this._fattoreUrto,
         aTerra: this._locomotiva.aTerra,
-        locomotiva: { x: this._locomotiva.hitbox.x, larghezza: this._locomotiva.hitbox.width },
+        locomotiva: {
+          x: this._locomotiva.hitbox.x,
+          larghezza: this._locomotiva.hitbox.width,
+          altezza: this._locomotiva.hitbox.height,
+        },
         salto: this._livello.salto,
         ostacoli: this._generatore.ostacoli
           .filter((o) => o.stato === "in-corsa")

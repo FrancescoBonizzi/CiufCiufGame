@@ -112,9 +112,14 @@ ASSET = {
                "smokestack, NO boiler, NO round steam-engine shapes. The body " + MAGENTA + "No smoke.",
                "1536x1024"),
     "elettrica": (STILE + OGGETTO + SENZA_RUOTE +
-                  "A cute small modern electric locomotive, side view facing right, sleek streamlined body with a "
-                  "sloped rounded nose and a wide light-blue windshield, two small side windows and a door, a white "
-                  "round headlight on the nose, a grey diamond-shaped pantograph folded flat on the roof. The body "
+                  "A cute bullet train power car inspired by the Japanese Shinkansen, side view facing right: LOW and "
+                  "very aerodynamic, much longer than tall (about 3.5 times as long as tall), the front is a long "
+                  "smooth tapered duck-bill nose that slopes gently down almost to the rails, with a small "
+                  "light-blue cockpit windshield set far back on top of the nose, a white headlight low on the nose "
+                  "tip, a continuous row of small square passenger windows along the side, a contrasting white "
+                  "stripe along the lower body, a smooth rounded roof with a small low grey pantograph in the "
+                  "middle, smooth skirts covering the bottom edge. Not a boxy locomotive, no cab bulge, no "
+                  "grilles. The body "
                   + MAGENTA, "1536x1024"),
 
     # --- Ostacoli ---

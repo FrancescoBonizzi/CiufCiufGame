@@ -208,7 +208,8 @@ CONTRAPPESO = (0xA9, 0xA2, 0xB6)
 # la velocità di rotolamento: chi lo cambia qui lo cambia anche lì.
 # Per tipo: altezza della carrozzeria, ruote (centro x, raggio, colore del mozzo), se ha la biella
 # d'accoppiamento, per il vapore il cilindro (x del bordo sinistro) da cui parte la biella motrice e, per la
-# diesel, i carrelli (x della prima e dell'ultima ruota, raggio) di cui disegnare il telaio.
+# diesel, i carrelli (x della prima e dell'ultima ruota, raggio) di cui disegnare il telaio; "rialzo" sono le
+# righe fra il fondo della carrozzeria e il fondo del fotogramma (8 con ruote grandi, 6 con piccole).
 LOCOMOTIVE = {
     "vapore": {"altezza": 31, "ruote": [(17, 7, (0xD6, 0x3C, 0x3C)), (35, 7, (0xD6, 0x3C, 0x3C))],
                "piccole": [], "biella": True, "cilindro": 51},
@@ -216,8 +217,9 @@ LOCOMOTIVE = {
     "diesel": {"altezza": 31, "ruote": [(12, 4, GRIGIO_RUOTA), (21, 4, GRIGIO_RUOTA), (42, 4, GRIGIO_RUOTA),
                                          (51, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False,
                "carrelli": [(12, 21, 4), (42, 51, 4)]},
-    "elettrica": {"altezza": 32, "ruote": [(12, 4, GRIGIO_RUOTA), (22, 4, GRIGIO_RUOTA), (40, 4, GRIGIO_RUOTA),
-                                            (50, 4, GRIGIO_RUOTA)], "piccole": [], "biella": False},
+    # Elettrica: treno ad alta velocità basso e affusolato; ruote piccole che sbucano appena sotto le gonne.
+    "elettrica": {"altezza": 32, "ruote": [(9, 3, GRIGIO_RUOTA), (16, 3, GRIGIO_RUOTA), (38, 3, GRIGIO_RUOTA),
+                                            (45, 3, GRIGIO_RUOTA)], "piccole": [], "biella": False, "rialzo": 4},
 }
 
 
@@ -303,7 +305,7 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
     foglio = Image.new("RGBA", (l * FOTOGRAMMI, a), (0, 0, 0, 0))
     for f in range(FOTOGRAMMI):
         fot = Image.new("RGBA", (l, a), (0, 0, 0, 0))
-        fot.alpha_composite(corpo, (ox, a - 8 - ac if conf["ruote"][0][1] >= 7 else a - 6 - ac))
+        fot.alpha_composite(corpo, (ox, a - conf.get("rialzo", 8 if conf["ruote"][0][1] >= 7 else 6) - ac))
         p = fot.load()
         # Senso orario: guardando a destra, la locomotiva avanza e le ruote girano in avanti.
         angolo = f * 2 * math.pi / FOTOGRAMMI

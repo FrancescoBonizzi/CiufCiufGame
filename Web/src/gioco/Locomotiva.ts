@@ -19,6 +19,8 @@ class Locomotiva {
     private readonly _livello: Livello,
     /** Ogni quanti px percorsi le ruote passano al fotogramma successivo. */
     private readonly _pxPerFotogramma: number,
+    /** Altezza della sagoma disegnata: un treno basso non urta una trave che a schermo non tocca. */
+    private readonly _altezzaSagoma: number,
   ) {
     this.sprite = new Sprite(_fotogrammi[0]);
     this.sprite.anchor.set(0.5, 1);
@@ -81,7 +83,8 @@ class Locomotiva {
   }
 
   private aggiornaHitbox(): void {
-    const { larghezza, altezza } = this._livello.hitboxLocomotiva;
+    const { larghezza } = this._livello.hitboxLocomotiva;
+    const altezza = Math.min(this._livello.hitboxLocomotiva.altezza, this._altezzaSagoma);
     this.hitbox.x = this.sprite.x - larghezza / 2;
     this.hitbox.y = this.sprite.y - altezza;
     this.hitbox.width = larghezza;

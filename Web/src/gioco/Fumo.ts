@@ -57,7 +57,7 @@ const EFFETTI: Record<IdLocomotiva, Effetto> = {
   },
   elettrica: {
     file: "scintilla",
-    origine: { x: -2, y: -37 },
+    origine: { x: -6, y: -20 },
     ogniPx: 90,
     probabilita: 0.35,
     segueIlTerreno: false,
