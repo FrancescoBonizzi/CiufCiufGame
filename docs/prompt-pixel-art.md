@@ -253,7 +253,8 @@ Nel menu le figure si mostrano ingrandite con `image-rendering: pixelated`.
 
 ```
 Three pixel art thumbnails side by side, each 96x54 pixels (288x54 total), for a level select menu:
-1) green countryside with blue sky and a hay bale, 2) a railway station platform with a clock,
+1) green countryside with blue sky and a hay bale, 2) a small town with colorful terraced houses
+and a railway signal,
 3) a harbour with a tall gantry crane, colorful containers and blue barrels. Bright, simple, no text.
 ```
 
