@@ -3,7 +3,7 @@ import type { IdLivello } from "../config/livelli.ts";
 import type { TipoOstacolo } from "../config/ostacoli.ts";
 import type { IdColore, IdLocomotiva } from "../preferenze.ts";
 import { canvasDa, type Effetto, type Pezzo } from "./immagini.ts";
-import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva, miniaturaLocomotiva } from "./locomotive.ts";
+import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva } from "./locomotive.ts";
 import { disegnaCavo } from "./cavo.ts";
 
 // Le texture si creano una volta e restano per le partite successive, come quelle nella cache di Assets:
@@ -39,9 +39,6 @@ export const texturesLocomotiva = (tipo: IdLocomotiva, colore: IdColore): Textur
   return frames;
 };
 
-export const textureMiniaturaLocomotiva = (tipo: IdLocomotiva, colore: IdColore): Texture =>
-  daCanvas(`mini:${tipo}:${colore}`, () => miniaturaLocomotiva(tipo, colore));
-
 export const textureOstacolo = (tipo: TipoOstacolo, indice: number): Texture =>
   daCanvas(`ostacolo:${tipo}:${indice}`, () => canvasDa(`ostacoli/${tipo}-${indice}`));
 
@@ -57,4 +54,3 @@ export const textureStazione = () => daCanvas("stazione", () => canvasDa("stazio
 export const textureEffetto = (nome: Effetto) =>
   daCanvas(`effetto:${nome}`, () => canvasDa(`effetti/${nome}`));
 export const texturePezzo = (nome: Pezzo) => daCanvas(`pezzo:${nome}`, () => canvasDa(`pezzi/${nome}`));
-export const textureIconaStazione = () => daCanvas("icona-stazione", () => canvasDa("icona-stazione"));

@@ -1,14 +1,13 @@
 import { Application, Container, Sprite, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
-import BarraPercorso from "./gioco/BarraPercorso.ts";
 import Fumo from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
 import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
 import Scenario from "./gioco/Scenario.ts";
 import { pxPerFotogramma } from "./grafica/locomotive.ts";
-import { textureMiniaturaLocomotiva, texturePezzo, texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
+import { texturePezzo, texturesLocomotiva, textureStazione } from "./grafica/textures.ts";
 import Controller from "./interaction/Controller.ts";
 import ParticleSystem from "./particles/ParticleSystem.ts";
 import type { Preferenze } from "./preferenze.ts";
@@ -36,7 +35,6 @@ class Game {
   private readonly _generatore: Generatore;
   private readonly _locomotiva: Locomotiva;
   private readonly _stazione: Sprite;
-  private readonly _barra: BarraPercorso;
   private readonly _polvere: ParticleSystem;
   private readonly _fumo: Fumo;
   private readonly _pezzi: Pezzi;
@@ -99,7 +97,6 @@ class Game {
 
     this._pezzi = new Pezzi(particelle);
 
-    this._barra = new BarraPercorso(app.stage, width, textureMiniaturaLocomotiva(preferenze.locomotiva, preferenze.colore));
 
     // Solo in sviluppo (Vite lo toglie dal build): lo stato che legge il bot della prova automatica.
     if (import.meta.env.DEV) {
@@ -170,7 +167,6 @@ class Game {
     const generazioneAttiva = this._tempo < durataSecondi - chiusuraSecondi;
     this._generatore.update(dt, this._tempo, velocita, this.velocitaCurva, this.progressoCurva, generazioneAttiva);
     this._scenario.update(dt, velocita);
-    this._barra.progresso = this._tempo / durataSecondi;
     this.controllaUrti();
 
     if (this._stato === "viaggio" && this._tempo >= durataSecondi) {
@@ -194,7 +190,6 @@ class Game {
     this.muoviLocomotiva(dt, velocita, false);
     this._generatore.update(dt, this._tempo, velocita, velocita, 1, false);
     this._scenario.update(dt, velocita);
-    this._barra.progresso = 1;
 
     if (distanza - passo <= COMUNE.tolleranzaArrivoPx && this._locomotiva.aTerra) {
       this._stato = "fermo";

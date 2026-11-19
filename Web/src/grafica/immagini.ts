@@ -20,7 +20,6 @@ const INTERFACCIA = [
 
 export type NomeImmagine =
   | `locomotive/${IdLocomotiva}`
-  | `locomotive/${IdLocomotiva}-mini`
   | `ostacoli/${TipoOstacolo}-${number}`
   | `effetti/${Effetto}`
   | `scenari/${IdLivello}-${StratoScenario}`
@@ -32,7 +31,6 @@ export type NomeImmagine =
 // Un file per variante di ostacolo: ostacoli/<tipo>-<indice>, come le varianti di OSTACOLI.
 const NOMI: NomeImmagine[] = [
   ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}` as const),
-  ...LOCOMOTIVE.map((tipo) => `locomotive/${tipo}-mini` as const),
   ...(Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) =>
     OSTACOLI[tipo].map((_, i) => `ostacoli/${tipo}-${i}` as const),
   ),

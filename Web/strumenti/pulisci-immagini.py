@@ -330,26 +330,8 @@ def foglio_locomotiva(tipo: str) -> Image.Image:
     return foglio
 
 
-def miniatura_locomotiva(tipo: str) -> Image.Image:
-    """32×20 per la barra del percorso: la carrozzeria ridotta a quella misura e ruote piccole disegnate qui.
-    Rimpicciolire lo sprite 64×40 a metà salterebbe righe e colonne a caso."""
-    l, a = 32, 20
-    corpo = ritaglia(carica(tipo))
-    lc, ac = adatta(corpo, l - 2, a - 4)
-    corpo = riduci(corpo, lc, ac, magenta=True)
-    out = Image.new("RGBA", (l, a), (0, 0, 0, 0))
-    out.alpha_composite(corpo, ((l - lc) // 2, a - 3 - ac))
-    p = out.load()
-    for cx, r, _ in LOCOMOTIVE[tipo]["ruote"]:
-        x = round(cx / 2)
-        disco(p, l, a, x, a - 3, 2, CONTORNO)
-        disco(p, l, a, x, a - 3, 1, GRIGIO_RUOTA)
-    return out
-
-
 def locomotiva(tipo: str) -> None:
     salva(foglio_locomotiva(tipo), f"locomotive/{tipo}.png")
-    salva(miniatura_locomotiva(tipo), f"locomotive/{tipo}-mini.png")
 
 
 # --- Ostacoli: misura esatta di src/config/ostacoli.ts, appoggiati al bordo basso ----------------------------

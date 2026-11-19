@@ -40,7 +40,8 @@ Ogni pixel dello schermo deve avere la stessa misura: sprite, sfondi e interfacc
   uguali, partita compresa.
 - Il fondo di menu e pagine si ingrandisce del fattore intero più piccolo che copre la finestra, mai con
   `cover`.
-- La miniatura della barra del percorso è disegnata a 32×20, non rimpicciolita dallo sprite.
+- Uno sprite non si rimpicciolisce a metà per una seconda misura: salterebbe righe e colonne. Si disegna alla
+  misura in cui serve.
 
 ## Cosa fa la pulizia
 

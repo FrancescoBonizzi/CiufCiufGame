@@ -19,7 +19,7 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 | Salto | **Durata e altezza fisse** per livello: più velocità, più terreno coperto | Il ritmo della pressione non cambia mai e ogni ostacolo resta saltabile a ogni velocità (come Chrome Dino). |
 | Treno | **Solo la locomotiva**, nessun vagone | Una hitbox corta e leggibile; i vagoni allungherebbero salti e distanze contro l'obiettivo del facile. |
 | Urto nel facile | L'ostacolo **viene sbalzato via** (parabola, rotazione, suono buffo); il treno frena e riprende velocità in circa 2 s | L'urto si capisce e non spaventa; la partita non si interrompe. |
-| HUD | **Barra del percorso**: una piccola locomotiva del colore scelto va dalla partenza alla stazione | Il traguardo si vede senza saper leggere; niente timer né punteggi. |
+| HUD | **Nessuno**: solo il bottone di pausa; la stazione si scopre all'arrivo | La barra del percorso, con la locomotiva in miniatura sospesa sopra il cielo, sembrava un treno che vola (tolta in fase 6). Niente timer né punteggi. |
 | Menu | **Illustrato, usabile da chi non legge**: tre righe di figure (locomotive, colori, scenari) e un grande bottone ▶; parole solo come didascalia; anteprima dal vivo della locomotiva colorata | La bambina sceglie e parte da sola. |
 | Pausa | Esc o bottone in alto a destra; pausa automatica a scheda nascosta (già nello starter) | Il tocco sul bottone di pausa non fa saltare. |
 | Scenari | **Campagna**, **cittadina con stazione**, **porto** con gru, navi e container, ispirati alle ferrovie dei cartoni per bambini senza nomi né personaggi | Ambienti che un bambino riconosce, sempre più fitti mentre il gioco accelera. Il porto rende colorato il livello difficile, che l'industria faceva grigio. |
@@ -151,7 +151,7 @@ in `try/catch`; un valore illeggibile torna ai default senza errori.
 - [x] Menu illustrato con anteprima dal vivo della locomotiva colorata (segnaposto fino alla fase 6)
 - [x] Sostituzione di palette sulla carrozzeria
 - [x] Preferenze salvate e ripristinate
-- [x] Barra del percorso
+- [x] Barra del percorso (tolta in fase 6: sembrava un treno che vola)
 - [x] Pausa (Esc, bottone, scheda nascosta)
 - [ ] Prova su tablet e telefono: tocco, overlay di rotazione, letterbox (fatta su iPhone 13 emulato in
       Chrome; resta la prova su un dispositivo vero)
@@ -186,9 +186,9 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
       quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
 - [x] Interfaccia nello stesso stile: titolo, bottoni con icona, cornici dei pannelli, campioni di colore,
       fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
-- [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, miniatura della
-      barra disegnata a 32×20, polvere all'atterraggio in pixel art
-- [ ] Niente atlas: 56 PNG singoli per 348 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, polvere
+      all'atterraggio in pixel art
+- [ ] Niente atlas: 53 PNG singoli per 336 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Da rivedere solo se il caricamento si nota su rete lenta
 
 ### 7. Audio
