@@ -189,7 +189,7 @@ dalla fase 7.
       fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
 - [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, polvere
       all'atterraggio in pixel art
-- [x] Niente atlas: 53 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+- [x] Niente atlas: 52 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
       Mentre arrivano, una locomotiva e una barra d'avanzamento scritte in `index.html` (compaiono prima
       ancora dello script)
 

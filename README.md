@@ -7,7 +7,7 @@
 ![Una locomotiva a vapore rossa salta una staccionata nella campagna](docs/screenshot/partita-campagna.png)
 
 Gioco web 2D per tutti, pensato perché il livello facile sia giocabile anche da una bambina di quattro anni:
-un solo comando, partite brevi che finiscono sempre con un traguardo, nessun punteggio.
+un solo comando, partite brevi con un traguardo, nessun punteggio.
 
 ## Come si gioca
 
@@ -36,8 +36,9 @@ un solo comando, partite brevi che finiscono sempre con un traguardo, nessun pun
   sono disegnate a codice. Il colore della locomotiva si cambia sostituendo la palette della carrozzeria.
 - **Suoni veri**: registrazioni di treni (sbuffi, motori, fischi) e una musica per scenario, con la marcia
   che accelera e rallenta insieme al treno.
-- **Ogni ostacolo è saltabile per costruzione**: `validaConfigurazione` verifica a ogni avvio in sviluppo, e
-  in un test sulla configurazione rilasciata, che a ogni velocità ci sia una finestra utile per saltare.
+- **Ogni ostacolo è superabile per costruzione**: `validaConfigurazione` verifica a ogni avvio in sviluppo, e
+  in un test sulla configurazione rilasciata, che a ogni velocità ci sia una finestra utile per saltare e che
+  sotto le travi si passi da terra.
 - Nessun tracciamento, nessuna pubblicità, nessun dato raccolto: le preferenze restano nel browser.
 
 Decisioni, conti e storia dello sviluppo: [ROADMAP.md](ROADMAP.md).

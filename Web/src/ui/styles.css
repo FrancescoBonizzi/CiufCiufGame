@@ -436,7 +436,7 @@ canvas.pixel-art {
 .avvio__locomotiva {
   width: calc(64 * var(--pixel));
   height: calc(64 * var(--pixel));
-  animation: avvio-sbuffo 0.6s steps(2) infinite;
+  animation: avvio-sbuffo 0.6s steps(1, end) infinite;
 }
 
 /* Un pixel su e giù a scatti: la locomotiva è accesa e aspetta di partire. */
