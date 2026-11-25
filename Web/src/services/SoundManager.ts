@@ -1,6 +1,7 @@
 import { Howl, Howler } from "howler";
 import { ASSETS_ROOT } from "../assets/paths.ts";
 import { LOOP } from "../audio/loop.ts";
+import { isAudioUnlocked } from "./AudioUnlocker.ts";
 
 interface SoundDefinition {
   // Percorso sotto public/assets/sounds/.
@@ -11,8 +12,9 @@ interface SoundDefinition {
 }
 
 // Registrazioni vere preparate da strumenti/prepara-suoni.py (fonti e licenze in THIRD-PARTY-NOTICES.md).
-// I file escono tutti a -18 LUFS (gli impatti un po' sotto, limitati dal picco): il mix sta qui. La musica
-// suona a circa -20 LUFS, i fischi al suo livello, la marcia 11 dB sotto perché non la copra.
+// I file escono tutti a -18 LUFS (l'urto, un colpo secco, a -24 anche col limitatore): il mix sta qui. La
+// musica suona a circa -20 LUFS, i fischi al suo livello, la marcia 11 dB sotto perché non la copra, gli
+// effetti fra -28 (atterraggio, a ogni salto) e -19 (schianto).
 const SOUNDS = {
   "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.22 },
   "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.22 },
@@ -21,10 +23,10 @@ const SOUNDS = {
   "fischio-vapore-corto": { file: "fischio-vapore-corto.mp3", volume: 1 },
   "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.85 },
   "fischio-elettrica": { file: "fischio-elettrica.mp3", volume: 0.9 },
-  salto: { file: "salto.mp3", volume: 0.41 },
-  atterraggio: { file: "atterraggio.mp3", volume: 0.3 },
-  urto: { file: "urto.mp3", volume: 0.85 },
-  schianto: { file: "schianto.mp3", volume: 0.85 },
+  salto: { file: "salto.mp3", volume: 0.63 },
+  atterraggio: { file: "atterraggio.mp3", volume: 0.35 },
+  urto: { file: "urto.mp3", volume: 1 },
+  schianto: { file: "schianto.mp3", volume: 0.9 },
   "musica-campagna": { file: "musica-campagna.mp3", volume: 0.75, loop: true },
   "musica-cittadina": { file: "musica-cittadina.mp3", volume: 0.75, loop: true },
   "musica-porto": { file: "musica-porto.mp3", volume: 0.75, loop: true },
@@ -32,7 +34,7 @@ const SOUNDS = {
 
 export type SoundName = keyof typeof SOUNDS;
 
-/** I suoni continui: uno per canale, che si mettono in pausa e riprendono insieme alla partita. */
+/** I suoni continui: uno per canale. Si sospendono e riprendono per motivo (MotivoSospensione). */
 export type Canale = "musica" | "marcia";
 
 /** Partita ferma (pausa, schermo da ruotare) o scheda del browser nascosta, anche fuori dalla partita. */
@@ -48,6 +50,8 @@ class SoundManager {
   private readonly _howls = new Map<SoundName, Howl>();
   private readonly _canali = new Map<Canale, { name: SoundName; id: number; volume: number; rate: number; quota: number }>();
   private readonly _conCiclo = new Set<SoundName>();
+  /** Suoni continui chiesti prima dello sblocco dell'audio: partono in audioSbloccato. */
+  private readonly _inAttesa = new Map<Canale, SoundName>();
   /** Chi ha chiesto di fermare i suoni continui: ripartono solo quando nessuno lo chiede più. */
   private readonly _sospensioni = new Set<MotivoSospensione>();
 
@@ -78,8 +82,17 @@ class SoundManager {
   avviaLoop(canale: Canale, name: SoundName): void {
     const howl = this._howls.get(name);
     if (!howl) return;
-    const attuale = this._canali.get(canale);
-    if (attuale?.name === name && (this.sospeso || howl.playing(attuale.id))) return;
+    // WARNING: prima dello sblocco Howler mette il suono in coda e lo considera in pausa. Un pause/play di
+    // sospendi e riprendi su quel suono ne accoderebbe un secondo, che allo sblocco suona insieme al primo
+    // e non si ferma più. Il suono quindi si chiede solo a audio sbloccato.
+    if (!isAudioUnlocked()) {
+      this.fermaLoop(canale);
+      this._inAttesa.set(canale, name);
+      return;
+    }
+    // Un canale si svuota solo in fermaLoop: se ha già questo suono, sta suonando o sta per farlo (file
+    // ancora in caricamento, dove playing() dice false). Riavviarlo lo farebbe ripartire da capo.
+    if (this._canali.get(canale)?.name === name) return;
 
     this.fermaLoop(canale);
     const id = this._conCiclo.has(name) ? howl.play(SPRITE_CICLO) : howl.play();
@@ -108,7 +121,14 @@ class SoundManager {
     }
   }
 
+  /** Al primo gesto che sblocca l'audio: partono i suoni continui chiesti prima. */
+  audioSbloccato(): void {
+    for (const [canale, name] of [...this._inAttesa]) this.avviaLoop(canale, name);
+    this._inAttesa.clear();
+  }
+
   fermaLoop(canale: Canale, dissolvenzaMs = 0): void {
+    this._inAttesa.delete(canale);
     const attuale = this._canali.get(canale);
     if (!attuale) return;
     this._canali.delete(canale);
@@ -133,9 +153,9 @@ class SoundManager {
   }
 
   /**
-   * Fine della partita: si ferma la marcia. La musica resta, perché menu, partita e fine partita suonano
-   * quella dello scenario scelto; gli effetti finiscono da soli, così il fischio d'arrivo e lo schianto si
-   * sentono interi anche nella schermata di fine.
+   * Fine della partita: si ferma la marcia. La musica resta, perché menu, partita e vittoria suonano quella
+   * dello scenario scelto (dopo uno schianto è già sfumata); gli effetti finiscono da soli, così il fischio
+   * d'arrivo e lo schianto si sentono interi anche nella schermata di fine.
    */
   fermaPartita(): void {
     this.fermaLoop("marcia");

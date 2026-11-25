@@ -43,6 +43,9 @@ def incompetech(titolo):
 # solo nei volumi del registro di SoundManager, che così si confrontano fra loro.
 LUFS = -18
 PICCO_MAX = -1
+# Un colpo secco (urto, atterraggio) ha il picco molto sopra il volume percepito: per arrivare a LUFS passa
+# da un limitatore, ma non oltre questi dB in più rispetto al guadagno che il picco permetterebbe.
+LIMITATORE_MAX_DB = 8
 
 # inizio e durata in secondi nella registrazione.
 # ciclo: durata del loop, ricavata dal ritmo misurato; dissolvenza: secondi di incrocio fra coda e testa.
@@ -112,18 +115,28 @@ def sfuma(canale, testa, coda):
 
 
 def lufs(canali):
-    """Volume percepito integrato. Sotto i 400 ms la misura R128 non esiste: lì vale l'RMS, che le somiglia."""
+    """Volume percepito integrato (EBU R128). Sotto i 400 ms la misura non esiste: il taglio va allungato."""
     intercalati = [v for gruppo in zip(*canali) for v in gruppo]
     err = subprocess.run(
         ["ffmpeg", "-nostats", "-f", "f32le", "-ar", str(FREQ), "-ac", str(len(canali)), "-i", "-",
          "-af", "ebur128", "-f", "null", "-"],
         input=struct.pack(f"<{len(intercalati)}f", *intercalati), capture_output=True, check=True).stderr.decode()
     misure = re.findall(r"^\s+I:\s+(-?[\d.]+) LUFS", err, re.M)
-    valore = float(misure[-1]) if misure else -70.0
-    if valore > -70:
-        return valore
-    rms = math.sqrt(sum(v * v for v in intercalati) / len(intercalati))
-    return 20 * math.log10(rms)
+    assert misure and float(misure[-1]) > -70, "volume percepito non misurabile: taglio troppo corto o muto"
+    return float(misure[-1])
+
+
+def limita(canali, guadagno_db):
+    """Guadagno e limitatore di ffmpeg: i picchi restano sotto PICCO_MAX senza tagliare la forma d'onda."""
+    n = len(canali)
+    intercalati = [v for gruppo in zip(*canali) for v in gruppo]
+    uscita = subprocess.run(
+        ["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(FREQ), "-ac", str(n), "-i", "-",
+         "-af", f"volume={guadagno_db}dB,alimiter=limit={10 ** (PICCO_MAX / 20)}:attack=1:release=60:level=disabled",
+         "-f", "f32le", "-"],
+        input=struct.pack(f"<{len(intercalati)}f", *intercalati), capture_output=True, check=True).stdout
+    campioni = list(struct.unpack(f"<{len(uscita) // 4}f", uscita))
+    return [campioni[c::n] for c in range(n)]
 
 
 def normalizza(nome, canali):
@@ -131,10 +144,12 @@ def normalizza(nome, canali):
     picco = max((abs(v) for v in tutti), default=0)
     assert picco > 0, f"{nome}: taglio vuoto o muto, controlla inizio e durata"
     guadagno_db = LUFS - lufs(canali)
-    # Il picco resta sotto PICCO_MAX: se il guadagno lo superasse, il file esce più basso e lo si dice.
-    guadagno_db = min(guadagno_db, PICCO_MAX - 20 * math.log10(picco))
-    guadagno = 10 ** (guadagno_db / 20)
-    canali = [[v * guadagno for v in c] for c in canali]
+    guadagno_libero_db = PICCO_MAX - 20 * math.log10(picco)
+    if guadagno_db <= guadagno_libero_db:
+        # Guadagno lineare: il volume d'arrivo è esattamente LUFS, senza rimisurarlo.
+        return [[v * 10 ** (guadagno_db / 20) for v in c] for c in canali], LUFS
+    # Se nemmeno il limitatore basta, il file esce più basso e lo si dice.
+    canali = limita(canali, min(guadagno_db, guadagno_libero_db + LIMITATORE_MAX_DB))
     return canali, lufs(canali)
 
 

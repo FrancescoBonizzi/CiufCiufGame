@@ -6,13 +6,14 @@ const GESTURES = ["pointerup", "touchend", "click", "keydown"] as const;
 
 // I browser creano l'AudioContext sospeso finché non c'è un gesto dell'utente: i play prima di allora
 // non danno errore, semplicemente non si sentono.
-export const wireAudioUnlockOnce = () => {
+export const wireAudioUnlockOnce = (onUnlocked: () => void) => {
   const unlock = async () => {
     try {
       await unlockHowler();
     } catch {}
     // Si smette di ascoltare solo a sblocco riuscito: un gesto che non è bastato lascia il posto al prossimo.
     if (isAudioUnlocked()) {
+      onUnlocked();
       for (const gesture of GESTURES) window.removeEventListener(gesture, unlock);
     }
   };
