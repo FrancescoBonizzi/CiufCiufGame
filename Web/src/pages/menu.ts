@@ -94,6 +94,7 @@ export function renderMenuPage(container: HTMLElement): void {
           ).join("")}
         </div>
       </section>
+      <p class="crediti">${TESTI.menu.creditiMusiche}, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p>
     </main>
   `;
 

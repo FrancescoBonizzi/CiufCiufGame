@@ -16,6 +16,8 @@ export const TESTI = {
     gioca: "Parti!",
     audioAcceso: "Audio acceso",
     audioSpento: "Audio spento",
+    // Attribuzione chiesta dalla licenza CC BY 4.0 delle musiche: deve accompagnare il gioco pubblicato.
+    creditiMusiche: "Musiche: Kevin MacLeod (incompetech.com)",
   },
 
   locomotive: {

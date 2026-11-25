@@ -205,7 +205,8 @@ registrazione si cambia la sua riga e si rilancia.
 - [x] Una musica per scenario, di Kevin MacLeod: campagna *Hillbilly Swing* (banjo e violino), cittadina
       *Life of Riley* (ukulele), porto *Fiddles McGinty* (cornamusa irlandese e flauto)
 - [x] Pausa, scheda nascosta e schermo da ruotare fermano marcia e musica, e le riprendono
-- [x] Licenze in `THIRD-PARTY-NOTICES.md`
+- [x] Licenze in `THIRD-PARTY-NOTICES.md`; l'attribuzione delle musiche (CC BY 4.0) sta anche nel menu,
+      perché deve accompagnare il gioco pubblicato
 - [ ] Ascolto di Francesco: volumi relativi e scelte da confermare
 
 ### 8. Pubblicazione
