@@ -169,7 +169,7 @@ dalla fase 7.
 
 ### 5. Calibrazione
 
-- [x] Partite di prova sui tre livelli: la difficoltà va bene così
+- [x] Partite di prova di Francesco: la difficoltà va bene così
 - [x] Valori in `livelli.ts` e nella tabella di questo file: restano quelli di partenza, con le durate
       accorciate di un terzo (40, 60 e 80 s)
 
