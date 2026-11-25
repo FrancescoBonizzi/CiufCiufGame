@@ -1,7 +1,7 @@
 import { LIVELLI } from "./config/livelli.ts";
 import { validaConfigurazione } from "./config/validaConfigurazione.ts";
 import { ASSETS_ROOT } from "./assets/paths.ts";
-import { caricaImmagini } from "./grafica/immagini.ts";
+import { caricaImmagini, NUMERO_IMMAGINI } from "./grafica/immagini.ts";
 import { initializeRouter } from "./pages/router.ts";
 import { leggiPreferenze } from "./preferenze.ts";
 import { wireAudioUnlockOnce } from "./services/AudioUnlocker.ts";
@@ -45,8 +45,19 @@ if (errori.length > 0) {
 
   // Font e immagini prima del router: menu e partita le disegnano senza attese. Il font è un di più: se non
   // arriva, il CSS ricade su system-ui e il gioco parte lo stesso.
-  const caricaFont = font.load().catch((e: unknown) => console.warn("Font non caricato, uso system-ui", e));
-  Promise.all([caricaFont, caricaImmagini()])
+  const barra = document.querySelector<HTMLElement>(".avvio__barra");
+  const daCaricare = NUMERO_IMMAGINI + 1;
+  let caricati = 0;
+  const avanza = () => {
+    const percentuale = Math.round((++caricati / daCaricare) * 100);
+    barra?.style.setProperty("--avanzamento", `${percentuale}%`);
+    barra?.setAttribute("aria-valuenow", String(percentuale));
+  };
+  const caricaFont = font
+    .load()
+    .catch((e: unknown) => console.warn("Font non caricato, uso system-ui", e))
+    .finally(avanza);
+  Promise.all([caricaFont, caricaImmagini(avanza)])
     .then(initializeRouter)
     .catch((e: unknown) => {
       console.error(e);

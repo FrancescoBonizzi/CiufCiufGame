@@ -55,8 +55,11 @@ const carica = (nome: NomeImmagine) =>
     img.src = `${ASSETS_ROOT}images/${nome}.png`;
   });
 
-export const caricaImmagini = async (): Promise<void> => {
-  await Promise.all(NOMI.map(carica));
+/** Quante immagini caricaImmagini deve scaricare: serve a chi mostra l'avanzamento. */
+export const NUMERO_IMMAGINI = NOMI.length;
+
+export const caricaImmagini = async (allaCaricata?: () => void): Promise<void> => {
+  await Promise.all(NOMI.map((nome) => carica(nome).then(allaCaricata)));
   // La hitbox si calcola dalla misura in ostacoli.ts: uno sprite di misura diversa farebbe urtare l'aria.
   // pulisci-immagini.py ne tiene una copia (OSTACOLI): chi cambia una misura rigenera lo sprite.
   const sbagliate = (Object.keys(OSTACOLI) as TipoOstacolo[]).flatMap((tipo) =>

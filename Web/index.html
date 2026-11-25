@@ -56,7 +56,23 @@
     </script>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Il caricamento sta nell'HTML: compare subito, mentre ancora scaricano lo script, il font e la pixel
+         art. Il primo render del router lo sostituisce; main.ts ne fa avanzare la barra. -->
+    <div id="app">
+      <main class="avvio">
+        <img class="pixel avvio__locomotiva" src="/favicon.png" alt="" width="64" height="64" />
+        <div
+          class="avvio__barra"
+          role="progressbar"
+          aria-label="Caricamento"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span class="avvio__riempimento"></span>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
