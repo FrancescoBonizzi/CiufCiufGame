@@ -14,14 +14,14 @@ interface SoundDefinition {
 // Registrazioni vere preparate da strumenti/prepara-suoni.py (fonti e licenze in THIRD-PARTY-NOTICES.md).
 // I file escono tutti a -18 LUFS (l'urto, un colpo secco, a -24 anche col limitatore): il mix sta qui,
 // tarato a orecchio da Francesco. La musica suona a circa -23,5 LUFS, i fischi un po' sopra (-20), la
-// marcia 8 dB sotto la musica, gli effetti fra -29,5 (atterraggio, a ogni salto) e -20,5 (schianto).
+// marcia 7,5 dB sotto la musica, gli effetti fra -29,7 (atterraggio, a ogni salto) e -20,7 (schianto).
 const SOUNDS = {
   "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.22 },
   "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.22 },
   "marcia-elettrica": { file: "marcia-elettrica.mp3", volume: 0.22 },
   "fischio-vapore": { file: "fischio-vapore.mp3", volume: 0.76 },
   "fischio-vapore-corto": { file: "fischio-vapore-corto.mp3", volume: 0.84 },
-  "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.71 },
+  "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.72 },
   "fischio-elettrica": { file: "fischio-elettrica.mp3", volume: 0.76 },
   salto: { file: "salto.mp3", volume: 0.53 },
   atterraggio: { file: "atterraggio.mp3", volume: 0.29 },
