@@ -200,8 +200,8 @@ function applyPause() {
   // NOTE: il ticker ripartito non recupera il tempo passato in pausa, quindi nessun salto in avanti.
   const paused = pausedByOrientation || pausedByHiddenPage || pausedByPlayer;
   // Un punto solo per tutte le pause: i suoni si fermano e riprendono con il ticker.
-  if (paused) SoundManagerInstance.sospendi();
-  else SoundManagerInstance.riprendi();
+  if (paused) SoundManagerInstance.sospendi("partita");
+  else SoundManagerInstance.riprendi("partita");
   if (paused) {
     app.ticker.stop();
   } else if (!app.ticker.started) {

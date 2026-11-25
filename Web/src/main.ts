@@ -22,6 +22,11 @@ if (errori.length > 0) {
   SoundManagerInstance.impostaAudio(leggiPreferenze().audio);
   // Prima lo sblocco audio: il router disegna subito il menu.
   wireAudioUnlockOnce();
+  // La musica suona anche nel menu: con la scheda nascosta si ferma ovunque. La partita in più si mette in pausa.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) SoundManagerInstance.sospendi("scheda");
+    else SoundManagerInstance.riprendi("scheda");
+  });
   // Font e immagini del CSS passano da ASSETS_ROOT come il resto: un url assoluto in styles.css ignorerebbe la
   // sottocartella in cui il gioco è pubblicato.
   const radice = document.documentElement.style;

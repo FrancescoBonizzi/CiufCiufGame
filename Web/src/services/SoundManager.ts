@@ -11,28 +11,32 @@ interface SoundDefinition {
 }
 
 // Registrazioni vere preparate da strumenti/prepara-suoni.py (fonti e licenze in THIRD-PARTY-NOTICES.md).
-// Volumi tarati perché la marcia stia sotto la musica e i fischi sopra tutto.
+// I file escono tutti a -18 LUFS (gli impatti un po' sotto, limitati dal picco): il mix sta qui. La musica
+// suona a circa -20 LUFS, i fischi al suo livello, la marcia 11 dB sotto perché non la copra.
 const SOUNDS = {
-  "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.45 },
-  "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.35 },
-  "marcia-elettrica": { file: "marcia-elettrica.mp3", volume: 0.35 },
-  "fischio-vapore": { file: "fischio-vapore.mp3", volume: 0.7 },
-  "fischio-vapore-corto": { file: "fischio-vapore-corto.mp3", volume: 0.6 },
-  "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.6 },
-  "fischio-elettrica": { file: "fischio-elettrica.mp3", volume: 0.6 },
-  salto: { file: "salto.mp3", volume: 0.5 },
-  atterraggio: { file: "atterraggio.mp3", volume: 0.5 },
-  urto: { file: "urto.mp3", volume: 0.9 },
-  schianto: { file: "schianto.mp3", volume: 0.9 },
-  "musica-campagna": { file: "musica-campagna.mp3", volume: 0.4, loop: true },
-  "musica-cittadina": { file: "musica-cittadina.mp3", volume: 0.4, loop: true },
-  "musica-porto": { file: "musica-porto.mp3", volume: 0.4, loop: true },
+  "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.22 },
+  "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.22 },
+  "marcia-elettrica": { file: "marcia-elettrica.mp3", volume: 0.22 },
+  "fischio-vapore": { file: "fischio-vapore.mp3", volume: 0.9 },
+  "fischio-vapore-corto": { file: "fischio-vapore-corto.mp3", volume: 1 },
+  "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.85 },
+  "fischio-elettrica": { file: "fischio-elettrica.mp3", volume: 0.9 },
+  salto: { file: "salto.mp3", volume: 0.41 },
+  atterraggio: { file: "atterraggio.mp3", volume: 0.3 },
+  urto: { file: "urto.mp3", volume: 0.85 },
+  schianto: { file: "schianto.mp3", volume: 0.85 },
+  "musica-campagna": { file: "musica-campagna.mp3", volume: 0.75, loop: true },
+  "musica-cittadina": { file: "musica-cittadina.mp3", volume: 0.75, loop: true },
+  "musica-porto": { file: "musica-porto.mp3", volume: 0.75, loop: true },
 } satisfies Record<string, SoundDefinition>;
 
 export type SoundName = keyof typeof SOUNDS;
 
 /** I suoni continui: uno per canale, che si mettono in pausa e riprendono insieme alla partita. */
 export type Canale = "musica" | "marcia";
+
+/** Partita ferma (pausa, schermo da ruotare) o scheda del browser nascosta, anche fuori dalla partita. */
+export type MotivoSospensione = "partita" | "scheda";
 
 /** Lo sprite che ripete solo il ciclo: il file ha un margine per lato contro il silenzio dell'MP3. */
 const SPRITE_CICLO = "ciclo";
@@ -44,7 +48,12 @@ class SoundManager {
   private readonly _howls = new Map<SoundName, Howl>();
   private readonly _canali = new Map<Canale, { name: SoundName; id: number; volume: number; rate: number; quota: number }>();
   private readonly _conCiclo = new Set<SoundName>();
-  private _sospeso = false;
+  /** Chi ha chiesto di fermare i suoni continui: ripartono solo quando nessuno lo chiede più. */
+  private readonly _sospensioni = new Set<MotivoSospensione>();
+
+  private get sospeso(): boolean {
+    return this._sospensioni.size > 0;
+  }
 
   constructor() {
     // NOTE: le Howl si creano tutte subito. Howler crea l'AudioContext alla prima Howl: con la creazione
@@ -70,13 +79,13 @@ class SoundManager {
     const howl = this._howls.get(name);
     if (!howl) return;
     const attuale = this._canali.get(canale);
-    if (attuale?.name === name && (this._sospeso || howl.playing(attuale.id))) return;
+    if (attuale?.name === name && (this.sospeso || howl.playing(attuale.id))) return;
 
     this.fermaLoop(canale);
     const id = this._conCiclo.has(name) ? howl.play(SPRITE_CICLO) : howl.play();
     this._canali.set(canale, { name, id, volume: howl.volume(), rate: 1, quota: 1 });
     // Una partita che parte in pausa (scheda nascosta, schermo da ruotare) non deve suonare sotto l'overlay.
-    if (this._sospeso) howl.pause(id);
+    if (this.sospeso) howl.pause(id);
   }
 
   /**
@@ -105,7 +114,7 @@ class SoundManager {
     this._canali.delete(canale);
     const howl = this._howls.get(attuale.name);
     if (!howl) return;
-    if (dissolvenzaMs > 0 && !this._sospeso) {
+    if (dissolvenzaMs > 0 && !this.sospeso) {
       howl.once("fade", () => howl.stop(attuale.id), attuale.id);
       howl.fade(howl.volume(attuale.id) as number, 0, dissolvenzaMs, attuale.id);
     } else {
@@ -119,26 +128,28 @@ class SoundManager {
   }
 
   play(name: SoundName): void {
-    if (this._sospeso) return;
+    if (this.sospeso) return;
     this._howls.get(name)?.play();
   }
 
   /**
-   * Fine della partita: si fermano i suoni continui. Gli effetti finiscono da soli, così il fischio
-   * d'arrivo e lo schianto si sentono interi anche nella schermata di fine.
+   * Fine della partita: si ferma la marcia. La musica resta, perché menu, partita e fine partita suonano
+   * quella dello scenario scelto; gli effetti finiscono da soli, così il fischio d'arrivo e lo schianto si
+   * sentono interi anche nella schermata di fine.
    */
   fermaPartita(): void {
-    for (const canale of [...this._canali.keys()]) this.fermaLoop(canale);
-    this._sospeso = false;
+    this.fermaLoop("marcia");
+    this.riprendi("partita");
   }
 
   /**
-   * Partita ferma (pausa, scheda nascosta, schermo da ruotare): i suoni continui si fermano e riprendono
-   * da dove erano; gli effetti, brevi, si interrompono. Richiamarla due volte non cambia niente.
+   * I suoni continui si fermano e riprenderanno da dove erano; gli effetti, brevi, si interrompono.
+   * Ogni motivo si chiede e si toglie da sé: la pausa di gioco non sblocca la scheda nascosta, e viceversa.
    */
-  sospendi(): void {
-    if (this._sospeso) return;
-    this._sospeso = true;
+  sospendi(motivo: MotivoSospensione): void {
+    const giaSospeso = this.sospeso;
+    this._sospensioni.add(motivo);
+    if (giaSospeso) return;
     const continui = new Set([...this._canali.values()].map((c) => c.name));
     for (const [name, howl] of this._howls) {
       if (!continui.has(name)) howl.stop();
@@ -146,9 +157,8 @@ class SoundManager {
     for (const { name, id } of this._canali.values()) this._howls.get(name)?.pause(id);
   }
 
-  riprendi(): void {
-    if (!this._sospeso) return;
-    this._sospeso = false;
+  riprendi(motivo: MotivoSospensione): void {
+    if (!this._sospensioni.delete(motivo) || this.sospeso) return;
     for (const { name, id } of this._canali.values()) this._howls.get(name)?.play(id);
   }
 }

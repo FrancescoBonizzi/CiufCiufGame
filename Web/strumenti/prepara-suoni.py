@@ -14,6 +14,7 @@ si sentirebbe un buco. Il ciclo quindi sta in mezzo al file, con MARGINE secondi
 e il gioco lo ripete come sprite di Howler (loopStart/loopEnd della Web Audio), che salta quel silenzio.
 """
 import math
+import re
 import struct
 import subprocess
 import urllib.request
@@ -38,31 +39,36 @@ def incompetech(titolo):
             "file": f"incompetech-{titolo.replace(' ', '-')}.mp3"}
 
 
-# inizio e durata in secondi nella registrazione; dB è il livello RMS d'arrivo (il picco resta sotto -1 dBFS).
+# Tutti i file escono allo stesso volume percepito, LUFS (EBU R128): il mix fra marcia, musica e fischi sta
+# solo nei volumi del registro di SoundManager, che così si confrontano fra loro.
+LUFS = -18
+PICCO_MAX = -1
+
+# inizio e durata in secondi nella registrazione.
 # ciclo: durata del loop, ricavata dal ritmo misurato; dissolvenza: secondi di incrocio fra coda e testa.
 SUONI = {
     # Jacobite (Fort William - Mallaig): sbuffi regolari ogni 0,58 s fra 0,5 e 5,1 s; il ciclo ne tiene 7.
-    "marcia-vapore": dict(fonte=freesound(203175, "203/203175_3794199"), inizio=0.42, ciclo=4.05, dissolvenza=0.12, dB=-20),
+    "marcia-vapore": dict(fonte=freesound(203175, "203/203175_3794199"), inizio=0.42, ciclo=4.05, dissolvenza=0.12),
     # Treno diesel ad Aarhus: motore stazionario da 6 s in poi.
-    "marcia-diesel": dict(fonte=freesound(163431, "163/163431_1868374"), inizio=10.0, ciclo=6.0, dissolvenza=0.5, dB=-22),
+    "marcia-diesel": dict(fonte=freesound(163431, "163/163431_1868374"), inizio=10.0, ciclo=6.0, dissolvenza=0.5),
     # Motore elettrico al minimo (Queensland Rail), già registrato come loop.
-    "marcia-elettrica": dict(fonte=freesound(700034, "700/700034_14219512"), inizio=0.1, ciclo=2.0, dissolvenza=0.3, dB=-22),
-    "fischio-vapore": dict(fonte=freesound(71778, "71/71778_706955"), inizio=0.0, durata=3.2, coda=0.3, dB=-16),
+    "marcia-elettrica": dict(fonte=freesound(700034, "700/700034_14219512"), inizio=0.1, ciclo=2.0, dissolvenza=0.3),
+    "fischio-vapore": dict(fonte=freesound(71778, "71/71778_706955"), inizio=0.0, durata=3.2, coda=0.3),
     # Fischio corto di una macchina a vapore stradale: il secondo fischio durante la corsa.
-    "fischio-vapore-corto": dict(fonte=freesound(407394, "407/407394_5385809"), inizio=4.7, durata=0.75, coda=0.2, dB=-16),
+    "fischio-vapore-corto": dict(fonte=freesound(407394, "407/407394_5385809"), inizio=4.7, durata=0.75, coda=0.2),
     # Tromba di una diesel ferma: il colpo è fra 11,4 e 12,4 s, sopra il motore al minimo.
-    "fischio-diesel": dict(fonte=freesound(278176, "278/278176_1728127"), inizio=11.3, durata=1.5, coda=0.3, dB=-16),
+    "fischio-diesel": dict(fonte=freesound(278176, "278/278176_1728127"), inizio=11.3, durata=1.5, coda=0.3),
     # Treno elettrico estone (Elron) in arrivo: il colpo di tromba è fra 34,4 e 34,9 s.
-    "fischio-elettrica": dict(fonte=freesound(471063, "471/471063_2200015"), inizio=34.3, durata=1.1, coda=0.4, dB=-16),
-    "salto": dict(fonte=freesound(623817, "623/623817_12923717"), inizio=0.0, durata=0.5, coda=0.15, dB=-20),
+    "fischio-elettrica": dict(fonte=freesound(471063, "471/471063_2200015"), inizio=34.3, durata=1.1, coda=0.4),
+    "salto": dict(fonte=freesound(623817, "623/623817_12923717"), inizio=0.0, durata=0.5, coda=0.15),
     # Ferro su legno: le ruote che ricadono sulle traversine.
-    "atterraggio": dict(fonte=freesound(372877, "372/372877_6944346"), inizio=0.0, durata=0.8, coda=0.3, dB=-24),
-    "urto": dict(fonte=freesound(464484, "464/464484_4814007"), inizio=0.05, durata=0.8, coda=0.2, dB=-16),
-    "schianto": dict(fonte=freesound(562198, "562/562198_12618935"), inizio=0.0, durata=1.5, coda=0.4, dB=-15),
+    "atterraggio": dict(fonte=freesound(372877, "372/372877_6944346"), inizio=0.0, durata=0.8, coda=0.3),
+    "urto": dict(fonte=freesound(464484, "464/464484_4814007"), inizio=0.05, durata=0.8, coda=0.2),
+    "schianto": dict(fonte=freesound(562198, "562/562198_12618935"), inizio=0.0, durata=1.5, coda=0.4),
     # Musiche: i primi 105 s bastano alla partita più lunga (80 s più l'arrivo); poi riparte da capo.
-    "musica-campagna": dict(fonte=incompetech("Hillbilly Swing"), inizio=0.0, durata=105, coda=4, dB=-22, stereo=True),
-    "musica-cittadina": dict(fonte=incompetech("Life of Riley"), inizio=0.0, durata=105, coda=4, dB=-22, stereo=True),
-    "musica-porto": dict(fonte=incompetech("Fiddles McGinty"), inizio=0.0, durata=105, coda=4, dB=-22, stereo=True),
+    "musica-campagna": dict(fonte=incompetech("Hillbilly Swing"), inizio=0.0, durata=105, coda=4, stereo=True),
+    "musica-cittadina": dict(fonte=incompetech("Life of Riley"), inizio=0.0, durata=105, coda=4, stereo=True),
+    "musica-porto": dict(fonte=incompetech("Fiddles McGinty"), inizio=0.0, durata=105, coda=4, stereo=True),
 }
 
 
@@ -105,13 +111,31 @@ def sfuma(canale, testa, coda):
         canale[-1 - i] *= i / n_coda
 
 
-def normalizza(nome, canali, dB):
+def lufs(canali):
+    """Volume percepito integrato. Sotto i 400 ms la misura R128 non esiste: lì vale l'RMS, che le somiglia."""
+    intercalati = [v for gruppo in zip(*canali) for v in gruppo]
+    err = subprocess.run(
+        ["ffmpeg", "-nostats", "-f", "f32le", "-ar", str(FREQ), "-ac", str(len(canali)), "-i", "-",
+         "-af", "ebur128", "-f", "null", "-"],
+        input=struct.pack(f"<{len(intercalati)}f", *intercalati), capture_output=True, check=True).stderr.decode()
+    misure = re.findall(r"^\s+I:\s+(-?[\d.]+) LUFS", err, re.M)
+    valore = float(misure[-1]) if misure else -70.0
+    if valore > -70:
+        return valore
+    rms = math.sqrt(sum(v * v for v in intercalati) / len(intercalati))
+    return 20 * math.log10(rms)
+
+
+def normalizza(nome, canali):
     tutti = [v for c in canali for v in c]
-    rms = math.sqrt(sum(v * v for v in tutti) / len(tutti)) if tutti else 0
-    assert rms > 0, f"{nome}: taglio vuoto o muto, controlla inizio e durata"
-    picco = max(abs(v) for v in tutti)
-    guadagno = min(10 ** (dB / 20) / rms, 10 ** (-1 / 20) / picco)
-    return [[v * guadagno for v in c] for c in canali], 20 * math.log10(rms * guadagno)
+    picco = max((abs(v) for v in tutti), default=0)
+    assert picco > 0, f"{nome}: taglio vuoto o muto, controlla inizio e durata"
+    guadagno_db = LUFS - lufs(canali)
+    # Il picco resta sotto PICCO_MAX: se il guadagno lo superasse, il file esce più basso e lo si dice.
+    guadagno_db = min(guadagno_db, PICCO_MAX - 20 * math.log10(picco))
+    guadagno = 10 ** (guadagno_db / 20)
+    canali = [[v * guadagno for v in c] for c in canali]
+    return canali, lufs(canali)
 
 
 def scrivi_mp3(nome, canali, stereo):
@@ -132,7 +156,7 @@ def main():
             n_ciclo, n_diss = int(s["ciclo"] * FREQ), int(s["dissolvenza"] * FREQ)
             grezzo = leggi(sorgente, s["inizio"], s["ciclo"] + s["dissolvenza"] + 0.05, n_canali)
             ciclo = [ciclo_senza_giunture(c, n_ciclo, n_diss) for c in grezzo]
-            ciclo, livello = normalizza(nome, ciclo, s["dB"])
+            ciclo, livello = normalizza(nome, ciclo)
             m = int(MARGINE * FREQ)
             # Coda del ciclo, ciclo, testa del ciclo: ai due lati l'audio continua come nel loop.
             canali = [c[-m:] + c + c[:m] for c in ciclo]
@@ -141,9 +165,9 @@ def main():
             canali = leggi(sorgente, s["inizio"], s["durata"], n_canali)
             for c in canali:
                 sfuma(c, 0.005, s["coda"])
-            canali, livello = normalizza(nome, canali, s["dB"])
+            canali, livello = normalizza(nome, canali)
         scrivi_mp3(nome, canali, s.get("stereo", False))
-        print(f"{nome:22} {len(canali[0]) / FREQ:6.2f} s  {livello:6.1f} dBFS RMS")
+        print(f"{nome:22} {len(canali[0]) / FREQ:6.2f} s  {livello:6.1f} LUFS" + ("  (limitato dal picco)" if livello < LUFS - 0.5 else ""))
 
     righe = "\n".join(f'  "{n}": {{ inizioMs: {MARGINE * 1000:.0f}, durataMs: {d * 1000:.0f} }},' for n, d in cicli.items())
     LOOP_TS.parent.mkdir(parents=True, exist_ok=True)

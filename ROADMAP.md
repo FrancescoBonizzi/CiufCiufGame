@@ -204,10 +204,13 @@ registrazione si cambia la sua riga e si rilancia.
 - [x] Salto (uno sbuffo), atterraggio (ferro su legno), urto (cassetta di legno), schianto (metallo)
 - [x] Una musica per scenario, di Kevin MacLeod: campagna *Hillbilly Swing* (banjo e violino), cittadina
       *Life of Riley* (ukulele), porto *Fiddles McGinty* (cornamusa irlandese e flauto)
+- [x] La musica dello scenario scelto suona già nel menu, cambia con la scelta e prosegue nella partita
 - [x] Pausa, scheda nascosta e schermo da ruotare fermano marcia e musica, e le riprendono
+- [x] Volumi: tutti i file allo stesso volume percepito (-18 LUFS), il mix nel registro di `SoundManager`;
+      dopo il primo ascolto musica più alta di 8 dB e marce 11 dB sotto la musica
 - [x] Licenze in `THIRD-PARTY-NOTICES.md`; l'attribuzione delle musiche (CC BY 4.0) sta anche nel menu,
       perché deve accompagnare il gioco pubblicato
-- [ ] Ascolto di Francesco: volumi relativi e scelte da confermare
+- [x] Ascolto di Francesco: scelte confermate, volumi corretti come sopra
 
 ### 8. Pubblicazione
 
