@@ -210,7 +210,8 @@ registrazione si cambia la sua riga e si rilancia.
       dopo il primo ascolto musica più alta di 8 dB e marce 11 dB sotto la musica
 - [x] Licenze in `THIRD-PARTY-NOTICES.md`; l'attribuzione delle musiche (CC BY 4.0) sta anche nel menu,
       perché deve accompagnare il gioco pubblicato
-- [x] Ascolto di Francesco: scelte confermate, volumi corretti come sopra
+- [x] Ascolto di Francesco: scelte confermate
+- [ ] Secondo ascolto: i volumi corretti
 
 ### 8. Pubblicazione
 
