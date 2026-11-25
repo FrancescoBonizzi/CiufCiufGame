@@ -8,7 +8,8 @@ import type { SoundName } from "../services/SoundManager.ts";
 /** Il sonoro continuo della partita: la marcia che segue la velocità, i fischi lungo la corsa, la musica. */
 export default class AudioPartita {
   private readonly _suoni: { marcia: SoundName; fischi: SoundName[] };
-  private _prossimoFischio: number;
+  /** Il fischio di partenza suona al primo frame di corsa: una partita nata in pausa lo sentirebbe perso. */
+  private _prossimoFischio = 0;
 
   constructor(
     private readonly _sounds: SoundManager,
@@ -18,15 +19,15 @@ export default class AudioPartita {
     this._suoni = SUONI_LOCOMOTIVA[locomotiva];
     this._sounds.avviaLoop("musica", MUSICA_SCENARIO[livello]);
     this._sounds.avviaLoop("marcia", this._suoni.marcia);
-    this._sounds.play(this._suoni.fischi[0]!);
-    this._prossimoFischio = Numbers.randomBetweenInterval(AUDIO.intervalloFischi);
   }
 
   /** A ogni frame di corsa o di frenata. */
   aggiorna(tempo: number, velocita: number, fischiAmmessi: boolean): void {
     const { marcia } = AUDIO;
+    // Lineare: 1 alla partenza più lenta, riproduzione.max alla massima più alta; sotto prosegue fino a min.
+    const quota = (velocita - marcia.velocita.min) / (marcia.velocita.max - marcia.velocita.min);
     const riproduzione = Numbers.clamp(
-      1 + (velocita - marcia.velocitaRiferimento) * marcia.pendenza,
+      Numbers.lerp(1, marcia.riproduzione.max, quota),
       marcia.riproduzione.min,
       marcia.riproduzione.max,
     );
@@ -34,7 +35,8 @@ export default class AudioPartita {
 
     if (fischiAmmessi && tempo >= this._prossimoFischio) {
       const { fischi } = this._suoni;
-      this._sounds.play(fischi[Math.floor(Math.random() * fischi.length)]!);
+      const partenza = this._prossimoFischio === 0;
+      this._sounds.play(partenza ? fischi[0]! : fischi[Math.floor(Math.random() * fischi.length)]!);
       this._prossimoFischio = tempo + Numbers.randomBetweenInterval(AUDIO.intervalloFischi);
     }
   }

@@ -143,7 +143,7 @@ export function destroyGame() {
     (screen.orientation as unknown as { unlock(): void }).unlock();
   } catch {}
 
-  SoundManagerInstance.stopAll();
+  SoundManagerInstance.fermaPartita();
   game?.destroy();
   game = null;
   // children: true distrugge l'albero della scena; le texture no, perché restano in cache per la prossima partita.

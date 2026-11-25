@@ -105,9 +105,10 @@ def sfuma(canale, testa, coda):
         canale[-1 - i] *= i / n_coda
 
 
-def normalizza(canali, dB):
+def normalizza(nome, canali, dB):
     tutti = [v for c in canali for v in c]
-    rms = math.sqrt(sum(v * v for v in tutti) / len(tutti))
+    rms = math.sqrt(sum(v * v for v in tutti) / len(tutti)) if tutti else 0
+    assert rms > 0, f"{nome}: taglio vuoto o muto, controlla inizio e durata"
     picco = max(abs(v) for v in tutti)
     guadagno = min(10 ** (dB / 20) / rms, 10 ** (-1 / 20) / picco)
     return [[v * guadagno for v in c] for c in canali], 20 * math.log10(rms * guadagno)
@@ -131,7 +132,7 @@ def main():
             n_ciclo, n_diss = int(s["ciclo"] * FREQ), int(s["dissolvenza"] * FREQ)
             grezzo = leggi(sorgente, s["inizio"], s["ciclo"] + s["dissolvenza"] + 0.05, n_canali)
             ciclo = [ciclo_senza_giunture(c, n_ciclo, n_diss) for c in grezzo]
-            ciclo, livello = normalizza(ciclo, s["dB"])
+            ciclo, livello = normalizza(nome, ciclo, s["dB"])
             m = int(MARGINE * FREQ)
             # Coda del ciclo, ciclo, testa del ciclo: ai due lati l'audio continua come nel loop.
             canali = [c[-m:] + c + c[:m] for c in ciclo]
@@ -140,7 +141,7 @@ def main():
             canali = leggi(sorgente, s["inizio"], s["durata"], n_canali)
             for c in canali:
                 sfuma(c, 0.005, s["coda"])
-            canali, livello = normalizza(canali, s["dB"])
+            canali, livello = normalizza(nome, canali, s["dB"])
         scrivi_mp3(nome, canali, s.get("stereo", False))
         print(f"{nome:22} {len(canali[0]) / FREQ:6.2f} s  {livello:6.1f} dBFS RMS")
 

@@ -1,3 +1,4 @@
+import { SUONI_LOCOMOTIVA } from "../config/audio.ts";
 import type { IdLivello } from "../config/livelli.ts";
 import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva, pxPerFotogramma } from "../grafica/locomotive.ts";
 import { rampaDa } from "../grafica/palette.ts";
@@ -166,7 +167,7 @@ export function renderMenuPage(container: HTMLElement): void {
     mostraAudio();
     if (preferenze.audio) {
       // Nello stack del gesto, prima di ogni await: Safari sblocca solo così. Il fischio conferma che si sente.
-      void unlockHowler().then(() => SoundManagerInstance.play("fischio-vapore"));
+      void unlockHowler().then(() => SoundManagerInstance.play(SUONI_LOCOMOTIVA[preferenze.locomotiva].fischi[0]!));
     }
   });
 }

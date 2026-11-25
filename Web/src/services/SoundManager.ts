@@ -6,16 +6,16 @@ interface SoundDefinition {
   // Percorso sotto public/assets/sounds/.
   file: string;
   volume?: number;
-  /** Ripetuto senza fine: la musica, o il ciclo di un file di LOOP. */
+  /** Ripetuto dall'inizio alla fine del file. I suoni in LOOP si ripetono invece solo nel loro ciclo. */
   loop?: boolean;
 }
 
 // Registrazioni vere preparate da strumenti/prepara-suoni.py (fonti e licenze in THIRD-PARTY-NOTICES.md).
 // Volumi tarati perché la marcia stia sotto la musica e i fischi sopra tutto.
 const SOUNDS = {
-  "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.45, loop: true },
-  "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.35, loop: true },
-  "marcia-elettrica": { file: "marcia-elettrica.mp3", volume: 0.35, loop: true },
+  "marcia-vapore": { file: "marcia-vapore.mp3", volume: 0.45 },
+  "marcia-diesel": { file: "marcia-diesel.mp3", volume: 0.35 },
+  "marcia-elettrica": { file: "marcia-elettrica.mp3", volume: 0.35 },
   "fischio-vapore": { file: "fischio-vapore.mp3", volume: 0.7 },
   "fischio-vapore-corto": { file: "fischio-vapore-corto.mp3", volume: 0.6 },
   "fischio-diesel": { file: "fischio-diesel.mp3", volume: 0.6 },
@@ -37,9 +37,13 @@ export type Canale = "musica" | "marcia";
 /** Lo sprite che ripete solo il ciclo: il file ha un margine per lato contro il silenzio dell'MP3. */
 const SPRITE_CICLO = "ciclo";
 
+/** Variazione minima di ritmo o volume di un suono continuo che vale la pena applicare. */
+const SOGLIA_REGOLAZIONE = 0.01;
+
 class SoundManager {
   private readonly _howls = new Map<SoundName, Howl>();
-  private readonly _canali = new Map<Canale, { name: SoundName; id: number; volume: number }>();
+  private readonly _canali = new Map<Canale, { name: SoundName; id: number; volume: number; rate: number; quota: number }>();
+  private readonly _conCiclo = new Set<SoundName>();
   private _sospeso = false;
 
   constructor() {
@@ -47,11 +51,12 @@ class SoundManager {
     // pigra, al primo gesto dell'utente lo sblocco non trova nessun contesto da riprendere.
     for (const [name, definition] of Object.entries(SOUNDS) as [SoundName, SoundDefinition][]) {
       const ciclo = (LOOP as Record<string, { inizioMs: number; durataMs: number }>)[name];
+      if (ciclo) this._conCiclo.add(name);
       this._howls.set(
         name,
         new Howl({
           src: [`${ASSETS_ROOT}sounds/${definition.file}`],
-          loop: (definition.loop ?? false) && !ciclo,
+          loop: definition.loop ?? false,
           volume: definition.volume ?? 1,
           ...(ciclo ? { sprite: { [SPRITE_CICLO]: [ciclo.inizioMs, ciclo.durataMs, true] } } : {}),
           onloaderror: (_id, error) => console.error(`Suono "${name}" non caricato`, error),
@@ -65,11 +70,11 @@ class SoundManager {
     const howl = this._howls.get(name);
     if (!howl) return;
     const attuale = this._canali.get(canale);
-    if (attuale?.name === name) return;
+    if (attuale?.name === name && (this._sospeso || howl.playing(attuale.id))) return;
 
     this.fermaLoop(canale);
-    const id = name in LOOP ? howl.play(SPRITE_CICLO) : howl.play();
-    this._canali.set(canale, { name, id, volume: howl.volume() });
+    const id = this._conCiclo.has(name) ? howl.play(SPRITE_CICLO) : howl.play();
+    this._canali.set(canale, { name, id, volume: howl.volume(), rate: 1, quota: 1 });
     // Una partita che parte in pausa (scheda nascosta, schermo da ruotare) non deve suonare sotto l'overlay.
     if (this._sospeso) howl.pause(id);
   }
@@ -83,8 +88,15 @@ class SoundManager {
     const attuale = this._canali.get(canale);
     const howl = attuale && this._howls.get(attuale.name);
     if (!attuale || !howl) return;
-    howl.rate(velocitaRiproduzione, attuale.id);
-    howl.volume(attuale.volume * quotaVolume, attuale.id);
+    // Solo quando il valore cambia davvero: Howler a ogni rate() ricrea il timer di fine suono.
+    if (Math.abs(velocitaRiproduzione - attuale.rate) >= SOGLIA_REGOLAZIONE) {
+      attuale.rate = velocitaRiproduzione;
+      howl.rate(velocitaRiproduzione, attuale.id);
+    }
+    if (Math.abs(quotaVolume - attuale.quota) >= SOGLIA_REGOLAZIONE) {
+      attuale.quota = quotaVolume;
+      howl.volume(attuale.volume * quotaVolume, attuale.id);
+    }
   }
 
   fermaLoop(canale: Canale, dissolvenzaMs = 0): void {
@@ -111,9 +123,12 @@ class SoundManager {
     this._howls.get(name)?.play();
   }
 
-  stopAll(): void {
-    for (const howl of this._howls.values()) howl.stop();
-    this._canali.clear();
+  /**
+   * Fine della partita: si fermano i suoni continui. Gli effetti finiscono da soli, così il fischio
+   * d'arrivo e lo schianto si sentono interi anche nella schermata di fine.
+   */
+  fermaPartita(): void {
+    for (const canale of [...this._canali.keys()]) this.fermaLoop(canale);
     this._sospeso = false;
   }
 
