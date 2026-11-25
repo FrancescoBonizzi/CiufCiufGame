@@ -207,11 +207,12 @@ registrazione si cambia la sua riga e si rilancia.
 - [x] La musica dello scenario scelto suona già nel menu, cambia con la scelta e prosegue nella partita
 - [x] Pausa, scheda nascosta e schermo da ruotare fermano marcia e musica, e le riprendono
 - [x] Volumi: tutti i file allo stesso volume percepito (-18 LUFS), il mix nel registro di `SoundManager`;
-      dopo il primo ascolto musica più alta di 8 dB e marce 11 dB sotto la musica
+      dopo il primo ascolto musica più alta di 8 dB e marce 11 dB sotto la musica; dopo il secondo musica
+      giù di 3 dB, effetti e fischi giù di 1,5 dB
 - [x] Licenze in `THIRD-PARTY-NOTICES.md`; l'attribuzione delle musiche (CC BY 4.0) sta anche nel menu,
       perché deve accompagnare il gioco pubblicato
 - [x] Ascolto di Francesco: scelte confermate
-- [ ] Secondo ascolto: i volumi corretti
+- [x] Secondo ascolto: musica ed effetti un po' più bassi
 
 ### 8. Pubblicazione
 
