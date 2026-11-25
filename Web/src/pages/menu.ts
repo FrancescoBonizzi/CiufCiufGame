@@ -1,3 +1,4 @@
+import { MUSICA_SCENARIO, SUONI_LOCOMOTIVA } from "../config/audio.ts";
 import type { IdLivello } from "../config/livelli.ts";
 import { FOTOGRAMMA_LOCOMOTIVA, foglioLocomotiva, pxPerFotogramma } from "../grafica/locomotive.ts";
 import { rampaDa } from "../grafica/palette.ts";
@@ -94,6 +95,7 @@ export function renderMenuPage(container: HTMLElement): void {
           ).join("")}
         </div>
       </section>
+      <p class="crediti">${TESTI.menu.creditiMusiche}, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p>
     </main>
   `;
 
@@ -137,6 +139,10 @@ export function renderMenuPage(container: HTMLElement): void {
   };
   requestAnimationFrame(anima);
 
+  // La musica dello scenario scelto: cambia con la scelta e prosegue senza interruzioni nella partita, che
+  // avvia la stessa. Prima del primo gesto Howler la tiene in attesa e la fa partire allo sblocco.
+  SoundManagerInstance.avviaLoop("musica", MUSICA_SCENARIO[preferenze.livello]);
+
   for (const bottone of container.querySelectorAll<HTMLButtonElement>(".scelta")) {
     bottone.addEventListener("click", () => {
       const { riga, valore } = bottone.dataset as { riga: keyof Preferenze; valore: string };
@@ -146,6 +152,7 @@ export function renderMenuPage(container: HTMLElement): void {
         altro.setAttribute("aria-pressed", String(altro === bottone));
       }
       if (riga === "colore") ridipingi();
+      if (riga === "livello") SoundManagerInstance.avviaLoop("musica", MUSICA_SCENARIO[preferenze.livello]);
     });
   }
 
@@ -165,7 +172,7 @@ export function renderMenuPage(container: HTMLElement): void {
     mostraAudio();
     if (preferenze.audio) {
       // Nello stack del gesto, prima di ogni await: Safari sblocca solo così. Il fischio conferma che si sente.
-      void unlockHowler().then(() => SoundManagerInstance.play("fischio"));
+      void unlockHowler().then(() => SoundManagerInstance.play(SUONI_LOCOMOTIVA[preferenze.locomotiva].fischi[0]!));
     }
   });
 }

@@ -1,0 +1,55 @@
+import { AUDIO, MUSICA_SCENARIO, SUONI_LOCOMOTIVA } from "../config/audio.ts";
+import type { IdLivello } from "../config/livelli.ts";
+import type { IdLocomotiva } from "../preferenze.ts";
+import Numbers from "../services/Numbers.ts";
+import type SoundManager from "../services/SoundManager.ts";
+import type { SoundName } from "../services/SoundManager.ts";
+
+/** Il sonoro continuo della partita: la marcia che segue la velocità, i fischi lungo la corsa, la musica. */
+export default class AudioPartita {
+  private readonly _suoni: { marcia: SoundName; fischi: SoundName[] };
+  /** Il fischio di partenza suona al primo frame di corsa: una partita nata in pausa lo sentirebbe perso. */
+  private _prossimoFischio = 0;
+
+  constructor(
+    private readonly _sounds: SoundManager,
+    locomotiva: IdLocomotiva,
+    livello: IdLivello,
+  ) {
+    this._suoni = SUONI_LOCOMOTIVA[locomotiva];
+    this._sounds.avviaLoop("musica", MUSICA_SCENARIO[livello]);
+    this._sounds.avviaLoop("marcia", this._suoni.marcia);
+  }
+
+  /** A ogni frame di corsa o di frenata. */
+  aggiorna(tempo: number, velocita: number, fischiAmmessi: boolean): void {
+    const { marcia } = AUDIO;
+    // Lineare: 1 alla partenza più lenta, riproduzione.max alla massima più alta; sotto prosegue fino a min.
+    const quota = (velocita - marcia.velocita.min) / (marcia.velocita.max - marcia.velocita.min);
+    const riproduzione = Numbers.clamp(
+      Numbers.lerp(1, marcia.riproduzione.max, quota),
+      marcia.riproduzione.min,
+      marcia.riproduzione.max,
+    );
+    this._sounds.regolaLoop("marcia", riproduzione, Numbers.clamp01(velocita / marcia.velocitaSilenzio));
+
+    if (fischiAmmessi && tempo >= this._prossimoFischio) {
+      const { fischi } = this._suoni;
+      const partenza = this._prossimoFischio === 0;
+      this._sounds.play(partenza ? fischi[0]! : fischi[Math.floor(Math.random() * fischi.length)]!);
+      this._prossimoFischio = tempo + Numbers.randomBetweenInterval(AUDIO.intervalloFischi);
+    }
+  }
+
+  /** Il treno è fermo in stazione. */
+  arrivo(): void {
+    this._sounds.fermaLoop("marcia", AUDIO.marcia.dissolvenzaArrestoMs);
+    this._sounds.play(this._suoni.fischi[0]!);
+  }
+
+  schianto(): void {
+    this._sounds.fermaLoop("marcia");
+    this._sounds.fermaLoop("musica", AUDIO.dissolvenzaMusicaSchiantoMs);
+    this._sounds.play("schianto");
+  }
+}

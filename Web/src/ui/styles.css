@@ -194,6 +194,25 @@ button {
   filter: drop-shadow(var(--pixel) 0 0 var(--accent-ink));
 }
 
+/* Crediti delle musiche: piccoli, in basso, fuori dal flusso del menu. */
+.menu {
+  position: relative;
+}
+
+.crediti {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  margin: 0;
+  font-size: 0.65rem;
+  color: rgb(255 255 255 / 70%);
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 60%);
+}
+
+.crediti a {
+  color: inherit;
+}
+
 .menu__anteprima {
   display: flex;
   flex-direction: column;
