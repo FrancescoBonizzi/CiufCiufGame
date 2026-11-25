@@ -31,7 +31,8 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 
 - **Base**: lo starter della skill `giochi-pixijs` (PixiJS 8, Vite, TypeScript, Howler, Navigo in modalità hash),
   copiato in `Web/` come negli altri giochi. Menu, vittoria e game over in HTML; Pixi solo in `#/game`.
-- **Risoluzione logica 480×270**, ingrandita di un fattore intero (`nearest`, `image-rendering: pixelated`),
+- **Risoluzione logica 480×270**, ingrandita di un fattore intero da ×2 in su (sotto, come su un telefono
+  in orizzontale, il fattore resta frazionario) (`nearest`, `image-rendering: pixelated`),
   letterbox in CSS. Inchioda la misura di tutti gli asset.
 - **Tempo solo da `ticker.deltaMS`**: velocità in px/s, durate in secondi.
 - **Mondo con origine sul binario**, salire è y negativa. Locomotiva ferma a x ≈ 80; scorrono scenario e ostacoli.

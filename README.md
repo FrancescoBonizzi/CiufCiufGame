@@ -31,7 +31,7 @@ un solo comando, partite brevi con un traguardo, nessun punteggio.
 ## Com'è fatto
 
 - **PixiJS 8**, Vite e TypeScript; menu e fine partita sono pagine HTML, Pixi disegna solo la corsa.
-- **Pixel art a 480×270**, ingrandita di un fattore intero. Sprite e sfondi sono generati con AI e ripuliti a
+- **Pixel art a 480×270**, ingrandita di un fattore intero dove lo schermo arriva almeno al doppio. Sprite e sfondi sono generati con AI e ripuliti a
   codice ([`docs/prompt-pixel-art.md`](docs/prompt-pixel-art.md)); ruote, bielle e scintille del pantografo
   sono disegnate a codice. Il colore della locomotiva si cambia sostituendo la palette della carrozzeria.
 - **Suoni veri**: registrazioni di treni (sbuffi, motori, fischi) e una musica per scenario, con la marcia
