@@ -3,8 +3,11 @@
 Ciò che il gioco pubblicato contiene e non è prodotto in questo repository. La pixel art
 (`Web/public/assets/images`, bottoni e icone compresi) è generata con l'API di OpenAI
 (`gpt-image-2.6-sunburst`) e ripulita qui da `Web/strumenti/pulisci-immagini.py`, che disegna anche
-ruote, bielle, cornici e le icone dell'audio: la pubblichiamo sotto la licenza del repository. Da
-verificare sui termini d'uso di OpenAI prima della pubblicazione (fase 8).
+ruote, bielle, cornici e le icone dell'audio: la pubblichiamo sotto la licenza del repository. I
+[termini d'uso di OpenAI](https://openai.com/policies/terms-of-use/) (versione europea del 16 gennaio 2026)
+cedono l'output a chi lo genera («you own the Output») e vietano di presentarlo come opera umana: per
+questo il README e la pagina del progetto dicono che la pixel art è generata con AI. Se e quanto
+un'immagine generata sia tutelata dal diritto d'autore dipende dalla legge del paese, non dai termini.
 
 | Componente | Uso | Licenza |
 | --- | --- | --- |

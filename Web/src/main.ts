@@ -45,8 +45,27 @@ if (errori.length > 0) {
 
   // Font e immagini prima del router: menu e partita le disegnano senza attese. Il font è un di più: se non
   // arriva, il CSS ricade su system-ui e il gioco parte lo stesso.
-  const caricaFont = font.load().catch((e: unknown) => console.warn("Font non caricato, uso system-ui", e));
-  Promise.all([caricaFont, caricaImmagini()])
+  const barra = document.querySelector<HTMLElement>(".avvio__barra");
+  // Il font vale quanto un'immagine: la barra conta le immagini arrivate più il font.
+  let immagini = { fatte: 0, totale: 1 };
+  let fontPronto = 0;
+  const aggiornaBarra = () => {
+    const percentuale = Math.round(((immagini.fatte + fontPronto) / (immagini.totale + 1)) * 100);
+    barra?.style.setProperty("--avanzamento", `${percentuale}%`);
+    barra?.setAttribute("aria-valuenow", String(percentuale));
+  };
+  const caricaFont = font
+    .load()
+    .catch((e: unknown) => console.warn("Font non caricato, uso system-ui", e))
+    .finally(() => {
+      fontPronto = 1;
+      aggiornaBarra();
+    });
+  const caricaTutteLeImmagini = caricaImmagini((fatte, totale) => {
+    immagini = { fatte, totale };
+    aggiornaBarra();
+  });
+  Promise.all([caricaFont, caricaTutteLeImmagini])
     .then(initializeRouter)
     .catch((e: unknown) => {
       console.error(e);

@@ -31,7 +31,8 @@ aperto. Ogni fase si chiude con le sue voci spuntate e una partita giocata davve
 
 - **Base**: lo starter della skill `giochi-pixijs` (PixiJS 8, Vite, TypeScript, Howler, Navigo in modalità hash),
   copiato in `Web/` come negli altri giochi. Menu, vittoria e game over in HTML; Pixi solo in `#/game`.
-- **Risoluzione logica 480×270**, ingrandita di un fattore intero (`nearest`, `image-rendering: pixelated`),
+- **Risoluzione logica 480×270**, ingrandita di un fattore intero da ×2 in su (sotto, come su un telefono
+  in orizzontale, il fattore resta frazionario) (`nearest`, `image-rendering: pixelated`),
   letterbox in CSS. Inchioda la misura di tutti gli asset.
 - **Tempo solo da `ticker.deltaMS`**: velocità in px/s, durate in secondi.
 - **Mondo con origine sul binario**, salire è y negativa. Locomotiva ferma a x ≈ 80; scorrono scenario e ostacoli.
@@ -153,8 +154,7 @@ in `try/catch`; un valore illeggibile torna ai default senza errori.
 - [x] Preferenze salvate e ripristinate
 - [x] Barra del percorso (tolta in fase 6: sembrava un treno che vola)
 - [x] Pausa (Esc, bottone, scheda nascosta)
-- [x] Tocco, overlay di rotazione e letterbox provati su iPhone 13 emulato in Chrome; la prova su un
-      dispositivo vero passa al collaudo finale (fase 8)
+- [x] Tocco, overlay di rotazione e letterbox provati su iPhone 13 emulato in Chrome
 
 Come sono state provate le fasi 1–4: in sviluppo `Game` espone il suo stato in `window.__ciufciuf`
 (Vite lo toglie dal build), e una prova Playwright fa giocare un bot che salta al centro della finestra.
@@ -162,7 +162,7 @@ Medio e difficile sono arrivati in stazione senza urti; il facile senza nessun i
 sbalzando gli ostacoli. Non prova che siano *divertenti*: quello è la fase 5.
 
 Fatti in anticipo, perché costavano poco: polvere all'atterraggio (fase 6) e i meta SEO dello starter in
-`index.html` (fase 8; canonical e immagine puntano a pagine del sito che ancora non esistono).
+`index.html` (fase 8).
 
 La grafica segnaposto disegnata a codice è stata sostituita dalla fase 6, gli effetti sonori sintetizzati
 dalla fase 7.
@@ -190,8 +190,9 @@ dalla fase 7.
       fondo illustrato di menu e fine partita, font pixel (Pixelify Sans), favicon; tutto a ×3 (×2 su telefono)
 - [x] Una grana sola: sfondi generati a griglia fine, fondo del menu a ingrandimento intero, polvere
       all'atterraggio in pixel art
-- [ ] Niente atlas: 53 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
-      Da rivedere solo se il caricamento si nota su rete lenta
+- [x] Niente atlas: 52 PNG singoli per 173 KB, caricati prima del menu da `src/grafica/immagini.ts`.
+      Mentre arrivano, una locomotiva e una barra d'avanzamento scritte in `index.html` (compaiono prima
+      ancora dello script)
 
 ### 7. Audio
 
@@ -218,10 +219,11 @@ registrazione si cambia la sua riga e si rilancia.
 
 ### 8. Pubblicazione
 
-- [ ] SEO della pagina giocabile (`noindex, follow`, `canonical`, JSON-LD `VideoGame`)
-- [ ] Import in `site-craft/apps/imagine-software` (`import-ciufciuf`), redirect di sviluppo in `next.config.ts`
-- [ ] Pagina del progetto sul sito, screenshot nel README
-- [ ] Collaudo finale su tablet e telefono veri: tocco, overlay di rotazione, letterbox, audio
+- [x] SEO della pagina giocabile (`noindex, follow`, `canonical`, JSON-LD `VideoGame`)
+- [x] Import in `site-craft/apps/imagine-software` (`import-ciufciuf`), redirect di sviluppo in `next.config.ts`
+- [x] Pagina del progetto sul sito (`/open-source-projects/ciufciuf`), screenshot nel README
+- [x] Termini d'uso di OpenAI sulle immagini generate: l'output è ceduto a chi lo genera, con il divieto di
+      presentarlo come fatto a mano (riassunto in `THIRD-PARTY-NOTICES.md`)
 
 ## Fuori dallo scopo
 
