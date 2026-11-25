@@ -539,7 +539,7 @@ def miniatura(livello: str, livelli: dict[str, Image.Image]) -> None:
 
 # --- Effetti: un fotogramma, crescita e dissolvenza le fa il sistema di particelle -------------------------
 
-EFFETTI = {"fumo": 16, "scarico": 12, "scintilla": 12}
+EFFETTI = {"fumo": 16, "scarico": 12}
 
 
 def effetto(id_asset: str) -> None:

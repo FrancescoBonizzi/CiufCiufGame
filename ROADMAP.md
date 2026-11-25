@@ -181,6 +181,8 @@ dalla fase 7.
 - [x] Locomotive in 8 fotogrammi con ruote e bielle disegnate a codice (vapore: cilindro e biella motrice),
       sfondi in parallasse per i tre scenari, miniature del menu ricavate dagli strati veri
 - [x] Fumo del vapore, scarico del diesel, scintille del pantografo, col ritmo della strada percorsa
+- [x] Elettrica: arco a zigzag che lampeggia sul pantografo e scintille di 1-2 pixel sparse che ricadono,
+      disegnati a codice (`gioco/Scintille.ts`) al posto dello sprite di scintilla, che faceva grappoli
 - [x] Pezzi dell'ostacolo sbalzato nel facile (legna, paglia, assi) con una stellina d'urto
 - [x] Hitbox: gli ostacoli escono alla misura esatta di `ostacoli.ts`, quindi le hitbox restano valide;
       quelle delle locomotive (40×28 e 48×32) stanno dentro lo sprite 64×40. `validaConfigurazione` verde
