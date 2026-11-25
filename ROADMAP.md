@@ -68,7 +68,7 @@ lungo e alto, hitbox ridotte, pressione anticipata ricordata e velocità moderat
 L'altro vincolo è l'anticipo: con la locomotiva a x ≈ 80 restano circa 400 px di vista, quindi
 `anticipo = 400 / v`. La velocità massima di ogni livello si ricava dall'anticipo che si vuole garantire.
 
-### Valori di partenza (ipotesi da calibrare in fase 5)
+### Valori (confermati dalle prove della fase 5)
 
 | Parametro | Facile – Campagna | Medio – Cittadina | Difficile – Porto |
 | --- | --- | --- | --- |
@@ -153,8 +153,8 @@ in `try/catch`; un valore illeggibile torna ai default senza errori.
 - [x] Preferenze salvate e ripristinate
 - [x] Barra del percorso (tolta in fase 6: sembrava un treno che vola)
 - [x] Pausa (Esc, bottone, scheda nascosta)
-- [ ] Prova su tablet e telefono: tocco, overlay di rotazione, letterbox (fatta su iPhone 13 emulato in
-      Chrome; resta la prova su un dispositivo vero)
+- [x] Tocco, overlay di rotazione e letterbox provati su iPhone 13 emulato in Chrome; la prova su un
+      dispositivo vero passa al collaudo finale (fase 8)
 
 Come sono state provate le fasi 1–4: in sviluppo `Game` espone il suo stato in `window.__ciufciuf`
 (Vite lo toglie dal build), e una prova Playwright fa giocare un bot che salta al centro della finestra.
@@ -164,14 +164,14 @@ sbalzando gli ostacoli. Non prova che siano *divertenti*: quello è la fase 5.
 Fatti in anticipo, perché costavano poco: polvere all'atterraggio (fase 6) e i meta SEO dello starter in
 `index.html` (fase 8; canonical e immagine puntano a pagine del sito che ancora non esistono).
 
-Gli effetti sonori segnaposto sono sintetizzati da `strumenti/genera-suoni.py`: la fase 7 cambia da dove
-vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è stata sostituita dalla fase 6.
+La grafica segnaposto disegnata a codice è stata sostituita dalla fase 6, gli effetti sonori sintetizzati
+dalla fase 7.
 
 ### 5. Calibrazione
 
-- [ ] Partite del facile con la bambina: annotare urti per partita, dove esita, se capisce la fine
-- [ ] Medio e difficile giocati da un adulto fino alla vittoria: nessun passaggio impossibile, nessun picco
-- [ ] Valori aggiornati in `livelli.ts` e nella tabella di questo file, con cosa li ha fatti cambiare
+- [x] Partite di prova sui tre livelli: la difficoltà va bene così
+- [x] Valori in `livelli.ts` e nella tabella di questo file: restano quelli di partenza, con le durate
+      accorciate di un terzo (40, 60 e 80 s)
 
 ### 6. Pixel art
 
@@ -193,15 +193,27 @@ vengono i suoni, non chi li usa. La grafica segnaposto disegnata a codice è sta
 
 ### 7. Audio
 
-- [ ] Effetti: salto, atterraggio, urto buffo, schianto, fischio di partenza e arrivo, ciuf-ciuf per tipo
-- [ ] Una musica per scenario, volume 0,4
-- [ ] Licenze in `THIRD-PARTY-NOTICES.md` per tutto ciò che non è prodotto nel repo
+Suoni veri invece di effetti da videogioco: registrazioni CC0 di Freesound, scelte, tagliate, messe in loop
+e normalizzate da `strumenti/prepara-suoni.py`, che ne tiene fonte e punti di taglio. Per provare un'altra
+registrazione si cambia la sua riga e si rilancia.
+
+- [x] Marcia continua per tipo, in loop senza giunture: sbuffi del vapore (Jacobite, ritmo misurato di
+      0,58 s), motore diesel, ronzio del motore elettrico. La velocità di riproduzione segue quella del
+      treno (`src/config/audio.ts`): accelera, rallenta all'urto del facile, sfuma in stazione
+- [x] Fischi: alla partenza, a caso ogni 10-18 s di corsa, all'arrivo; tromba per diesel ed elettrica
+- [x] Salto (uno sbuffo), atterraggio (ferro su legno), urto (cassetta di legno), schianto (metallo)
+- [x] Una musica per scenario, di Kevin MacLeod: campagna *Hillbilly Swing* (banjo e violino), cittadina
+      *Life of Riley* (ukulele), porto *Fiddles McGinty* (cornamusa irlandese e flauto)
+- [x] Pausa, scheda nascosta e schermo da ruotare fermano marcia e musica, e le riprendono
+- [x] Licenze in `THIRD-PARTY-NOTICES.md`
+- [ ] Ascolto di Francesco: volumi relativi e scelte da confermare
 
 ### 8. Pubblicazione
 
 - [ ] SEO della pagina giocabile (`noindex, follow`, `canonical`, JSON-LD `VideoGame`)
 - [ ] Import in `site-craft/apps/imagine-software` (`import-ciufciuf`), redirect di sviluppo in `next.config.ts`
 - [ ] Pagina del progetto sul sito, screenshot nel README
+- [ ] Collaudo finale su tablet e telefono veri: tocco, overlay di rotazione, letterbox, audio
 
 ## Fuori dallo scopo
 

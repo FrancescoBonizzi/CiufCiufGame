@@ -183,8 +183,6 @@ function resize() {
 function onVisibilityChange() {
   pausedByHiddenPage = document.hidden;
   applyPause();
-  if (document.hidden) SoundManagerInstance.pauseForHiddenPage();
-  else SoundManagerInstance.resumeAfterHiddenPage();
 }
 
 function onKeyDown(e: KeyboardEvent) {
@@ -201,6 +199,9 @@ function applyPause() {
   if (!app) return;
   // NOTE: il ticker ripartito non recupera il tempo passato in pausa, quindi nessun salto in avanti.
   const paused = pausedByOrientation || pausedByHiddenPage || pausedByPlayer;
+  // Un punto solo per tutte le pause: i suoni si fermano e riprendono con il ticker.
+  if (paused) SoundManagerInstance.sospendi();
+  else SoundManagerInstance.riprendi();
   if (paused) {
     app.ticker.stop();
   } else if (!app.ticker.started) {

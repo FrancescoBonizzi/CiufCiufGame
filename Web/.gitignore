@@ -4,3 +4,5 @@ dist
 .DS_Store
 # Immagini grezze e consumi di strumenti/genera-immagini.py
 strumenti/.grezze/
+# Registrazioni originali scaricate da strumenti/prepara-suoni.py
+strumenti/.sorgenti-audio/

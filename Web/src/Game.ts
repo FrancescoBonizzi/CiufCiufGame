@@ -1,6 +1,7 @@
 import { Application, Container, Sprite, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
+import AudioPartita from "./gioco/AudioPartita.ts";
 import Fumo from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
 import Pezzi from "./gioco/Pezzi.ts";
@@ -38,6 +39,7 @@ class Game {
   private readonly _polvere: ParticleSystem;
   private readonly _fumo: Fumo;
   private readonly _pezzi: Pezzi;
+  private readonly _audio: AudioPartita;
 
   private _stato: Stato = "viaggio";
   private _tempo = 0;
@@ -102,7 +104,7 @@ class Game {
     });
 
     this._pezzi = new Pezzi(particelle);
-
+    this._audio = new AudioPartita(_sounds, preferenze.locomotiva, preferenze.livello);
 
     // Solo in sviluppo (Vite lo toglie dal build): lo stato che legge il bot della prova automatica.
     if (import.meta.env.DEV) {
@@ -177,6 +179,7 @@ class Game {
     const generazioneAttiva = this._tempo < durataSecondi - chiusuraSecondi;
     this._generatore.update(dt, this._tempo, velocita, this.velocitaCurva, this.progressoCurva, generazioneAttiva);
     this._scenario.update(dt, velocita);
+    this._audio.aggiorna(this._tempo, velocita, generazioneAttiva);
     this.controllaUrti();
 
     if (this._stato === "viaggio" && this._tempo >= durataSecondi) {
@@ -200,11 +203,12 @@ class Game {
     this.muoviLocomotiva(dt, velocita, false);
     this._generatore.update(dt, this._tempo, velocita, velocita, 1, false);
     this._scenario.update(dt, velocita);
+    this._audio.aggiorna(this._tempo, velocita, false);
 
     if (distanza - passo <= COMUNE.tolleranzaArrivoPx && this._locomotiva.aTerra) {
       this._stato = "fermo";
       this._attesa = 0;
-      this._sounds.play("fischio");
+      this._audio.arrivo();
     }
   }
 
@@ -233,7 +237,7 @@ class Game {
       } else {
         this._stato = "schianto";
         this._attesa = 0;
-        this._sounds.play("schianto");
+        this._audio.schianto();
         this._camera.shake(8);
         return;
       }

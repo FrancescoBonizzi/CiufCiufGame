@@ -165,7 +165,7 @@ export function renderMenuPage(container: HTMLElement): void {
     mostraAudio();
     if (preferenze.audio) {
       // Nello stack del gesto, prima di ogni await: Safari sblocca solo così. Il fischio conferma che si sente.
-      void unlockHowler().then(() => SoundManagerInstance.play("fischio"));
+      void unlockHowler().then(() => SoundManagerInstance.play("fischio-vapore"));
     }
   });
 }

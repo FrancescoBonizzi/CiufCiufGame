@@ -1,8 +1,8 @@
 import type Interval from "../primitives/Interval.ts";
 import type { TipoOstacolo } from "./ostacoli.ts";
 
-// Tutto il bilanciamento: la logica non contiene numeri di gioco. Valori di partenza della ROADMAP, da
-// calibrare in fase 5 giocando; ogni cambio va riletto da validaConfigurazione, che gira all'avvio.
+// Tutto il bilanciamento: la logica non contiene numeri di gioco. Valori della ROADMAP, confermati giocando
+// in fase 5; ogni cambio va riletto da validaConfigurazione, che gira all'avvio.
 
 export type IdLivello = "facile" | "medio" | "difficile";
 
