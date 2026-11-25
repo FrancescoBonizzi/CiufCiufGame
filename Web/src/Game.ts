@@ -2,7 +2,7 @@ import { Application, Container, Sprite, Ticker } from "pixi.js";
 import type GameAssets from "./assets/GameAssets.ts";
 import { COMUNE, LIVELLI, type Livello } from "./config/livelli.ts";
 import AudioPartita from "./gioco/AudioPartita.ts";
-import Fumo from "./gioco/Fumo.ts";
+import { creaEffettoLocomotiva, type EffettoLocomotiva } from "./gioco/Fumo.ts";
 import Generatore from "./gioco/Generatore.ts";
 import Pezzi from "./gioco/Pezzi.ts";
 import Locomotiva from "./gioco/Locomotiva.ts";
@@ -37,7 +37,7 @@ class Game {
   private readonly _locomotiva: Locomotiva;
   private readonly _stazione: Sprite;
   private readonly _polvere: ParticleSystem;
-  private readonly _fumo: Fumo;
+  private readonly _fumo: EffettoLocomotiva;
   private readonly _pezzi: Pezzi;
   private readonly _audio: AudioPartita;
 
@@ -78,7 +78,6 @@ class Game {
     // Prima della locomotiva, quindi dietro: ricadendo dopo un salto passa attraverso il fumo, non sotto.
     const fumo = new Container();
     mondo.addChild(fumo);
-    this._fumo = new Fumo(fumo, preferenze.locomotiva);
     this._locomotiva = new Locomotiva(
       mondo,
       fotogrammi,
@@ -90,6 +89,7 @@ class Game {
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
     const particelle = new Container();
     mondo.addChild(particelle);
+    this._fumo = creaEffettoLocomotiva(fumo, particelle, preferenze.locomotiva);
     this._polvere = new ParticleSystem(particelle, {
       texture: texturePezzo("polvere"),
       density: 2,

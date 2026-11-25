@@ -254,14 +254,12 @@ ASSET = {
                       "ballast underneath filling the bottom. Transparent above the rail. Uniform along the width.",
                       "1536x1024"),
 
-    # --- Effetti: solo la nuvola o la scintilla, il generatore tende ad aggiungere chi la produce ---
+    # --- Effetti: solo la nuvola, il generatore tende ad aggiungere chi la produce ---
     "fumo": (STILE + SOLO_EFFETTO + "A single soft round puff of white and very light grey steam, made of four "
              "overlapping round blobs, like a small cartoon cloud. Outline in light grey (#b8b2c0), not dark.",
              "1024x1024"),
     "scarico": (STILE + SOLO_EFFETTO + "A single small round puff of dark grey exhaust smoke, made of three "
                 "overlapping round blobs, like a small dark cartoon cloud.", "1024x1024"),
-    "scintilla": (STILE + SOLO_EFFETTO + "A single small electric spark: a bright white-yellow four-pointed star "
-                  "burst with short light-blue zigzag rays. No outline.", "1024x1024"),
 }
 
 

@@ -6,8 +6,8 @@ import { LIVELLI_IN_ORDINE, LOCOMOTIVE, type IdLocomotiva } from "../preferenze.
 // La pixel art (public/assets/images, prodotta da strumenti/pulisci-immagini.py) si carica una volta sola,
 // prima del menu: chi disegna (menu, partita, fine partita) la trova pronta e resta sincrono.
 
-export type Effetto = "fumo" | "scarico" | "scintilla";
-const EFFETTI: Effetto[] = ["fumo", "scarico", "scintilla"];
+export type Effetto = "fumo" | "scarico";
+const EFFETTI: Effetto[] = ["fumo", "scarico"];
 type StratoScenario = "cielo" | "lontano" | "vicino" | "binario" | "miniatura";
 const STRATI: StratoScenario[] = ["cielo", "lontano", "vicino", "binario", "miniatura"];
 export type Pezzo = "legna" | "paglia" | "asse" | "stella" | "polvere";
