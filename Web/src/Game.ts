@@ -78,7 +78,6 @@ class Game {
     // Prima della locomotiva, quindi dietro: ricadendo dopo un salto passa attraverso il fumo, non sotto.
     const fumo = new Container();
     mondo.addChild(fumo);
-    this._fumo = creaEffettoLocomotiva(fumo, preferenze.locomotiva);
     this._locomotiva = new Locomotiva(
       mondo,
       fotogrammi,
@@ -90,6 +89,7 @@ class Game {
     // Container proprio: lo zIndex della prospettiva riordinerebbe tutto il mondo (vedi Particle).
     const particelle = new Container();
     mondo.addChild(particelle);
+    this._fumo = creaEffettoLocomotiva(fumo, particelle, preferenze.locomotiva);
     this._polvere = new ParticleSystem(particelle, {
       texture: texturePezzo("polvere"),
       density: 2,

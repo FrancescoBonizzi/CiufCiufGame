@@ -11,8 +11,6 @@ interface Effetto {
   origine: { x: number; y: number };
   /** Ogni quanti px percorsi parte uno sbuffo: il ritmo segue la velocità, come il ciuf-ciuf. */
   ogniPx: number;
-  /** Se lo sbuffo resta indietro col terreno invece di seguire la locomotiva. */
-  segueIlTerreno: boolean;
   particelle: Omit<ParticleSystemOptions, "texture">;
 }
 
@@ -22,7 +20,6 @@ const EFFETTI: Record<Exclude<IdLocomotiva, "elettrica">, Effetto> = {
     file: "fumo",
     origine: { x: 14, y: -38 },
     ogniPx: 48,
-    segueIlTerreno: true,
     particelle: {
       density: 12,
       numParticles: { min: 1, max: 2 },
@@ -39,7 +36,6 @@ const EFFETTI: Record<Exclude<IdLocomotiva, "elettrica">, Effetto> = {
     file: "scarico",
     origine: { x: -8, y: -32 },
     ogniPx: 28,
-    segueIlTerreno: true,
     particelle: {
       density: 16,
       numParticles: { min: 1, max: 1 },
@@ -61,8 +57,12 @@ export interface EffettoLocomotiva {
   destroy(): void;
 }
 
-export const creaEffettoLocomotiva = (parent: Container, tipo: IdLocomotiva): EffettoLocomotiva =>
-  tipo === "elettrica" ? new Scintille(parent) : new Fumo(parent, tipo);
+/**
+ * @param dietro contenitore sotto la locomotiva: fumo, scarico, scintille
+ * @param davanti contenitore sopra la locomotiva: l'arco del pantografo
+ */
+export const creaEffettoLocomotiva = (dietro: Container, davanti: Container, tipo: IdLocomotiva): EffettoLocomotiva =>
+  tipo === "elettrica" ? new Scintille(dietro, davanti) : new Fumo(dietro, tipo);
 
 // Fumo del vapore e scarico del diesel; le scintille dell'elettrica sono in Scintille.
 // Il mondo è fermo in orizzontale e scorre lo scenario: gli sbuffi nascono in un contenitore che scorre col
@@ -86,7 +86,7 @@ class Fumo implements EffettoLocomotiva {
 
   /** px percorsi in questo frame; x, y: la base della locomotiva. */
   avanza(passo: number, x: number, y: number): void {
-    if (this._effetto.segueIlTerreno) this._scorre.x -= passo;
+    this._scorre.x -= passo;
     this._distanza += passo;
     while (this._distanza >= this._effetto.ogniPx) {
       this._distanza -= this._effetto.ogniPx;
